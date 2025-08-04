@@ -99,7 +99,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login" }: Au
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto"
+            className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto"
           >
             {/* Close Button */}
             <button
@@ -175,14 +175,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login" }: Au
                   </svg>
                   Continue with Google
                 </button>
-                <button
-                  onClick={() => handleSocialAuth("Facebook")}
-                  disabled={isLoading}
-                  className="w-full bg-blue-600 py-3 rounded-lg text-white hover:bg-blue-700 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-                >
-                  <Facebook className="w-5 h-5" />
-                  Continue with Facebook
-                </button>
+                
               </div>
 
               {/* Divider */}

@@ -3,7 +3,7 @@ import { motion } from "framer-motion"
 import type React from "react"
 
 import { useState } from "react"
-import { Eye, EyeOff, Mail, Lock, ArrowRight, Heart, Phone, Facebook } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, ArrowRight, Heart, Phone,  } from 'lucide-react'
 import Link from "next/link"
 
 export default function LoginPage() {
@@ -40,12 +40,7 @@ export default function LoginPage() {
     console.log("Google login attempt")
   }
 
-  const handleFacebookLogin = async () => {
-    setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setIsLoading(false)
-    console.log("Facebook login attempt")
-  }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-100 via-red-50 to-pink-100 flex items-center justify-center p-4">
@@ -115,16 +110,7 @@ export default function LoginPage() {
               </svg>
               Continue with Google
             </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleFacebookLogin}
-              disabled={isLoading}
-              className="w-full bg-blue-600 py-3 rounded-lg text-white hover:bg-blue-700 transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-sm"
-            >
-              <Facebook className="w-5 h-5" />
-              Continue with Facebook
-            </motion.button>
+          
           </div>
         </motion.div>
 
