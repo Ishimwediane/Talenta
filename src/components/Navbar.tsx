@@ -2,12 +2,16 @@
 import Link from "next/link"
 import { useState, useRef, useEffect } from "react"
 import { Search, Menu, X, ChevronDown } from "lucide-react"
+import AuthModal from "./auth-modal"
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [browseOpen, setBrowseOpen] = useState(false)
   const [language, setLanguage] = useState("EN")
   const browseRef = useRef<HTMLDivElement>(null)
+
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authModalMode, setAuthModalMode] = useState<"login" | "signup">("login")
 
   // Close dropdown if clicked outside
   useEffect(() => {
@@ -263,15 +267,24 @@ export default function Navbar() {
 
             {/* Desktop Auth */}
             <div className="hidden md:flex items-center space-x-3">
-              <Link href="/login" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+              <button
+                onClick={() => {
+                  setAuthModalMode("login")
+                  setAuthModalOpen(true)
+                }}
+                className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+              >
                 Login
-              </Link>
-              <Link
-                href="/signup"
+              </button>
+              <button
+                onClick={() => {
+                  setAuthModalMode("signup")
+                  setAuthModalOpen(true)
+                }}
                 className="bg-orange-500 text-white px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors"
               >
                 Sign Up
-              </Link>
+              </button>
             </div>
 
             {/* Mobile menu button */}
@@ -348,16 +361,29 @@ export default function Navbar() {
 
               <hr className="border-gray-200" />
 
-              <Link href="/login" className="block text-gray-700 font-medium">
+              <button
+                onClick={() => {
+                  setAuthModalMode("login")
+                  setAuthModalOpen(true)
+                }}
+                className="block text-gray-700 font-medium"
+              >
                 Login
-              </Link>
-              <Link href="/signup" className="block text-orange-500 font-medium">
+              </button>
+              <button
+                onClick={() => {
+                  setAuthModalMode("signup")
+                  setAuthModalOpen(true)
+                }}
+                className="block text-orange-500 font-medium"
+              >
                 Sign Up
-              </Link>
+              </button>
             </div>
           </div>
         )}
       </div>
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} initialMode={authModalMode} />
     </nav>
   )
 }
