@@ -34,11 +34,11 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
+    <div className="min-h-screen bg-gradient-podnova">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-20 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl floating-animation"></div>
-        <div className="absolute bottom-20 right-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl floating-animation" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-20 left-20 w-72 h-72 bg-podnova-orange/20 rounded-full blur-3xl floating-animation"></div>
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-podnova-orange/15 rounded-full blur-3xl floating-animation" style={{ animationDelay: '2s' }}></div>
       </div>
 
       {/* Navigation */}
