@@ -1,5 +1,6 @@
 
 import Link from "next/link"
+import Image from "next/image"
 
 export default function BrowsePage() {
   const categories = [
@@ -70,17 +71,19 @@ export default function BrowsePage() {
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {categories.map((category, index) => (
+            {categories.map((category) => (
               <Link
                 key={category.name}
                 href={`/explore/${encodeURIComponent(category.name.toLowerCase())}`}
                 className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
               >
                 <div className="relative h-48 overflow-hidden">
-                  <img
+                  <Image
                     src={category.image || "/placeholder.svg"}
                     alt={category.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                   <div
                     className={`absolute inset-0 bg-gradient-to-t ${category.color} opacity-20 group-hover:opacity-30 transition-opacity`}

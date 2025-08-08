@@ -14,7 +14,7 @@ export default function AboutPage() {
             About Talenta
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Preserving and celebrating Rwanda's rich cultural heritage through digital storytelling, connecting artists
+            Preserving and celebrating Rwanda&apos;s rich cultural heritage through digital storytelling, connecting artists
             with audiences, and fostering creative expression.
           </p>
         </div>
@@ -33,7 +33,7 @@ export default function AboutPage() {
                 <h2 className="text-2xl font-bold text-gray-900">Our Mission</h2>
               </div>
               <p className="text-gray-600 leading-relaxed">
-                To create a vibrant digital platform that preserves, promotes, and celebrates Rwanda's cultural heritage
+                To create a vibrant digital platform that preserves, promotes, and celebrates Rwanda&apos;s cultural heritage
                 through poetry, stories, films, and traditional arts. We empower local artists and storytellers to share
                 their voices with the world while connecting global audiences with authentic Rwandan culture.
               </p>
@@ -135,7 +135,7 @@ export default function AboutPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-4">Join Our Cultural Journey</h2>
           <p className="text-xl opacity-90 mb-8">
-            Be part of preserving and celebrating Rwanda's rich cultural heritage
+            Be part of preserving and celebrating Rwanda&apos;s rich cultural heritage
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

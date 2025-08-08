@@ -3,7 +3,8 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import React from "react";
-import { Play, Mic, PenTool, Heart, Share2, Filter, Search } from "lucide-react";
+import Link from "next/link";
+import { Play, Mic, PenTool, Heart, Share2, Search } from "lucide-react";
 
 export default function DiscoverPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -124,9 +125,9 @@ export default function DiscoverPage() {
             >
               Talenta
             </motion.div>
-            <a href="/" className="text-white hover:text-gray-300 transition-colors">
+            <Link href="/" className="text-white hover:text-gray-300 transition-colors">
               ← Back to Home
-            </a>
+            </Link>
           </div>
         </div>
       </nav>

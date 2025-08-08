@@ -17,7 +17,7 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-gray-400 mb-6 leading-relaxed">
-              Preserving and celebrating Rwanda's rich cultural heritage through digital storytelling and creative
+              Preserving and celebrating Rwanda&apos;s rich cultural heritage through digital storytelling and creative
               expression.
             </p>
             <div className="flex space-x-4">

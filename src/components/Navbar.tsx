@@ -2,6 +2,8 @@
 import Link from "next/link"
 import { useState, useRef, useEffect } from "react"
 import { Search, Menu, X, ChevronDown } from "lucide-react"
+import LoginModal from './login-modal'
+import SignupModal from './signup-modal'
 import AuthModal from "./auth-modal"
 
 export default function Navbar() {
@@ -9,9 +11,19 @@ export default function Navbar() {
   const [browseOpen, setBrowseOpen] = useState(false)
   const [language, setLanguage] = useState("EN")
   const browseRef = useRef<HTMLDivElement>(null)
+  const [loginModalOpen, setLoginModalOpen] = useState(false)
+  const [signupModalOpen, setSignupModalOpen] = useState(false)
 
-  const [authModalOpen, setAuthModalOpen] = useState(false)
-  const [authModalMode, setAuthModalMode] = useState<"login" | "signup">("login")
+  // Functions to switch between modals
+  const handleSwitchToSignup = () => {
+    setLoginModalOpen(false)
+    setSignupModalOpen(true)
+  }
+
+  const handleSwitchToLogin = () => {
+    setSignupModalOpen(false)
+    setLoginModalOpen(true)
+  }
 
   // Close dropdown if clicked outside
   useEffect(() => {
@@ -221,7 +233,7 @@ export default function Navbar() {
                         </div>
                         <h3 className="text-xl font-bold mb-2">Embrace Culture</h3>
                         <p className="text-sm opacity-90 mb-6 leading-relaxed">
-                          Connect with Rwanda's artistic soul through poetry, stories, and creative expressions
+                          Connect with Rwanda&apos;s artistic soul through poetry, stories, and creative expressions
                         </p>
                         <Link
                           href="/featured"
@@ -267,20 +279,14 @@ export default function Navbar() {
 
             {/* Desktop Auth */}
             <div className="hidden md:flex items-center space-x-3">
-              <button
-                onClick={() => {
-                  setAuthModalMode("login")
-                  setAuthModalOpen(true)
-                }}
+                          <button
+                onClick={() => setLoginModalOpen(true)}
                 className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
               >
                 Login
               </button>
               <button
-                onClick={() => {
-                  setAuthModalMode("signup")
-                  setAuthModalOpen(true)
-                }}
+                onClick={() => setSignupModalOpen(true)}
                 className="bg-orange-500 text-white px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors"
               >
                 Sign Up
@@ -361,29 +367,39 @@ export default function Navbar() {
 
               <hr className="border-gray-200" />
 
-              <button
-                onClick={() => {
-                  setAuthModalMode("login")
-                  setAuthModalOpen(true)
-                }}
+                            <button
+                onClick={() => setLoginModalOpen(true)}
                 className="block text-gray-700 font-medium"
               >
                 Login
               </button>
               <button
-                onClick={() => {
-                  setAuthModalMode("signup")
-                  setAuthModalOpen(true)
-                }}
+                onClick={() => setSignupModalOpen(true)}
                 className="block text-orange-500 font-medium"
               >
                 Sign Up
               </button>
             </div>
           </div>
-        )}
+                )}
       </div>
-      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} initialMode={authModalMode} />
+
+      {/* Modals */}
+      {loginModalOpen && (
+        <LoginModal
+          isOpen={loginModalOpen}
+          onClose={() => setLoginModalOpen(false)}
+          onSwitchToSignup={handleSwitchToSignup}
+        />
+      )}
+
+      {signupModalOpen && (
+        <SignupModal
+          isOpen={signupModalOpen}
+          onClose={() => setSignupModalOpen(false)}
+          onSwitchToLogin={handleSwitchToLogin}
+        />
+      )}
     </nav>
   )
 }

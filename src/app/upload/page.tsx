@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
+import Link from "next/link";
 import { Upload as UploadIcon, Play, Mic, PenTool, X, Check } from "lucide-react";
 
 export default function UploadPage() {
@@ -63,9 +64,9 @@ export default function UploadPage() {
             >
               Talenta
             </motion.div>
-            <a href="/" className="text-white hover:text-gray-300 transition-colors">
+            <Link href="/" className="text-white hover:text-gray-300 transition-colors">
               ← Back to Home
-            </a>
+            </Link>
           </div>
         </div>
       </nav>

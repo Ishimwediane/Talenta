@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { LogOut, User, Upload, Eye, Heart } from 'lucide-react';
+import { LogOut, Upload, Eye, Heart } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, logout, isAuthenticated, loading } = useAuth();

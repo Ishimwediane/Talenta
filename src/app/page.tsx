@@ -81,10 +81,12 @@ export default function Home() {
                      boxShadow: '0 0 30px rgba(245, 74, 0, 0.2)',
                      backgroundColor: 'white'
                    }}>
-                <img
+                <Image
                   src="/image/bk.png"
                   alt="Cultural Heritage"
-                  className="w-full h-full object-contain"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-contain"
                 />
               </div>
               
@@ -348,7 +350,7 @@ export default function Home() {
                 Your Journey?
               </h2>
               <p className="text-lg text-black mb-8 leading-relaxed">
-                Join creators preserving Rwanda's rich heritage.
+                Join creators preserving Rwanda&apos;s rich heritage.
               </p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start">
                 <Link
