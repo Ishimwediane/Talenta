@@ -21,18 +21,18 @@ export default function AuthModal({ isOpen, onClose, initialMode }: AuthModalPro
       <div className="bg-white p-6 rounded-md max-w-md w-full">
         <button onClick={onClose} className="mb-4">Close</button>
 
-        {mode === "login" && (
-          <div>
+              {mode === "login" && (
+                  <div>
             <h2 className="text-xl font-bold mb-4">Sign In</h2>
             {/* Sign In form */}
-          </div>
+                  </div>
         )}
 
-        {mode === "signup" && (
-          <div>
+              {mode === "signup" && (
+                    <div>
             <h2 className="text-xl font-bold mb-4">Sign Up</h2>
             {/* Sign Up form */}
-          </div>
+                  </div>
         )}
 
         {/* Optional: buttons to switch modes inside modal */}
@@ -40,12 +40,12 @@ export default function AuthModal({ isOpen, onClose, initialMode }: AuthModalPro
           {mode === "login" ? (
             <button onClick={() => setMode("signup")} className="text-orange-500">
               Don't have an account? Sign Up
-            </button>
+                      </button>
           ) : (
             <button onClick={() => setMode("login")} className="text-orange-500">
               Already have an account? Sign In
-            </button>
-          )}
+                  </button>
+              )}
         </div>
       </div>
     </div>

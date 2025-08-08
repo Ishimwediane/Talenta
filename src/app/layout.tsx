@@ -1,27 +1,30 @@
-import "./globals.css";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/footer";
-import { AuthProvider } from "@/contexts/AuthContext";
-import Script from "next/script";
+import "./globals.css";
+import { AuthProvider } from "@/contexts/AuthContext"; // Adjust path to your AuthProvider
 
-export const metadata = {
-  title: "Talenta – Rwanda's Home for Stories",
-  description: "Read, write, and listen to stories rooted in Rwandan culture.",
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "Talenta - Rwandan Youth Creative Platform",
+  description:
+    "Online hub for Rwandan youth to upload short films, poetry, podcasts, and get paid. Create in silence. Be heard worldwide.",
+  keywords: "Rwanda, youth, creative platform, short films, poetry, podcasts, digital content",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
-      </head>
-      <body className="min-h-screen flex flex-col" suppressHydrationWarning>
+    <html lang="en">
+      <body className={`${inter.className} antialiased`}>
         <AuthProvider>
           <Navbar />
-          <main className="flex-grow">{children}</main>
+          <main>{children}</main>
           <Footer />
         </AuthProvider>
       </body>
     </html>
   );
 }
+

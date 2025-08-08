@@ -150,7 +150,7 @@ export default function Home() {
             {/* Main Circular Portrait */}
             <div className="relative w-96 h-96 mx-auto">
               <div className="w-96 h-96 rounded-full overflow-hidden" style={{ backgroundColor: "#F54A00" }}>
-                <Image
+        <Image
           src="/images/marius-dojo-main.png"
           alt="Marius Dojo founder portrait"
           fill
@@ -164,7 +164,7 @@ export default function Home() {
             {/* Smaller Action Image */}
             <div className="absolute -bottom-8 -right-8 w-32 h-32">
               <div className="w-32 h-32 rounded-full overflow-hidden bg-white relative">
-                <Image
+            <Image
                   src="/images/marius-dojo-action.png"
                   alt="Martial arts action shot"
                   fill
@@ -214,7 +214,7 @@ export default function Home() {
             {/* Left Column - Visual */}
             <div className="relative">
               <div className="relative w-full h-96 overflow-hidden rounded-lg">
-                <Image
+          <Image
                   src="/image/pod.png"
                   alt="Podcast Host"
                   fill
@@ -366,7 +366,7 @@ export default function Home() {
             {/* Right - Hand Image */}
             <div className="flex justify-center lg:justify-end">
               <div className="relative w-106 h-96">
-                <Image
+          <Image
                   src="/image/ha.png"
                   alt="Cultural Heritage"
                   fill
@@ -382,7 +382,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </div>
+    </div>
       </section>
 
   
