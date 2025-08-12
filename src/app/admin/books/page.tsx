@@ -49,19 +49,22 @@ export default function BookManagement() {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const token = localStorage.getItem("token");
-        // Use the consistent API_BASE_URL
-        const res = await fetch(`${API_BASE_URL}/api/books`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error("Failed to fetch books");
+        // The GET request to /api/books is now public.
+        // We no longer need to get the token or send an Authorization header.
+        const res = await fetch(`${API_BASE_URL}/api/books`);
+
+        if (!res.ok) {
+          throw new Error(`Failed to fetch books. Status: ${res.status}`);
+        }
+
         const data = await res.json();
         setBooks(data);
       } catch (error) {
         console.error(error);
-        alert("Could not load books");
+        alert("Could not load the list of books from the server.");
       }
     };
+
     fetchBooks();
   }, []);
 
