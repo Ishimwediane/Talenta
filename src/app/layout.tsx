@@ -1,12 +1,14 @@
+// This file is now a Server Component. Do NOT add "use client" here.
+
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/footer";
+import { AuthProvider } from "@/contexts/AuthContext";
+import LayoutClient from "@/components/LayoutClient"; // <-- Import our new component
 import "./globals.css";
-import { AuthProvider } from "@/contexts/AuthContext"; // Adjust path to your AuthProvider
 
 const inter = Inter({ subsets: ["latin"] });
 
+// We can safely export metadata because this is a Server Component.
 export const metadata: Metadata = {
   title: "Talenta - Rwandan Youth Creative Platform",
   description:
@@ -18,13 +20,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${inter.className} antialiased`}>
+        {/* AuthProvider can wrap server components and provide context to client components below it */}
         <AuthProvider>
-          <Navbar />
-          <main>{children}</main>
-          <Footer />
+          {/* Use the new client component to handle the dynamic layout */}
+          <LayoutClient>{children}</LayoutClient>
         </AuthProvider>
       </body>
     </html>
   );
 }
-

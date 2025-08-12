@@ -2,12 +2,14 @@
 import Link from "next/link"
 import { useState, useRef, useEffect } from "react"
 import { Search, Menu, X, ChevronDown } from "lucide-react"
+import { useRouter } from "next/navigation"
 import LoginModal from './login-modal'
 import SignupModal from './signup-modal'
 import AuthModal from "./auth-modal"
 import { useAuth } from "@/contexts/AuthContext" // Adjust path to your AuthContext
 
 export default function Navbar() {
+  const router = useRouter()
     const [mobileOpen, setMobileOpen] = useState(false)
   const [browseOpen, setBrowseOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
@@ -578,6 +580,14 @@ export default function Navbar() {
           isOpen={loginModalOpen}
           onClose={() => setLoginModalOpen(false)}
           onSwitchToSignup={handleSwitchToSignup}
+          onLoginSuccess={(userData) => {
+            setLoginModalOpen(false)
+            if (userData.role === "ADMIN") {
+              router.push("/admin")
+            } else {
+              router.push("/")
+            }
+          }}
         />
       )}
 

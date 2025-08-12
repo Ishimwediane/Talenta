@@ -25,9 +25,26 @@ interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSwitchToSignup: () => void;
+  onLoginSuccess: (userData: { role: string }) => void
+}
+function parseJwt(token: string) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    console.error('Failed to parse JWT', e);
+    return null;
+  }
 }
 
-export default function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginModalProps) {
+export default function LoginModal({ isOpen, onClose, onSwitchToSignup,onLoginSuccess }: LoginModalProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [authMethod, setAuthMethod] = useState<"email" | "phone">("email");
@@ -39,28 +56,59 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginM
 
   const { login, googleLogin, error, clearError } = useAuth();
   const router = useRouter();
+  
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    clearError?.();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
+  clearError?.();
 
-    try {
-      const credentials = {
-        emailOrPhone: authMethod === "email" ? formData.email : formData.phone,
-        password: formData.password,
-      };
+  try {
+    const credentials = {
+      emailOrPhone: authMethod === "email" ? formData.email : formData.phone,
+      password: formData.password,
+    };
 
-      await login(credentials);
-      router.push("/dashboard");
-      onClose();
-    } catch (error) {
-      console.error("Login failed:", error);
-      // Error is already set in the AuthContext
-    } finally {
-      setIsLoading(false);
+    console.log("Sending payload to login function:", credentials);
+
+    const response = await login(credentials);
+    const token = response?.data?.token;
+
+    if (!token) {
+      console.error("No token received");
+      return;
     }
-  };
+
+    const payload = parseJwt(token);
+    const role = payload?.role || payload?.Role || payload?.userRole || null;
+
+    console.log("Decoded role from token:", role);
+
+    if (role && typeof role === 'string') {
+      if (role === "ADMIN") {
+        router.push("/admin");
+      } else {
+        router.push("/dashboard");
+      }
+    } else {
+      router.push("/dashboard");
+    }
+
+    if (typeof onLoginSuccess === "function") {
+      onLoginSuccess(response.data.user);
+      onClose();
+    }
+
+  } catch (error) {
+    console.error("An unexpected error occurred in handleSubmit:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+
+
 
   const handleGoogleLogin = async () => {
     try {

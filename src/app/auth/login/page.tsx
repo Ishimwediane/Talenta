@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Heart } from "lucide-react";
 import Link from "next/link";
@@ -8,6 +9,8 @@ import LoginModal from "@/components/login-modal";
 import SignupModal from "@/components/signup-modal";
 
 export default function LoginPage() {
+
+  const router = useRouter();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<"login" | "signup">("login");
 
@@ -32,6 +35,17 @@ export default function LoginPage() {
   const handleSwitchToLogin = () => {
     setAuthModalMode("login");
   };
+
+  const handleLoginSuccess=(userData :{role:string})=>{
+  
+    setAuthModalOpen(false);
+    if(userData.role=="ADMIN"){
+      router.push("/admin");
+
+    }else{
+      router.push("/dashboard");
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-100 via-red-50 to-pink-100 flex items-center justify-center p-4">
@@ -111,6 +125,7 @@ export default function LoginPage() {
         <LoginModal
           isOpen={authModalOpen}
           onClose={handleCloseModal}
+          onLoginSuccess={handleLoginSuccess}
           onSwitchToSignup={handleSwitchToSignup}
         />
       )}
