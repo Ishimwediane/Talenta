@@ -21,6 +21,7 @@ const links = [
   { href: "/admin/analytics", label: "Analytics", icon: TrendingUp },
   { href: "/admin", label: "Admin Panel", icon: Shield },
   { href: "/admin/books", label: "Books", icon: Book },
+  { href: "/admin/audio", label: "Audios", icon: Book },
   { href: "/podcasts", label: "Podcasts", icon: Mic2 },
   { href: "/discover", label: "Discover", icon: Search },
   { href: "/sales", label: "Sales", icon: DollarSign },
