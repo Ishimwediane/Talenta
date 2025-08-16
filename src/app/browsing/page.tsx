@@ -1,68 +1,72 @@
-
 import Link from "next/link"
 import Image from "next/image"
 
 export default function BrowsePage() {
   const categories = [
     {
-      name: "Poetry",
-      description: "Express emotions through beautiful verses",
-      image: "/placeholder.svg?height=200&width=300",
-      count: "1,234 poems",
+      name: "Books & Novels",
+      description: "Fiction, poetry, biographies, and educational works by talented writers.",
+      image: "/categories/books.jpg",
+      count: "1,200+ books",
       color: "from-orange-400 to-red-400",
     },
     {
-      name: "Ibisigo (Traditional Poems)",
-      description: "Ancient wisdom in rhythmic form",
-      image: "/placeholder.svg?height=200&width=300",
-      count: "567 ibisigo",
+      name: "Storytelling Films",
+      description: "Short cinematic stories with narrative depth and cultural themes.",
+      image: "/categories/storytelling-films.jpg",
+      count: "96 films",
       color: "from-red-400 to-pink-400",
     },
     {
-      name: "Films",
-      description: "Visual stories that captivate",
-      image: "/placeholder.svg?height=200&width=300",
-      count: "89 films",
+      name: "Photo Stories",
+      description: "Narratives told through powerful sequences of images.",
+      image: "/categories/photo-stories.jpg",
+      count: "210 photo series",
       color: "from-pink-400 to-purple-400",
     },
     {
-      name: "Podcasts",
-      description: "Voices that inspire and educate",
-      image: "/placeholder.svg?height=200&width=300",
-      count: "156 episodes",
+      name: "Modern Poetry",
+      description: "Contemporary poems in text, audio, and video form.",
+      image: "/categories/modern-poetry.jpg",
+      count: "1,234 works",
       color: "from-purple-400 to-indigo-400",
     },
     {
-      name: "Cultural Stories",
-      description: "Tales passed through generations",
-      image: "/placeholder.svg?height=200&width=300",
-      count: "432 stories",
+      name: "Ibisigo (Traditional Poetry)",
+      description: "Heritage poetic art blending wisdom, history, and rhythm.",
+      image: "/categories/ibisigo.jpg",
+      count: "567 ibisigo",
       color: "from-indigo-400 to-blue-400",
     },
     {
-      name: "Stories",
-      description: "Modern narratives and adventures",
-      image: "/placeholder.svg?height=200&width=300",
-      count: "678 stories",
+      name: "Cultural Stories & Folktales",
+      description: "Legends, myths, and oral traditions passed through generations.",
+      image: "/categories/cultural-stories.jpg",
+      count: "432 stories",
       color: "from-blue-400 to-cyan-400",
+    },
+    {
+      name: "Podcasts",
+      description: "Voices sharing inspiration, interviews, and cultural dialogue.",
+      image: "/categories/podcasts.jpg",
+      count: "156 episodes",
+      color: "from-teal-400 to-green-400",
     },
   ]
 
   return (
     <div className="min-h-screen bg-white">
-  
-
       {/* Hero Section */}
       <section className="py-16 bg-gradient-to-br from-orange-50 to-red-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Explore Our{" "}
             <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-              Cultural Collection
+              Creative & Cultural Hub
             </span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Discover authentic Rwandan culture through poetry, stories, films, and traditional arts
+            Discover books, films, poetry, and visual stories created by talented minds and inspired by cultural heritage.
           </p>
         </div>
       </section>
@@ -104,7 +108,6 @@ export default function BrowsePage() {
           </div>
         </div>
       </section>
-
     </div>
   )
 }
