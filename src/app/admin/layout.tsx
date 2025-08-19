@@ -1,5 +1,6 @@
 import {DashboardSidebar} from "@/app/admin/Sidebar";
 import {DashboardNavbar} from "@/app/admin/Navbar";
+import "@/components/tiptap.css"; 
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
