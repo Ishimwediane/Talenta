@@ -1,128 +1,80 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input";
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-
-// Import our new TipTap editor
-import { TiptapEditor } from "@/components/TiptapEditor";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Trash2 } from 'lucide-react';
 
 const API_BASE_URL = "http://localhost:5000";
 
-export default function BookEditorPage() {
-  const router = useRouter();
+interface Book {
+  id: string;
+  title: string;
+  status: 'DRAFT' | 'PUBLISHED';
+  updatedAt: string;
+  coverImage?: string | null;
+}
 
-  // State for all book properties
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  
-  // This state now holds the HTML content from our TipTap editor
-  const [content, setContent] = useState("");
+export default function MyBooksPage() {
+  const [books, setBooks] = useState<Book[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const handleSave = async (status: 'DRAFT' | 'PUBLISHED') => {
-    if (!title.trim()) {
-      alert("Please provide a title.");
-      return;
-    }
+  useEffect(() => {
+    const fetchMyBooks = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) { setIsLoading(false); return; }
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/books/my-books`, { headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok) throw new Error("Failed to fetch books.");
+        setBooks(await res.json());
+      } catch (error) { alert((error as Error).message); } 
+      finally { setIsLoading(false); }
+    };
+    fetchMyBooks();
+  }, []);
 
-    setIsLoading(true);
-
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("content", content); // The content comes directly from our state
-    formData.append("status", status);
-    if (coverImageFile) {
-      formData.append("coverImage", coverImageFile);
-    }
-    
-    // For now, we are creating a new book. Logic to update would check for a book ID.
-    const method = 'POST';
-    const url = `${API_BASE_URL}/api/books`;
-
+  const handleDelete = async (bookId: string) => {
+    if (!window.confirm("Are you sure? This cannot be undone.")) return;
+    setDeletingId(bookId);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(url, {
-        method: method,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || `Failed to ${status === 'DRAFT' ? 'save draft' : 'publish book'}`);
-      }
-
-      await res.json();
-      alert(`Book successfully ${status === 'DRAFT' ? 'saved as draft' : 'published'}!`);
-      // Redirect to a dashboard or list page after success
-      router.push('/dashboard'); 
-
-    } catch (error) {
-      console.error(error);
-      alert((error as Error).message);
-    } finally {
-      setIsLoading(false);
-    }
+      const res = await fetch(`${API_BASE_URL}/api/books/${bookId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) throw new Error((await res.json()).error || "Failed to delete.");
+      setBooks(prev => prev.filter(book => book.id !== bookId));
+    } catch (error) { alert((error as Error).message); } 
+    finally { setDeletingId(null); }
   };
 
+  if (isLoading) return <div className="p-6">Loading your books...</div>;
+
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold">Write Your Book</h1>
-
-      <div className="space-y-4 bg-white p-6 rounded-lg shadow-sm">
-        <Input 
-          placeholder="Book Title *" 
-          value={title} 
-          onChange={(e) => setTitle(e.target.value)} 
-          className="text-2xl h-12 font-semibold"
-          required
-        />
-        <Textarea 
-          placeholder="Short Description or Synopsis" 
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Cover Image (Optional)
-          </label>
-          <Input 
-            type="file" 
-            accept="image/*" 
-            onChange={(e) => setCoverImageFile(e.target.files ? e.target.files[0] : null)} 
-          />
+    <div className="p-6 max-w-5xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">My Books</h1>
+        <Link href="/admin/book-editor/new"><Button>Write New Book</Button></Link>
+      </div>
+      {books.length === 0 ? <p>You haven't created any books yet.</p> : (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {books.map(book => (
+            <Card key={book.id}>
+              <CardHeader>
+                <div className="flex justify-between items-start"><CardTitle className="line-clamp-2">{book.title}</CardTitle><Badge variant={book.status === 'PUBLISHED' ? 'default' : 'secondary'}>{book.status}</Badge></div>
+                <CardDescription>Updated: {new Date(book.updatedAt).toLocaleDateString()}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {book.coverImage ? <img src={`${API_BASE_URL}${book.coverImage}`} alt={book.title} className="mb-4 w-full h-48 object-cover rounded-md" /> : <div className="mb-4 w-full h-48 bg-gray-200 rounded-md flex items-center justify-center text-gray-500">No Cover</div>}
+                <div className="flex gap-2 mt-4">
+                  <Link href={`/admin/book-editor/${book.id}`} className="w-full"><Button variant="outline" className="w-full">Edit</Button></Link>
+                  <Button variant="destructive" size="icon" onClick={() => handleDelete(book.id)} disabled={deletingId === book.id}>{deletingId === book.id ? '...' : <Trash2 className="h-4 w-4" />}</Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      </div>
-      
-      {/* --- The New Rich Text Editor --- */}
-      <TiptapEditor
-        content={content}
-        onChange={(newContent: string) => setContent(newContent)}
-      />
-
-      <div className="flex items-center justify-end gap-4 pt-4">
-         <Button 
-          variant="outline" 
-          onClick={() => handleSave('DRAFT')}
-          disabled={isLoading}
-        >
-          {isLoading ? 'Saving...' : 'Save as Draft'}
-        </Button>
-        <Button 
-          variant="default" 
-          onClick={() => handleSave('PUBLISHED')}
-          disabled={isLoading}
-        >
-          {isLoading ? 'Publishing...' : 'Publish'}
-        </Button>
-      </div>
+      )}
     </div>
   );
 }
