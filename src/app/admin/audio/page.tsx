@@ -43,11 +43,14 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audio }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const audioUrl = audio.fileName 
-    ? `${API_BASE_URL}/uploads/audio/${audio.fileName}`
-    : audio.fileUrl.startsWith('http') 
-      ? audio.fileUrl 
-      : `${API_BASE_URL}${audio.fileUrl}`;
+  // Determine audio URL - prioritize Cloudinary URLs, fallback to local storage
+  const audioUrl = audio.fileUrl?.startsWith('http') 
+    ? audio.fileUrl // Cloudinary URL
+    : audio.fileName 
+      ? `${API_BASE_URL}/uploads/audio/${audio.fileName}` // Local storage URL
+      : audio.fileUrl?.startsWith('/') 
+        ? `${API_BASE_URL}${audio.fileUrl}` // Relative local URL
+        : audio.fileUrl; // Direct URL
 
   const togglePlayPause = async () => {
     if (!audioRef.current) return;

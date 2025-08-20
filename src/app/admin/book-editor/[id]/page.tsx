@@ -1,22 +1,15 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { BookEditorForm } from "../_components/BookEditorForm";
+import { Loader2, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import apiService from '@/lib/bookapi';
+import { Book } from '@/lib/types';
+import { BookEditorForm } from '../_components/BookEditorForm';
 
 interface PageProps {
   params: { id: string };
 }
-
-interface Book {
-  id: string;
-  title: string;
-  description?: string | null;
-  content?: string | null;
-  coverImage?: string | null;
-  bookFile?: string | null;
-}
-
-const API_BASE_URL = "http://localhost:5000";
 
 export default function EditBookPage({ params }: PageProps) {
   const { id } = params;
@@ -27,49 +20,54 @@ export default function EditBookPage({ params }: PageProps) {
   useEffect(() => {
     if (!id) return;
 
-    const fetchBookData = async () => {
-      setIsLoading(true);
-      setError(null);
+    const fetchBook = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("Authentication required.");
-
-        const res = await fetch(`${API_BASE_URL}/api/books/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (res.status === 404) {
-             throw new Error("Book not found or you don't have permission to edit it.");
-        }
-        if (!res.ok) {
-             throw new Error("Failed to fetch book data.");
-        }
-        
-        const data = await res.json();
-        setBook(data);
-      } catch (err: any) {
-        setError(err.message);
+        const bookData = await apiService.getBookById(id);
+        setBook(bookData);
+      } catch (err) {
+        setError((err as Error).message);
       } finally {
         setIsLoading(false);
       }
     };
-
-    fetchBookData();
+    fetchBook();
   }, [id]);
-
+  
   if (isLoading) {
-    return <div className="p-6 text-center">Loading editor...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading book data...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-     return <div className="p-6 text-center text-red-500">{error}</div>;
-  }
-  
-  if (!book) {
-     return <div className="p-6 text-center">Book could not be loaded.</div>
+    return (
+      <div className="container mx-auto p-6">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-red-600 mb-2">Error Loading Book</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
+      </div>
+    );
   }
 
-  return (
-    <BookEditorForm formType="edit" initialData={book} />
-  );
+  if (!book) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-600 mb-2">Book Not Found</h2>
+          <p className="text-gray-500 mb-4">The book you're looking for doesn't exist or you don't have permission to edit it.</p>
+          <Button onClick={() => window.history.back()}>Go Back</Button>
+        </div>
+      </div>
+    );
+  }
+
+  return <BookEditorForm formType="edit" initialData={book} />;
 }

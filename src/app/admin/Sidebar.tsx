@@ -39,7 +39,7 @@ export function DashboardSidebar() {
   }
 
   return (
-    <div className="w-44 bg-white shadow-sm border-r fixed top-0 left-0 h-screen flex flex-col">
+    <div className="w-54 bg-white shadow-sm border-r fixed top-0 left-0 h-screen flex flex-col">
       {/* Logo */}
       <div className="p-6 border-b flex-shrink-0">
         <div className="flex items-center gap-2">
