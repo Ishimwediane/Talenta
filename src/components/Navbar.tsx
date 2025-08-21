@@ -254,6 +254,9 @@ export default function Navbar() {
               )}
             </div>
              {/* Search */}
+                <Link href="/books" className="text-gray-700 hover:text-orange-500 font-medium transition-colors">
+                  Books
+                </Link>
                 <Link href="/search" className="text-gray-700 hover:text-orange-500 font-medium transition-colors">
                   Search
                 </Link>
@@ -285,6 +288,9 @@ export default function Navbar() {
               <>
               <Link href="/" className="text-gray-700 hover:text-orange-500 font-medium transition-colors">
                   Home
+                </Link>
+                <Link href="/books" className="text-gray-700 hover:text-orange-500 font-medium transition-colors">
+                  Books
                 </Link>
                 {/* Browse Dropdown */}
                <div className="relative" ref={browseRef}>
@@ -499,6 +505,9 @@ export default function Navbar() {
             <div className="space-y-4">
               <Link href="/" className="block text-gray-700 font-medium">
                 Home
+              </Link>
+              <Link href="/books" className="block text-gray-700 font-medium">
+                Books
               </Link>
 
               <div>
