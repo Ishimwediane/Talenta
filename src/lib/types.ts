@@ -22,9 +22,11 @@ export interface Book {
   description: string | null;
   content: string | null;
   tags: string[];
+  subCategories?: string[];
   status: 'DRAFT' | 'PUBLISHED';
   coverImage: string | null;
   bookFile: string | null;
+  category?: string | null;
   userId?: string | null;
   readUrl?: string | null;
   downloadUrl?: string | null;

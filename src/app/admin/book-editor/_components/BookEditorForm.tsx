@@ -22,6 +22,8 @@ export function BookEditorForm({ initialData, formType }: BookEditorFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [content, setContent] = useState("");
+  const [category, setCategory] = useState<string>("");
+  const [subCategories, setSubCategories] = useState<string>("");
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   const [coverImagePreview, setCoverImagePreview] = useState<string | null>(null);
   const [bookFile, setBookFile] = useState<File | null>(null);
@@ -35,6 +37,10 @@ export function BookEditorForm({ initialData, formType }: BookEditorFormProps) {
       setTitle(initialData.title || "");
       setDescription(initialData.description || "");
       setContent(initialData.content || "");
+      setCategory(initialData.category || "");
+      if (initialData.subCategories && initialData.subCategories.length) {
+        setSubCategories(initialData.subCategories.join(", "));
+      }
       if (initialData.coverImage) setCoverImagePreview(initialData.coverImage);
       if (initialData.bookFile) {
         setExistingBookFileName(initialData.bookFile.split('/').pop()?.split('-').slice(1).join('-') || 'Existing File');
@@ -107,6 +113,8 @@ export function BookEditorForm({ initialData, formType }: BookEditorFormProps) {
     formData.append("title", title);
     formData.append("description", description);
     formData.append("status", status);
+    if (category) formData.append("category", category);
+    if (subCategories.trim()) formData.append("subCategories", subCategories);
     
     // Only add content if using text method
     if (contentMethod === 'text') {
@@ -171,6 +179,14 @@ export function BookEditorForm({ initialData, formType }: BookEditorFormProps) {
               <div>
                 <Label htmlFor="description">Short Description</Label>
                 <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="A short summary of your book..." />
+              </div>
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <Input id="category" value={category} onChange={(e) => setCategory(e.target.value)} placeholder="e.g., Books & Novels" />
+              </div>
+              <div>
+                <Label htmlFor="subCategories">Subcategories (comma separated)</Label>
+                <Input id="subCategories" value={subCategories} onChange={(e) => setSubCategories(e.target.value)} placeholder="e.g., Romance, Adult" />
               </div>
             </CardContent>
           </Card>

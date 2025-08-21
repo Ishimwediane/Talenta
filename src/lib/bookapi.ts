@@ -77,7 +77,7 @@ class ApiService {
   // ... (register, login, etc. - no changes needed)
 
   // --- BOOK ENDPOINTS ---
-  getPublishedBooks = () => this.request<PublishedBookSummary[]>('/books');
+  getPublishedBooks = (category?: string) => this.request<PublishedBookSummary[]>(`/books${category ? `?category=${encodeURIComponent(category)}` : ''}`);
   getMyBooks = () => this.request<MyBookSummary[]>('/books/my-books');
   getBookById = (id: string) => this.request<Book>(`/books/${id}`);
   createBook = (formData: FormData) => this.request<Book>('/books', { method: 'POST', body: formData });

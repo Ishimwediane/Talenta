@@ -20,10 +20,12 @@ interface Audio {
   title: string;
   description?: string | null;
   tags?: string[];
+  subCategories?: string[];
   fileName?: string | null;
   fileUrl: string;
   createdAt: string;
-  status?: 'draft' | 'published';
+  status?: 'DRAFT' | 'PUBLISHED' | 'draft' | 'published';
+  category?: string | null;
   user?: {
     id: string;
     firstName: string;
@@ -195,6 +197,7 @@ const AudioRecorder: React.FC<{
   const [recordingTitle, setRecordingTitle] = useState("");
   const [recordingDescription, setRecordingDescription] = useState("");
   const [recordingTags, setRecordingTags] = useState("");
+  const [recordingSubCategories, setRecordingSubCategories] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{type: 'success' | 'error', message: string} | null>(null);
   const [microphoneAccess, setMicrophoneAccess] = useState<'granted' | 'denied' | 'pending'>('pending');
@@ -327,6 +330,9 @@ const AudioRecorder: React.FC<{
     formData.append("status", isDraft ? "draft" : "published");
     if (recordingTags.trim()) {
       formData.append("tags", recordingTags);
+    }
+    if (recordingSubCategories.trim()) {
+      formData.append("subCategories", recordingSubCategories);
     }
     formData.append("audio", audioBlob, `recording_${Date.now()}.webm`);
 
@@ -469,6 +475,12 @@ const AudioRecorder: React.FC<{
                   onChange={(e) => setRecordingTags(e.target.value)}
                   disabled={isSaving}
                 />
+                <Input 
+                  placeholder="Subcategories (comma separated, optional)" 
+                  value={recordingSubCategories} 
+                  onChange={(e) => setRecordingSubCategories(e.target.value)}
+                  disabled={isSaving}
+                />
               </div>
               
               {saveMessage && (
@@ -521,6 +533,8 @@ export default function AudioManagementPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState("");
+  const [subCategories, setSubCategories] = useState("");
+  const [category, setCategory] = useState("");
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -542,9 +556,9 @@ export default function AudioManagementPage() {
       const data = await res.json();
       const allAudios = data.audios || [];
       
-      // Separate published and draft audios
-      setAudios(allAudios.filter((audio: Audio) => audio.status !== 'draft'));
-      setDrafts(allAudios.filter((audio: Audio) => audio.status === 'draft'));
+      // Separate published and draft audios (normalize case)
+      setAudios(allAudios.filter((audio: Audio) => (audio.status || '').toString().toUpperCase() === 'PUBLISHED'));
+      setDrafts(allAudios.filter((audio: Audio) => (audio.status || '').toString().toUpperCase() === 'DRAFT'));
     } catch (error) {
       console.error('Fetch error:', error);
       setFetchError('Could not load audios from the server. Please check your connection.');
@@ -576,6 +590,8 @@ export default function AudioManagementPage() {
     formData.append("description", description);
     formData.append("status", isDraft ? "draft" : "published");
     if (tags.trim()) formData.append("tags", tags);
+    if (subCategories.trim()) formData.append("subCategories", subCategories);
+    if (category.trim()) formData.append("category", category.trim());
     
     // Use recorded audio or uploaded file
     if (recordedBlob) {
@@ -756,6 +772,18 @@ export default function AudioManagementPage() {
                 placeholder="Tags (comma separated)" 
                 value={tags} 
                 onChange={(e) => setTags(e.target.value)}
+                disabled={isLoading}
+              />
+              <Input 
+                placeholder="Subcategories (comma separated)" 
+                value={subCategories} 
+                onChange={(e) => setSubCategories(e.target.value)}
+                disabled={isLoading}
+              />
+              <Input 
+                placeholder="Category (e.g., Podcasts)"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
                 disabled={isLoading}
               />
               
