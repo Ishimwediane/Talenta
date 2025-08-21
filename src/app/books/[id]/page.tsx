@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Download, Loader2 } from 'lucide-react';
 import apiService from '@/lib/bookapi';
 import { Book } from '@/lib/types';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 
@@ -18,6 +19,7 @@ export default function PublicBookReaderPage({ params }: PageProps) {
   const { user } = useAuth();
   const [book, setBook] = useState<Book | null>(null);
   const [bookHtmlContent, setBookHtmlContent] = useState<string | null>(null);
+  const [relatedAudios, setRelatedAudios] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,6 +39,20 @@ export default function PublicBookReaderPage({ params }: PageProps) {
             const htmlContent = await apiService.readBookContent(filename);
             setBookHtmlContent(htmlContent);
           }
+        }
+
+        // Fetch related audios by category or subCategories
+        try {
+          const category = bookData.category || '';
+          const subCategory = (bookData.subCategories && bookData.subCategories[0]) || '';
+          const query = category 
+            ? `${API_BASE_URL}/audio?category=${encodeURIComponent(category)}${subCategory ? `&subCategory=${encodeURIComponent(subCategory)}` : ''}`
+            : `${API_BASE_URL}/audio`;
+          const res = await fetch(query, { cache: 'no-store' });
+          const data = await res.json();
+          setRelatedAudios(Array.isArray(data?.audios) ? data.audios.slice(0, 6) : []);
+        } catch (_) {
+          setRelatedAudios([]);
         }
       } catch (err) {
         setError((err as Error).message);
@@ -89,6 +105,27 @@ export default function PublicBookReaderPage({ params }: PageProps) {
           dangerouslySetInnerHTML={{ __html: contentToDisplay }}
         />
       </article>
+
+      {/* Related audio */}
+      {!!relatedAudios.length && (
+        <section className="mt-12">
+          <h2 className="text-2xl font-semibold mb-4">Related audio</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {relatedAudios.map((audio) => (
+              <div key={audio.id} className="border rounded-lg p-4">
+                <h3 className="font-medium line-clamp-1">{audio.title}</h3>
+                {audio.description && (
+                  <p className="text-sm text-gray-600 mt-1 line-clamp-2">{audio.description}</p>
+                )}
+                <audio controls className="w-full mt-3">
+                  <source src={audio.fileUrl} />
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
