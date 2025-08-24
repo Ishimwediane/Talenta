@@ -47,8 +47,8 @@ export function DashboardSidebar({ isCollapsed, onToggleCollapse }: DashboardSid
   }
 
   return (
-    <div className={`bg-white shadow-sm border-r fixed top-0 left-0 h-screen flex flex-col transition-all duration-300 ${
-      isCollapsed ? 'w-16' : 'w-54'
+    <div className={`sidebar bg-white shadow-sm border-r fixed top-0 left-0 h-screen flex flex-col transition-all duration-300 ${
+      isCollapsed ? 'w-16' : 'w-64'
     }`}>
       {/* Logo and Toggle Button */}
       <div className="p-4 border-b flex-shrink-0">

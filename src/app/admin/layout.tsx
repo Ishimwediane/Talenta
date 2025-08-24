@@ -13,14 +13,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className="admin-layout flex h-screen bg-gray-50">
+    <div className="admin-layout">
       <DashboardSidebar 
         isCollapsed={isSidebarCollapsed} 
         onToggleCollapse={toggleSidebar} 
       />
       {/* This wrapper pushes the content to the right of the fixed sidebar */}
-      <div className={`flex-grow flex flex-col transition-all duration-300 ${
-        isSidebarCollapsed ? 'ml-16' : 'ml-44'
+      <div className={`content-area flex-grow flex flex-col transition-all duration-300 ${
+        isSidebarCollapsed ? 'ml-16' : 'ml-64'
       }`}>
         <DashboardNavbar />
         <main className="flex-1 overflow-y-auto p-6">
