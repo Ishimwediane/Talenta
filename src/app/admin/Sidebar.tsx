@@ -18,14 +18,12 @@ import {
 } from "lucide-react"
 
 const links = [
-  { href: "/dashboard", label: "Dashboards", icon: BarChart3 },
+  
   { href: "/admin/analytics", label: "Analytics", icon: TrendingUp },
   { href: "/admin", label: "Admin Panel", icon: Shield },
   { href: "/admin/books", label: "Books", icon: Book },
   { href: "/admin/audio", label: "Audios", icon: Book },
-  { href: "/podcasts", label: "Podcasts", icon: Mic2 },
-  { href: "/discover", label: "Discover", icon: Search },
-  { href: "/sales", label: "Sales", icon: DollarSign },
+ 
 ]
 
 export function DashboardSidebar() {
@@ -83,27 +81,7 @@ export function DashboardSidebar() {
             )
           })}
 
-          <div className="pt-4">
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
-              PAGES
-            </p>
-            <Button variant="ghost" className="w-full justify-start gap-3 text-gray-600">
-              <span className="w-4 h-4 flex items-center justify-center text-xs">📄</span>
-              Pages
-            </Button>
-            <Button variant="ghost" className="w-full justify-start gap-3 text-gray-600">
-              <User className="w-4 h-4" />
-              Account
-            </Button>
-            <Button variant="ghost" className="w-full justify-start gap-3 text-gray-600">
-              <span className="w-4 h-4 flex items-center justify-center text-xs">⚡</span>
-              Applications
-            </Button>
-            <Button variant="ghost" className="w-full justify-start gap-3 text-gray-600">
-              <span className="w-4 h-4 flex items-center justify-center text-xs">🛒</span>
-              Ecommerce
-            </Button>
-          </div>
+        
         </nav>
       </div>
 
