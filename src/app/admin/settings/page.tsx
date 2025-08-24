@@ -49,7 +49,7 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="settings-page space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
@@ -65,7 +65,7 @@ export default function AdminSettingsPage() {
 
       <div className="grid gap-6">
         {/* Notifications */}
-        <Card>
+        <Card className="h-fit">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Bell className="w-5 h-5" />
@@ -77,9 +77,9 @@ export default function AdminSettingsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Email Notifications</Label>
-                <p className="text-sm text-muted-foreground">
+              <div className="space-y-0.5 min-w-0 flex-1">
+                <Label className="block">Email Notifications</Label>
+                <p className="text-sm text-muted-foreground truncate">
                   Receive notifications via email
                 </p>
               </div>
@@ -89,9 +89,9 @@ export default function AdminSettingsPage() {
               />
             </div>
             <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Push Notifications</Label>
-                <p className="text-sm text-muted-foreground">
+              <div className="space-y-0.5 min-w-0 flex-1">
+                <Label className="block">Push Notifications</Label>
+                <p className="text-sm text-muted-foreground truncate">
                   Receive push notifications in browser
                 </p>
               </div>
@@ -101,9 +101,9 @@ export default function AdminSettingsPage() {
               />
             </div>
             <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>SMS Notifications</Label>
-                <p className="text-sm text-muted-foreground">
+              <div className="space-y-0.5 min-w-0 flex-1">
+                <Label className="block">SMS Notifications</Label>
+                <p className="text-sm text-muted-foreground truncate">
                   Receive notifications via SMS
                 </p>
               </div>
@@ -116,7 +116,7 @@ export default function AdminSettingsPage() {
         </Card>
 
         {/* Security */}
-        <Card>
+        <Card className="h-fit">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="w-5 h-5" />
@@ -128,9 +128,9 @@ export default function AdminSettingsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Two-Factor Authentication</Label>
-                <p className="text-sm text-muted-foreground">
+              <div className="space-y-0.5 min-w-0 flex-1">
+                <Label className="block">Two-Factor Authentication</Label>
+                <p className="text-sm text-muted-foreground truncate">
                   Enable 2FA for enhanced security
                 </p>
               </div>
@@ -141,7 +141,7 @@ export default function AdminSettingsPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Session Timeout (minutes)</Label>
+                <Label className="block">Session Timeout (minutes)</Label>
                 <Select
                   value={settings.security.sessionTimeout}
                   onValueChange={(value) => handleSettingChange('security', 'sessionTimeout', value)}
@@ -158,7 +158,7 @@ export default function AdminSettingsPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Password Expiry (days)</Label>
+                <Label className="block">Password Expiry (days)</Label>
                 <Select
                   value={settings.security.passwordExpiry}
                   onValueChange={(value) => handleSettingChange('security', 'passwordExpiry', value)}
@@ -179,7 +179,7 @@ export default function AdminSettingsPage() {
         </Card>
 
         {/* Appearance */}
-        <Card>
+        <Card className="h-fit">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Palette className="w-5 h-5" />
@@ -192,7 +192,7 @@ export default function AdminSettingsPage() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label>Theme</Label>
+                <Label className="block">Theme</Label>
                 <Select
                   value={settings.appearance.theme}
                   onValueChange={(value) => handleSettingChange('appearance', 'theme', value)}
@@ -208,7 +208,7 @@ export default function AdminSettingsPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Language</Label>
+                <Label className="block">Language</Label>
                 <Select
                   value={settings.appearance.language}
                   onValueChange={(value) => handleSettingChange('appearance', 'language', value)}
@@ -225,7 +225,7 @@ export default function AdminSettingsPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Timezone</Label>
+                <Label className="block">Timezone</Label>
                 <Select
                   value={settings.appearance.timezone}
                   onValueChange={(value) => handleSettingChange('appearance', 'timezone', value)}
@@ -246,7 +246,7 @@ export default function AdminSettingsPage() {
         </Card>
 
         {/* System */}
-        <Card>
+        <Card className="h-fit">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Database className="w-5 h-5" />
@@ -258,9 +258,9 @@ export default function AdminSettingsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Automatic Backups</Label>
-                <p className="text-sm text-muted-foreground">
+              <div className="space-y-0.5 min-w-0 flex-1">
+                <Label className="block">Automatic Backups</Label>
+                <p className="text-sm text-muted-foreground truncate">
                   Enable automatic system backups
                 </p>
               </div>
@@ -270,9 +270,9 @@ export default function AdminSettingsPage() {
               />
             </div>
             <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Analytics Collection</Label>
-                <p className="text-sm text-muted-foreground">
+              <div className="space-y-0.5 min-w-0 flex-1">
+                <Label className="block">Analytics Collection</Label>
+                <p className="text-sm text-muted-foreground truncate">
                   Allow collection of usage analytics
                 </p>
               </div>
@@ -282,9 +282,9 @@ export default function AdminSettingsPage() {
               />
             </div>
             <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Debug Mode</Label>
-                <p className="text-sm text-muted-foreground">
+              <div className="space-y-0.5 min-w-0 flex-1">
+                <Label className="block">Debug Mode</Label>
+                <p className="text-sm text-muted-foreground truncate">
                   Enable debug logging and features
                 </p>
               </div>
@@ -292,6 +292,26 @@ export default function AdminSettingsPage() {
                 checked={settings.system.debugMode}
                 onCheckedChange={(checked) => handleSettingChange('system', 'debugMode', checked)}
               />
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Test section with long text to verify scrolling */}
+        <Card className="h-fit">
+          <CardHeader>
+            <CardTitle>Test Long Content</CardTitle>
+            <CardDescription>
+              This section tests scrolling and text overflow handling with long content.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label className="block">Long Description Test</Label>
+              <div className="p-4 bg-gray-50 rounded border text-sm text-gray-600 max-h-32 overflow-y-auto">
+                <p>This is a comprehensive test section to verify that long text content is properly handled and scrolling works correctly across all admin pages. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                <p className="mt-2">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</p>
+                <p className="mt-2">Totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
+              </div>
             </div>
           </CardContent>
         </Card>

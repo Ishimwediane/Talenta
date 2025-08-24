@@ -138,18 +138,154 @@
   position: relative;
   z-index: 10;
   background-color: rgb(249 250 251); /* bg-gray-50 */
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* Ensure content doesn't get hidden behind sidebar */
 .admin-layout main {
-  min-height: calc(100vh - 4rem); /* Account for navbar height */
+  height: calc(100vh - 4rem); /* Account for navbar height */
   padding-left: 1rem;
   padding-right: 1rem;
+  overflow-y: auto !important; /* Force vertical scrolling */
+  overflow-x: hidden; /* Hide horizontal scrollbar */
+  position: relative; /* Ensure proper positioning context */
 }
 
-/* Responsive adjustments */
+/* Profile and Settings page specific styles */
+.admin-layout .profile-page,
+.admin-layout .settings-page {
+  height: auto;
+  min-height: 100%;
+  overflow-y: visible; /* Allow content to flow naturally */
+  padding-bottom: 2rem; /* Add bottom padding for better scrolling */
+}
+
+/* Ensure the main content area can scroll properly */
+.admin-layout main:has(.profile-page),
+.admin-layout main:has(.settings-page) {
+  overflow-y: auto !important;
+  height: calc(100vh - 4rem) !important;
+}
+
+/* Ensure profile page content flows properly */
+.admin-layout .profile-page .space-y-6 {
+  min-height: 100%;
+  padding-bottom: 2rem;
+}
+
+/* Make sure cards don't interfere with scrolling */
+.admin-layout .profile-page .card,
+.admin-layout .settings-page .card {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  height: fit-content;
+  min-height: fit-content;
+}
+
+/* Ensure text content is properly displayed */
+.admin-layout .profile-page .card,
+.admin-layout .settings-page .card {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Fix for long text in inputs and labels */
+.admin-layout input,
+.admin-layout textarea,
+.admin-layout label {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Ensure proper spacing for long content */
+.admin-layout .space-y-6 > * {
+  min-height: fit-content;
+}
+
+/* Better text handling for long content */
+.admin-layout .truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-layout .min-w-0 {
+  min-width: 0;
+}
+
+.admin-layout .flex-1 {
+  flex: 1 1 0%;
+}
+
+/* Card improvements for better text handling */
+.admin-layout .card {
+  overflow: hidden;
+}
+
+.admin-layout .card-content {
+  word-break: break-word;
+}
+
+/* Input field improvements */
+.admin-layout input,
+.admin-layout select,
+.admin-layout textarea {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Label improvements */
+.admin-layout label {
+  display: block;
+  width: 100%;
+  word-break: break-word;
+}
+
+/* Force scrolling on profile and settings pages */
+.admin-layout main {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
+}
+
+.admin-layout main::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-layout main::-webkit-scrollbar-track {
+  background: #f7fafc;
+}
+
+.admin-layout main::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+}
+
+.admin-layout main::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+/* Responsive text sizing */
 @media (max-width: 768px) {
   .admin-layout .content-area {
     margin-left: 4rem !important; /* Force collapsed sidebar on mobile */
+  }
+  
+  .admin-layout main {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  .admin-layout .text-3xl {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+  
+  .admin-layout .grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+  
+  .admin-layout .grid-cols-3 {
+    grid-template-columns: 1fr;
   }
 }

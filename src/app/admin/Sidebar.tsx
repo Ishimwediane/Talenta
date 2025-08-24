@@ -148,7 +148,7 @@ export function DashboardSidebar({ isCollapsed, onToggleCollapse }: DashboardSid
           {links.map(({ href, label, icon: Icon }) => {
             const isActive = pathname === href
             return (
-              <Link key={href} href={href} passHref legacyBehavior>
+              <Link key={href} href={href}>
                 <Button
                   variant={isActive ? "default" : "ghost"}
                   className={`justify-start gap-3 ${
