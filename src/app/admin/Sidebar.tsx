@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useUser } from "@/contexts/UserContext"
 import {
   BarChart3,
   TrendingUp,
@@ -35,15 +36,33 @@ interface DashboardSidebarProps {
 export function DashboardSidebar({ isCollapsed, onToggleCollapse }: DashboardSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const { user, logout } = useUser()
   const [showProfileMenu, setShowProfileMenu] = useState(false)
 
-  const handleLogout = () => {
-    localStorage.removeItem("token")
+  const handleLogout = async () => {
+    await logout()
     router.push("/login")
   }
 
   const handleProfileClick = () => {
     setShowProfileMenu(!showProfileMenu)
+  }
+
+  // Get user initials for avatar fallback
+  const getUserInitials = () => {
+    if (!user) return "U"
+    const firstName = user.firstName || ""
+    const lastName = user.lastName || ""
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+  }
+
+  // Get user display name
+  const getUserDisplayName = () => {
+    if (!user) return "User"
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName}`
+    }
+    return user.firstName || user.email || "User"
   }
 
   return (
@@ -76,12 +95,15 @@ export function DashboardSidebar({ isCollapsed, onToggleCollapse }: DashboardSid
         <div className="p-4 border-b">
           <div className="flex items-center gap-3">
             <Avatar className="w-10 h-10">
-              <AvatarImage src="/placeholder.svg?height=40&width=40" />
-              <AvatarFallback>BA</AvatarFallback>
+              <AvatarImage src={user?.profilePicture} />
+              <AvatarFallback>{getUserInitials()}</AvatarFallback>
             </Avatar>
             {!isCollapsed && (
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">Brooklyn Alice</p>
+                <p className="text-sm font-medium text-gray-900">{getUserDisplayName()}</p>
+                {user?.role && (
+                  <p className="text-xs text-gray-500 capitalize">{user.role.toLowerCase()}</p>
+                )}
               </div>
             )}
             {!isCollapsed && (

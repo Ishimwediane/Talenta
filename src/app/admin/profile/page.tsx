@@ -1,24 +1,41 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { User, Mail, Phone, MapPin, Save, Edit } from "lucide-react"
+import { User, Mail, Phone, MapPin, Save, Edit, Loader2 } from "lucide-react"
+import { useUser } from "@/contexts/UserContext"
 
 export default function AdminProfilePage() {
+  const { user, updateProfile, loading } = useUser()
   const [isEditing, setIsEditing] = useState(false)
   const [profile, setProfile] = useState({
-    firstName: "Brooklyn",
-    lastName: "Alice",
-    email: "brooklyn.alice@example.com",
-    phone: "+1 (555) 123-4567",
-    location: "New York, NY",
-    role: "Administrator",
-    avatar: "/placeholder.svg?height=100&width=100"
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    location: "",
+    bio: ""
   })
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState("")
+
+  // Initialize profile data when user data is loaded
+  useEffect(() => {
+    if (user) {
+      setProfile({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        location: user.location || "",
+        bio: user.bio || ""
+      })
+    }
+  }, [user])
 
   const handleInputChange = (field: string, value: string) => {
     setProfile(prev => ({
@@ -27,24 +44,63 @@ export default function AdminProfilePage() {
     }))
   }
 
-  const handleSave = () => {
-    // Here you would typically save to your backend
-    console.log('Saving profile:', profile)
-    setIsEditing(false)
+  const handleSave = async () => {
+    try {
+      setSaving(true)
+      setError("")
+      
+      const result = await updateProfile(profile)
+      if (result.success) {
+        setIsEditing(false)
+        // Show success message (you can add a toast notification here)
+        console.log('Profile updated successfully')
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to update profile')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleCancel = () => {
-    // Reset to original values
-    setProfile({
-      firstName: "Brooklyn",
-      lastName: "Alice",
-      email: "brooklyn.alice@example.com",
-      phone: "+1 (555) 123-4567",
-      location: "New York, NY",
-      role: "Administrator",
-      avatar: "/placeholder.svg?height=100&width=100"
-    })
+    // Reset to original user values
+    if (user) {
+      setProfile({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        location: user.location || "",
+        bio: user.bio || ""
+      })
+    }
     setIsEditing(false)
+    setError("")
+  }
+
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!user) return "U"
+    const firstName = user.firstName || ""
+    const lastName = user.lastName || ""
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin" />
+        <span className="ml-2">Loading profile...</span>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <span className="text-gray-500">User not found</span>
+      </div>
+    )
   }
 
   return (
@@ -67,14 +123,24 @@ export default function AdminProfilePage() {
               <Button variant="outline" onClick={handleCancel}>
                 Cancel
               </Button>
-              <Button onClick={handleSave}>
-                <Save className="w-4 h-4 mr-2" />
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4 mr-2" />
+                )}
                 Save Changes
               </Button>
             </>
           )}
         </div>
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      )}
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Profile Information */}
@@ -88,14 +154,16 @@ export default function AdminProfilePage() {
           <CardContent className="space-y-4">
             <div className="flex items-center space-x-4">
               <Avatar className="w-20 h-20">
-                <AvatarImage src={profile.avatar} />
+                <AvatarImage src={user.profilePicture} />
                 <AvatarFallback className="text-lg">
-                  {profile.firstName[0]}{profile.lastName[0]}
+                  {getUserInitials()}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="text-sm font-medium">{profile.role}</p>
-                <p className="text-sm text-muted-foreground">Member since 2024</p>
+                <p className="text-sm font-medium capitalize">{user.role || 'User'}</p>
+                <p className="text-sm text-muted-foreground">
+                  Member since {new Date(user.createdAt).getFullYear()}
+                </p>
               </div>
             </div>
 
@@ -150,6 +218,17 @@ export default function AdminProfilePage() {
                 disabled={!isEditing}
               />
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="bio">Bio</Label>
+              <Input
+                id="bio"
+                value={profile.bio}
+                onChange={(e) => handleInputChange('bio', e.target.value)}
+                disabled={!isEditing}
+                placeholder="Tell us about yourself..."
+              />
+            </div>
           </CardContent>
         </Card>
 
@@ -166,7 +245,7 @@ export default function AdminProfilePage() {
               <Label>Role</Label>
               <div className="flex items-center space-x-2">
                 <User className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm">{profile.role}</span>
+                <span className="text-sm capitalize">{user.role || 'User'}</span>
               </div>
             </div>
 
@@ -174,7 +253,7 @@ export default function AdminProfilePage() {
               <Label>Email</Label>
               <div className="flex items-center space-x-2">
                 <Mail className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm">{profile.email}</span>
+                <span className="text-sm">{user.email || 'Not provided'}</span>
               </div>
             </div>
 
@@ -182,7 +261,7 @@ export default function AdminProfilePage() {
               <Label>Phone</Label>
               <div className="flex items-center space-x-2">
                 <Phone className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm">{profile.phone}</span>
+                <span className="text-sm">{user.phone || 'Not provided'}</span>
               </div>
             </div>
 
@@ -190,7 +269,17 @@ export default function AdminProfilePage() {
               <Label>Location</Label>
               <div className="flex items-center space-x-2">
                 <MapPin className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm">{profile.location}</span>
+                <span className="text-sm">{user.location || 'Not provided'}</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Verification Status</Label>
+              <div className="flex items-center space-x-2">
+                <div className={`w-2 h-2 rounded-full ${user.isVerified ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                <span className="text-sm">
+                  {user.isVerified ? 'Verified' : 'Not Verified'}
+                </span>
               </div>
             </div>
 

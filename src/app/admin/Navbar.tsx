@@ -5,9 +5,11 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Search, Bell, Settings, User } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useUser } from "@/contexts/UserContext"
 
 export function DashboardNavbar() {
   const router = useRouter()
+  const { user } = useUser()
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
