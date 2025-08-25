@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation"
 import LoginModal from './login-modal'
 import SignupModal from './signup-modal'
 import AuthModal from "./auth-modal"
-import { useAuth } from "@/contexts/AuthContext" // Adjust path to your AuthContext
+import { useAuth } from "@/contexts/AuthContext"
+import UserProfileDropdown from "./UserProfileDropdown"
 
 export default function Navbar() {
   const router = useRouter()
@@ -480,20 +481,24 @@ export default function Navbar() {
             </Link>
 
             {/* Desktop Auth */}
-            <div className="hidden md:flex items-center space-x-3">
-                          <button
-                onClick={() => setLoginModalOpen(true)}
-                className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
-              >
-                Login
-              </button>
-              <button
-                onClick={() => setSignupModalOpen(true)}
-                className="bg-orange-500 text-white px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors"
-              >
-                Sign Up
-              </button>
-            </div>
+            {isAuthenticated ? (
+              <UserProfileDropdown user={user} />
+            ) : (
+              <div className="hidden md:flex items-center space-x-3">
+                <button
+                  onClick={() => setLoginModalOpen(true)}
+                  className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => setSignupModalOpen(true)}
+                  className="bg-orange-500 text-white px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors"
+                >
+                  Sign Up
+                </button>
+              </div>
+            )}
 
             {/* Mobile menu button */}
             <button
@@ -575,18 +580,61 @@ export default function Navbar() {
 
               <hr className="border-gray-200" />
 
-                            <button
-                onClick={() => setLoginModalOpen(true)}
-                className="block text-gray-700 font-medium"
-              >
-                Login
-              </button>
-              <button
-                onClick={() => setSignupModalOpen(true)}
-                className="block text-orange-500 font-medium"
-              >
-                Sign Up
-              </button>
+              {isAuthenticated ? (
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-semibold">
+                      {user.profilePicture ? (
+                        <img 
+                          src={user.profilePicture} 
+                          alt="Profile" 
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        `${user.firstName?.charAt(0) || ""}${user.lastName?.charAt(0) || ""}`
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{user.firstName} {user.lastName}</p>
+                      <p className="text-sm text-gray-500">{user.email}</p>
+                    </div>
+                  </div>
+                  
+                  <Link href="/profile" className="block text-gray-700 font-medium">
+                    View Profile
+                  </Link>
+                  <Link href="/dashboard" className="block text-gray-700 font-medium">
+                    Dashboard
+                  </Link>
+                  <Link href="/settings" className="block text-gray-700 font-medium">
+                    Settings
+                  </Link>
+                  
+                  <hr className="border-gray-200" />
+                  
+                  <button
+                    onClick={() => logout()}
+                    className="block text-red-600 font-medium"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setLoginModalOpen(true)}
+                    className="block text-gray-700 font-medium"
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={() => setSignupModalOpen(true)}
+                    className="block text-orange-500 font-medium"
+                  >
+                    Sign Up
+                  </button>
+                </>
+              )}
             </div>
           </div>
                 )}
