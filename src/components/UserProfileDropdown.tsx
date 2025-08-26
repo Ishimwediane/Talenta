@@ -75,96 +75,99 @@ export default function UserProfileDropdown({ user }: UserProfileDropdownProps) 
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Notifications Button */}
-      <div className="relative inline-block mr-4">
-        <button
-          onClick={() => setNotificationsOpen(!notificationsOpen)}
-          className="relative p-2.5 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-200 ease-in-out group"
-        >
-          <Bell className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
-          {/* Notification Badge */}
-          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full animate-pulse shadow-sm"></span>
-        </button>
+      {/* Main User Section - Horizontal Layout */}
+      <div className="flex items-center space-x-4">
+        {/* Notifications Button */}
+        <div className="relative">
+          <button
+            onClick={() => setNotificationsOpen(!notificationsOpen)}
+            className="relative p-2.5 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-200 ease-in-out group"
+          >
+            <Bell className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
+            {/* Notification Badge */}
+            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full animate-pulse shadow-sm"></span>
+          </button>
 
-        {/* Notifications Dropdown */}
-        {notificationsOpen && (
-          <div className="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 animate-in slide-in-from-top-2 duration-200">
-            <div className="p-5">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="text-lg font-bold text-gray-900">Notifications</h3>
-                <button className="text-sm text-orange-500 hover:text-orange-600 font-medium transition-colors duration-200">
-                  Mark all as read
-                </button>
-              </div>
-              
-              <div className="space-y-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
-                {/* Sample notifications */}
-                <div className="flex items-start space-x-3 p-3 bg-orange-50 rounded-xl border border-orange-100 hover:bg-orange-100 transition-colors duration-200">
-                  <div className="w-2.5 h-2.5 bg-orange-500 rounded-full mt-2 animate-pulse"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">Your poem "Rwanda's Heart" has been featured!</p>
-                    <p className="text-xs text-gray-500 mt-1">2 hours ago</p>
+          {/* Notifications Dropdown */}
+          {notificationsOpen && (
+            <div className="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 animate-in slide-in-from-top-2 duration-200">
+              <div className="p-5">
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-lg font-bold text-gray-900">Notifications</h3>
+                  <button className="text-sm text-orange-500 hover:text-orange-600 font-medium transition-colors duration-200">
+                    Mark all as read
+                  </button>
+                </div>
+                
+                <div className="space-y-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+                  {/* Sample notifications */}
+                  <div className="flex items-start space-x-3 p-3 bg-orange-50 rounded-xl border border-orange-100 hover:bg-orange-100 transition-colors duration-200">
+                    <div className="w-2.5 h-2.5 bg-orange-500 rounded-full mt-2 animate-pulse"></div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">Your poem "Rwanda's Heart" has been featured!</p>
+                      <p className="text-xs text-gray-500 mt-1">2 hours ago</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-3 p-3 bg-blue-50 rounded-xl border border-blue-100 hover:bg-blue-100 transition-colors duration-200">
+                    <div className="w-2.5 h-2.5 bg-blue-500 rounded-full mt-2"></div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">New comment on your story</p>
+                      <p className="text-xs text-gray-500 mt-1">1 day ago</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-xl border border-gray-100 hover:bg-gray-100 transition-colors duration-200">
+                    <div className="w-2.5 h-2.5 bg-gray-400 rounded-full mt-2"></div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">Welcome to Talenta! Start exploring content.</p>
+                      <p className="text-xs text-gray-500 mt-1">3 days ago</p>
+                    </div>
                   </div>
                 </div>
                 
-                <div className="flex items-start space-x-3 p-3 bg-blue-50 rounded-xl border border-blue-100 hover:bg-blue-100 transition-colors duration-200">
-                  <div className="w-2.5 h-2.5 bg-blue-500 rounded-full mt-2"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">New comment on your story</p>
-                    <p className="text-xs text-gray-500 mt-1">1 day ago</p>
-                  </div>
+                <div className="mt-5 pt-4 border-t border-gray-100">
+                  <Link 
+                    href="/notifications" 
+                    className="block text-center text-sm text-orange-500 hover:text-orange-600 font-semibold transition-colors duration-200 hover:bg-orange-50 py-2 rounded-lg"
+                  >
+                    View all notifications
+                  </Link>
                 </div>
-                
-                <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-xl border border-gray-100 hover:bg-gray-100 transition-colors duration-200">
-                  <div className="w-2.5 h-2.5 bg-gray-400 rounded-full mt-2"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">Welcome to Talenta! Start exploring content.</p>
-                    <p className="text-xs text-gray-500 mt-1">3 days ago</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-5 pt-4 border-t border-gray-100">
-                <Link 
-                  href="/notifications" 
-                  className="block text-center text-sm text-orange-500 hover:text-orange-600 font-semibold transition-colors duration-200 hover:bg-orange-50 py-2 rounded-lg"
-                >
-                  View all notifications
-                </Link>
               </div>
             </div>
-          </div>
-        )}
-      </div>
-
-      {/* User Profile Button */}
-      <button
-        onClick={() => {
-          console.log('Profile button clicked, current state:', isOpen);
-          setIsOpen(!isOpen);
-        }}
-        className="flex items-center space-x-3 p-2.5 rounded-xl hover:bg-gray-50 hover:shadow-md transition-all duration-200 ease-in-out group"
-      >
-        {/* Profile Picture or Initials */}
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:shadow-xl transition-all duration-200 group-hover:scale-105">
-          {user.profilePicture ? (
-            <img 
-              src={user.profilePicture} 
-              alt="Profile" 
-              className="w-9 h-9 rounded-full object-cover"
-            />
-          ) : (
-            getInitials(user.firstName, user.lastName)
           )}
         </div>
-        
-        <div className="hidden md:block text-left">
-          <p className="text-sm font-semibold text-gray-900 group-hover:text-gray-700 transition-colors duration-200">{user.firstName} {user.lastName}</p>
-          {getRoleBadge(user.role)}
-        </div>
-        
-        <ChevronDown className={`w-4 h-4 text-gray-500 transition-all duration-200 ${isOpen ? "rotate-180 text-orange-500" : "group-hover:text-gray-700"}`} />
-      </button>
+
+        {/* User Profile Button */}
+        <button
+          onClick={() => {
+            console.log('Profile button clicked, current state:', isOpen);
+            setIsOpen(!isOpen);
+          }}
+          className="flex items-center space-x-3 p-2.5 rounded-xl hover:bg-gray-50 hover:shadow-md transition-all duration-200 ease-in-out group"
+        >
+          {/* Profile Picture or Initials */}
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:shadow-xl transition-all duration-200 group-hover:scale-105">
+            {user.profilePicture ? (
+              <img 
+                src={user.profilePicture} 
+                alt="Profile" 
+                className="w-9 h-9 rounded-full object-cover"
+              />
+            ) : (
+              getInitials(user.firstName, user.lastName)
+            )}
+          </div>
+          
+          <div className="hidden md:block text-left">
+            <p className="text-sm font-semibold text-gray-900 group-hover:text-gray-700 transition-colors duration-200">{user.firstName} {user.lastName}</p>
+            {getRoleBadge(user.role)}
+          </div>
+          
+          <ChevronDown className={`w-4 h-4 text-gray-500 transition-all duration-200 ${isOpen ? "rotate-180 text-orange-500" : "group-hover:text-gray-700"}`} />
+        </button>
+      </div>
 
       {/* Profile Dropdown Menu */}
       {isOpen && (
