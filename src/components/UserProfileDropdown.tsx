@@ -41,7 +41,6 @@ export default function UserProfileDropdown({ user }: UserProfileDropdownProps) 
   }, []);
 
   const handleLogout = async () => {
-    console.log('Logout button clicked');
     try {
       await logout();
       router.push("/");
@@ -145,24 +144,11 @@ export default function UserProfileDropdown({ user }: UserProfileDropdownProps) 
             console.log('Profile button clicked, current state:', isOpen);
             setIsOpen(!isOpen);
           }}
-          className="flex items-center space-x-3 p-2.5 rounded-xl hover:bg-gray-50 hover:shadow-md transition-all duration-200 ease-in-out group"
+          className="flex items-center space-x-2 p-2.5 rounded-xl hover:bg-gray-50 hover:shadow-md transition-all duration-200 ease-in-out group"
         >
-          {/* Profile Picture or Initials */}
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:shadow-xl transition-all duration-200 group-hover:scale-105">
-            {user.profilePicture ? (
-              <img 
-                src={user.profilePicture} 
-                alt="Profile" 
-                className="w-9 h-9 rounded-full object-cover"
-              />
-            ) : (
-              getInitials(user.firstName, user.lastName)
-            )}
-          </div>
-          
-          <div className="hidden md:block text-left">
-            <p className="text-sm font-semibold text-gray-900 group-hover:text-gray-700 transition-colors duration-200">{user.firstName} {user.lastName}</p>
-            {getRoleBadge(user.role)}
+          {/* Simple User Icon */}
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 flex items-center justify-center text-white shadow-lg group-hover:shadow-xl transition-all duration-200 group-hover:scale-105">
+            <User className="w-5 h-5" />
           </div>
           
           <ChevronDown className={`w-4 h-4 text-gray-500 transition-all duration-200 ${isOpen ? "rotate-180 text-orange-500" : "group-hover:text-gray-700"}`} />
@@ -171,8 +157,8 @@ export default function UserProfileDropdown({ user }: UserProfileDropdownProps) 
 
       {/* Profile Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-2xl border border-gray-100 z-[9999] animate-in slide-in-from-top-2 duration-200 max-h-[80vh] overflow-hidden">
-          <div className="p-5 max-h-[calc(80vh-2rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent relative">
+        <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 animate-in slide-in-from-top-2 duration-200">
+          <div className="p-5">
             {/* User Info Header */}
             <div className="flex items-center space-x-4 pb-5 border-b border-gray-100 mb-5">
               <div className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 flex items-center justify-center text-white font-bold text-xl shadow-lg">
@@ -261,18 +247,15 @@ export default function UserProfileDropdown({ user }: UserProfileDropdownProps) 
             </div>
 
             {/* Logout Button */}
-            <div className="pt-4 border-t border-gray-100 mt-4">
+            <div className="pt-4 border-t border-gray-100">
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl transition-all duration-200 group bg-red-50/50"
+                className="flex items-center space-x-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl transition-all duration-200 group"
               >
                 <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
                 <span className="font-medium">Sign Out</span>
               </button>
             </div>
-            
-            {/* Scroll indicator */}
-            <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
           </div>
         </div>
       )}
