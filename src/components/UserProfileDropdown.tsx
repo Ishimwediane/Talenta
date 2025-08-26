@@ -41,6 +41,7 @@ export default function UserProfileDropdown({ user }: UserProfileDropdownProps) 
   }, []);
 
   const handleLogout = async () => {
+    console.log('Logout button clicked');
     try {
       await logout();
       router.push("/");
@@ -138,7 +139,10 @@ export default function UserProfileDropdown({ user }: UserProfileDropdownProps) 
 
       {/* User Profile Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          console.log('Profile button clicked, current state:', isOpen);
+          setIsOpen(!isOpen);
+        }}
         className="flex items-center space-x-3 p-2.5 rounded-xl hover:bg-gray-50 hover:shadow-md transition-all duration-200 ease-in-out group"
       >
         {/* Profile Picture or Initials */}
@@ -164,8 +168,8 @@ export default function UserProfileDropdown({ user }: UserProfileDropdownProps) 
 
       {/* Profile Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 animate-in slide-in-from-top-2 duration-200">
-          <div className="p-5">
+        <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-2xl border border-gray-100 z-[9999] animate-in slide-in-from-top-2 duration-200 max-h-[80vh] overflow-hidden">
+          <div className="p-5 max-h-[calc(80vh-2rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent relative">
             {/* User Info Header */}
             <div className="flex items-center space-x-4 pb-5 border-b border-gray-100 mb-5">
               <div className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 flex items-center justify-center text-white font-bold text-xl shadow-lg">
@@ -254,15 +258,18 @@ export default function UserProfileDropdown({ user }: UserProfileDropdownProps) 
             </div>
 
             {/* Logout Button */}
-            <div className="pt-4 border-t border-gray-100">
+            <div className="pt-4 border-t border-gray-100 mt-4">
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl transition-all duration-200 group"
+                className="flex items-center space-x-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl transition-all duration-200 group bg-red-50/50"
               >
                 <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
                 <span className="font-medium">Sign Out</span>
               </button>
             </div>
+            
+            {/* Scroll indicator */}
+            <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
           </div>
         </div>
       )}

@@ -23,6 +23,13 @@ export default function Navbar() {
   const [signupModalOpen, setSignupModalOpen] = useState(false)
   const { user, logout, isAuthenticated } = useAuth()
 
+  // Debug mobile menu state
+  useEffect(() => {
+    if (mobileOpen) {
+      console.log('Mobile menu is open');
+    }
+  }, [mobileOpen]);
+
 
   // Functions to switch between modals
   const handleSwitchToSignup = () => {
@@ -484,7 +491,7 @@ export default function Navbar() {
             {isAuthenticated ? (
               <UserProfileDropdown user={user} />
             ) : (
-              <div className="hidden md:flex items-center space-x-3">
+              <div className="flex items-center space-x-3">
                 <button
                   onClick={() => setLoginModalOpen(true)}
                   className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
@@ -502,7 +509,10 @@ export default function Navbar() {
 
             {/* Mobile menu button */}
             <button
-              onClick={() => setMobileOpen(!mobileOpen)}
+              onClick={() => {
+                console.log('Mobile menu button clicked, current state:', mobileOpen);
+                setMobileOpen(!mobileOpen);
+              }}
               className="lg:hidden p-2 text-gray-600 hover:text-gray-900"
             >
               {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -512,7 +522,7 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <div className="lg:hidden border-t border-gray-200 py-4">
+          <div className="lg:hidden border-t border-gray-200 py-4 max-h-[80vh] overflow-y-auto" style={{zIndex: 9999}}>
             <div className="space-y-4">
               <Link href="/" className="block text-gray-700 font-medium">
                 Home
@@ -613,7 +623,10 @@ export default function Navbar() {
                   <hr className="border-gray-200" />
                   
                   <button
-                    onClick={() => logout()}
+                    onClick={() => {
+                      console.log('Mobile logout button clicked');
+                      logout();
+                    }}
                     className="block text-red-600 font-medium"
                   >
                     Sign Out
@@ -636,6 +649,7 @@ export default function Navbar() {
                 </>
               )}
             </div>
+            <div className="pb-4"></div>
           </div>
                 )}
       </div>

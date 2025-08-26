@@ -167,3 +167,4 @@ Enable console logging by checking the browser console for:
 - **Multi-language Support**: Internationalization
 - **Dark Mode**: Theme preferences in profile
 
+
