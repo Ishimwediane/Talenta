@@ -549,7 +549,14 @@ export default function AudioManagementPage() {
   const fetchAudios = async () => {
     try {
       setFetchError(null);
-      const res = await fetch(`${API_BASE_URL}/api/audio`);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      const res = await fetch(`${API_BASE_URL}/api/audio/user/all`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       if (!res.ok) {
         throw new Error(`Failed to fetch audios. Status: ${res.status}`);
       }
