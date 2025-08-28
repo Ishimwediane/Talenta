@@ -305,6 +305,9 @@ export default function Navbar() {
                 <Link href="/audio" className="text-gray-700 hover:text-orange-500 font-medium transition-colors">
                   Audio
                 </Link>
+                <Link href="/about" className="text-gray-700 hover:text-orange-500 font-medium transition-colors">
+                  About Us
+                </Link>
                 {/* Browse Dropdown */}
                <div className="relative" ref={browseRef}>
               <button
@@ -320,7 +323,7 @@ export default function Navbar() {
                 <div
                   onMouseEnter={() => setBrowseOpen(true)}
                   onMouseLeave={() => setBrowseOpen(false)}
-                  className="absolute top-full mt-2 w-screen max-w-6xl bg-white shadow-2xl border border-gray-200 rounded-xl overflow-hidden z-50"
+                  className="absolute top-full mt-2 w-screen max-w-6xl bg-white shadow-2xl border border-gray-200 rounded-xl -ml-80 overflow-hidden z-50"
                   style={{ left: "-300px" }}
                 >
                   <div className="flex">
@@ -452,9 +455,7 @@ export default function Navbar() {
               )}
             </div>
                 
-                <Link href="/about" className="text-gray-700 hover:text-orange-500 font-medium transition-colors">
-                  About Us
-                </Link>
+               
                 
               </>
             )
@@ -464,7 +465,7 @@ export default function Navbar() {
           {/* Right side icons and auth */}
           <div className="flex items-center space-x-4">
             {/* Language Toggle with Flags */}
-            <div className="relative">
+            {/* <div className="relative">
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
@@ -475,7 +476,7 @@ export default function Navbar() {
                 <option value="FR">🇫🇷 FR</option>
               </select>
               <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-500 pointer-events-none" />
-            </div>
+            </div> */}
 
             {/* Search */}
             <button onClick={() => setSearchOpen(true)} className="p-2 text-gray-600 hover:text-orange-500 transition-colors">
@@ -528,7 +529,9 @@ export default function Navbar() {
               <Link href="/audio" className="block text-gray-700 font-medium">
                 Audio
               </Link>
-
+              <Link href="/about" className="block text-gray-700 font-medium">
+                About Us
+              </Link>
               <div>
                 <button
                   onClick={() => setBrowseOpen(!browseOpen)}
@@ -573,12 +576,7 @@ export default function Navbar() {
                 )}
               </div>
 
-              <Link href="/creators" className="block text-gray-700 font-medium">
-                Creators
-              </Link>
-              <Link href="/about" className="block text-gray-700 font-medium">
-                About Us
-              </Link>
+            
               
 
               <hr className="border-gray-200" />
