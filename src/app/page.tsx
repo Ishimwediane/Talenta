@@ -1,6 +1,8 @@
 
 import Link from "next/link"
 import Image from "next/image";
+import FeaturedBooks from "@/components/FeaturedBooks";
+import FeaturedAudio from "@/components/FeaturedAudio";
 
 export default function Home() {
   return (
@@ -14,11 +16,11 @@ export default function Home() {
             {/* Left Content */}
             <div className="z-10 pl-8 lg:pl-16">
               <h1 className="text-4xl lg:text-5xl font-bold text-black mb-8">
-                MEET<br />
-                TALENTA
+                TALENTA<br />
+                BOOKS & AUDIO
               </h1>
               <p className="text-lg text-black leading-relaxed mb-8">
-                Trailblazer in the intersection of culture, technology, and human potential.
+                A creative home for readers and listeners. Discover books, audiobooks, and voices that connect our culture and imagination.
               </p>
               
               {/* Flowing Lines Container */}
@@ -58,17 +60,17 @@ export default function Home() {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-6">
                 <Link
-                  href="/browse"
+                  href="/books"
                   className="text-black px-8 py-4 rounded-none font-bold text-lg hover:opacity-80 transition-colors text-center border border-black hover:bg-black hover:text-white"
                 >
-                  EXPLORE CONTENT
+                  Explore Books
                 </Link>
                 <Link
                   href="/creators"
                   className="text-white px-8 py-4 rounded-none font-bold text-lg hover:opacity-80 transition-colors text-center"
                   style={{ backgroundColor: '#F54A00' }}
                 >
-                  JOIN CREATORS
+                  Join Creators
                 </Link>
               </div>
             </div>
@@ -114,7 +116,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Reading & Literature Section */}
+      {/* About Talenta */}
    <section className="relative overflow-hidden bg-[#101828] py-20">
       {/* Top white curve */}
     {/* Top white curve (horizontal left-to-right) */}
@@ -150,13 +152,17 @@ export default function Home() {
             {/* Main Circular Portrait */}
             <div className="relative w-96 h-96 mx-auto">
               <div className="w-96 h-96 rounded-full overflow-hidden" style={{ backgroundColor: "#F54A00" }}>
-        <Image
-          src="/images/marius-dojo-main.png"
-          alt="Marius Dojo founder portrait"
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          style={{ objectFit: "cover" }}
-        />
+              <Image
+  src="/image/book1.webp"
+  alt="Marius Dojo founder portrait"
+  fill
+  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+  style={{
+    objectFit: "cover",
+    borderRadius: "50%", // makes it circular
+  }}
+/>
+
                
               </div>
             </div>
@@ -165,7 +171,7 @@ export default function Home() {
             <div className="absolute -bottom-8 -right-8 w-32 h-32">
               <div className="w-32 h-32 rounded-full overflow-hidden bg-white relative">
             <Image
-                  src="/images/marius-dojo-action.png"
+                  src="/image/audio.jpeg"
                   alt="Martial arts action shot"
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -180,29 +186,22 @@ export default function Home() {
             <h2 className="text-4xl lg:text-5xl font-bold text-white mb-8">
               ABOUT
               <br />
-              <span style={{ color: "#F54A00" }}>MARIUS DOJO</span>
+              <span style={{ color: "#F54A00" }}>TALENTA</span>
             </h2>
             <p className="text-lg text-white mb-6 leading-relaxed">
-              The official name of the association &quot;Marius dojo&quot; was legalized on 18/08/2020. As of
-              01/01/2022, we have settled in a new, modern, specialized judo hall - 20 Kovo 11-osios g. 8 floor, Kaunas.
+              Talenta is a platform where stories live in two forms: written and spoken. We celebrate Rwandan and global creativity through books and audio that educate, inspire, and connect.
             </p>
             <p className="text-lg text-white mb-6 leading-relaxed">
-              &quot;MARIUS&quot; is the name of the founder, Marius Paškevičius, a long-time member of the Lithuanian
-              judo team, a prize winner of the World and European Judo Championships and a participant in 2 Olympic
-              Games. His 25-year career as a professional athlete ended in 2017, then the idea of &quot;Marius
-              dojo&quot; was born, matured for many years.
+              Whether you prefer turning pages or pressing play, Talenta brings authors and voices together—so you can read deeply, listen freely, and share meaningfully.
             </p>
             <p className="text-lg text-white mb-8 leading-relaxed">
-              &quot;DOJO&quot; is a martial arts training hall. It is a sacred, spiritual place for fighters. This is
-              the attitude and atmosphere we aim to create in our dojo. We are creating a judo school, which would first
-              of all develop strong personalities, healthy, active and community-oriented people, and bring society
-              together.
+              Explore curated shelves, trending listens, and community favorites. Create with us, or discover new works every day.
             </p>
           </div>
         </div>
       </div>
     </section>
-      {/* Podcasts & Audio Section */}
+      {/* Books & Audio Highlight */}
       <section className="py-20 bg-white relative overflow-hidden">
         {/* Top subtle branding */}
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 text-6xl font-bold opacity-10" style={{ color: '#F54A00' }}>
@@ -296,45 +295,38 @@ export default function Home() {
             {/* Right Column - Text Content */}
             <div className="pl-8 lg:pl-16">
               <h2 className="text-4xl lg:text-5xl font-bold text-black mb-8">
-                BRINGING YOU THE WORLD, ONE{" "}
-                <span className="relative">
-                  POD
-                  <span className="absolute -top-2 -right-2 w-6 h-6" style={{ color: '#F54A00' }}>
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-                      <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-                    </svg>
-                  </span>
-                  CAST
-                  <span className="absolute -top-2 -right-8 w-6 h-6" style={{ color: '#F54A00' }}>
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                  </span>
-                </span>{" "}
-                AT A TIME
+                Read. Listen. Connect.
               </h2>
               
               <p className="text-lg text-black mb-8 leading-relaxed">
-                Discover the stories, ideas, and voices that shape our world. At Talenta we bring you a diverse range of podcasts, from cultural storytelling to captivating narratives.
+                Discover stories, ideas, and voices that shape our world. Explore books and audio—from cultural storytelling to contemporary thought—crafted by creators you can follow and support.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-6">
                 <Link
-                  href="/explore/podcasts"
+                  href="/audio"
                   className="text-black px-8 py-4 rounded-lg font-bold text-lg hover:opacity-80 transition-colors text-center flex items-center justify-center gap-3"
                   style={{ backgroundColor: '#F54A00' }}
                 >
-                  Start listening
+                  Start Listening
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
                   </svg>
+                </Link>
+                <Link
+                  href="/books"
+                  className="text-black px-8 py-4 rounded-lg font-bold text-lg hover:opacity-80 transition-colors text-center flex items-center justify-center gap-3 border border-black"
+                >
+                  Browse Books
                 </Link>
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      <FeaturedBooks />
+      <FeaturedAudio />
 
       {/* Community & Join Us Section */}
       
