@@ -8,6 +8,7 @@ import SignupModal from './signup-modal'
 import AuthModal from "./auth-modal"
 import { useAuth } from "@/contexts/AuthContext"
 import UserProfileDropdown from "./UserProfileDropdown"
+import SearchModal from "./search-modal"
 
 export default function Navbar() {
   const router = useRouter()
@@ -21,6 +22,7 @@ export default function Navbar() {
   const profileMenuRef = useRef<HTMLDivElement>(null)
   const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [signupModalOpen, setSignupModalOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const { user, logout, isAuthenticated } = useAuth()
 
   // Debug mobile menu state
@@ -267,9 +269,7 @@ export default function Navbar() {
                 <Link href="/audio" className="text-gray-700 hover:text-orange-500 font-medium transition-colors">
                   Audio
                 </Link>
-                <Link href="/search" className="text-gray-700 hover:text-orange-500 font-medium transition-colors">
-                  Search
-                </Link>
+                
                 {/* Create Dropdown */}
                 <div className="relative" ref={createRef}>
                   <button
@@ -451,15 +451,11 @@ export default function Navbar() {
                 </div>
               )}
             </div>
-                   <Link href="/creators" className="text-gray-700 hover:text-orange-500 font-medium transition-colors">
-                  Creators
-                </Link>
+                
                 <Link href="/about" className="text-gray-700 hover:text-orange-500 font-medium transition-colors">
                   About Us
                 </Link>
-                <Link href="/search" className="text-gray-700 hover:text-orange-500 font-medium transition-colors">
-                  Search
-                </Link>
+                
               </>
             )
             }</div>
@@ -482,9 +478,9 @@ export default function Navbar() {
             </div>
 
             {/* Search */}
-            <Link href="/search" className="p-2 text-gray-600 hover:text-orange-500 transition-colors">
+            <button onClick={() => setSearchOpen(true)} className="p-2 text-gray-600 hover:text-orange-500 transition-colors">
               <Search className="w-5 h-5" />
-            </Link>
+            </button>
 
             {/* Desktop Auth */}
             {isAuthenticated ? (
@@ -583,9 +579,7 @@ export default function Navbar() {
               <Link href="/about" className="block text-gray-700 font-medium">
                 About Us
               </Link>
-              <Link href="/search" className="block text-gray-700 font-medium">
-                Search
-              </Link>
+              
 
               <hr className="border-gray-200" />
 
@@ -677,6 +671,7 @@ export default function Navbar() {
           onSwitchToLogin={handleSwitchToLogin}
         />
       )}
+      <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
     </nav>
   )
 }
