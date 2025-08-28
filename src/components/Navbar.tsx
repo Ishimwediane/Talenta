@@ -65,8 +65,8 @@ export default function Navbar() {
       badge: "HERITAGE",
     },
     {
-      name: "Films",
-      subcategories: ["Romance", "Drama", "Documentary", "Comedy", "Culture"],
+      name: "Books",
+      subcategories: ["Fiction", "Non-fiction", "Biographies", "Education"],
       badge: "NEW",
     },
     {
@@ -86,13 +86,12 @@ export default function Navbar() {
   ]
 
   const contentTypes = [
-    { name: "Audio Content", items: ["Podcasts", "Poetry Readings", "Music", "Interviews"] },
-    { name: "Visual Content", items: ["Films", "Documentaries", "Photo Stories", "Art Gallery"] },
-    { name: "Written Content", items: ["Articles", "Poems", "Stories", "Reviews"] },
+    { name: "Audio Content", items: ["Podcasts", "Poetry Readings", "Audiobooks", "Interviews"] },
+    { name: "Written Content", items: ["Books", "Articles", "Poems", "Stories"] },
   ]
 
   const featuredContent = [
-    { name: "Trending Now", items: ["Popular Poems", "Viral Stories", "Top Films"] },
+    { name: "Trending Now", items: ["Popular Poems", "Viral Stories", "Top Books"] },
     { name: "Editor's Choice", items: ["Staff Picks", "Award Winners", "Hidden Gems"] },
     { name: "For Artists", items: ["Submit Work", "Artist Spotlight", "Collaborations"] },
   ]

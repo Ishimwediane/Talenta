@@ -11,10 +11,10 @@ export default function BrowsePage() {
       color: "from-orange-400 to-red-400",
     },
     {
-      name: "Storytelling Films",
-      description: "Short cinematic stories with narrative depth and cultural themes.",
-      image: "/categories/storytelling-films.jpg",
-      count: "96 films",
+      name: "Books",
+      description: "Discover printed and digital books across genres and interests.",
+      image: "/categories/books.jpg",
+      count: "1,200+ books",
       color: "from-red-400 to-pink-400",
     },
     {
