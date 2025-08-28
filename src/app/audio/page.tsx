@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { Search, Filter, Play, Clock, User } from "lucide-react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -16,7 +15,349 @@ type PublicAudio = {
   status: 'PUBLISHED' | 'DRAFT';
   createdAt?: string;
   user?: { id: string; firstName?: string | null; lastName?: string | null };
+  duration?: number;
+  tags?: string[];
 };
+
+type User = {
+  id: string;
+  email: string;
+  role: string;
+  firstName?: string | null;
+  lastName?: string | null;
+};
+
+// AudioCard Component
+function AudioCard({ audio }: { audio: PublicAudio }) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Fetch current user on component mount
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        console.log('Token found:', !!token);
+        if (!token) {
+          console.log('No token found, user not logged in');
+          setIsLoadingUser(false);
+          return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/auth/me`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        console.log('Auth response status:', response.status);
+        if (response.ok) {
+          const userData = await response.json();
+          console.log('User data received:', userData);
+          setCurrentUser(userData.user);
+        } else {
+          console.log('Auth failed, status:', response.status);
+        }
+      } catch (error) {
+        console.error('Error fetching current user:', error);
+      } finally {
+        setIsLoadingUser(false);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
+
+  const canEditAudio = () => {
+    if (!currentUser) return false;
+    console.log('Current user:', currentUser);
+    console.log('Audio user:', audio.user);
+    console.log('User role:', currentUser.role);
+    console.log('Is admin?', currentUser.role === 'ADMIN');
+    console.log('Is creator?', currentUser.id === audio.user?.id);
+    return currentUser.role === 'ADMIN' || currentUser.id === audio.user?.id;
+  };
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handlePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const time = parseFloat(e.target.value);
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+      setCurrentTime(time);
+    }
+  };
+
+  const handleEnded = () => {
+    setIsPlaying(false);
+    setCurrentTime(0);
+  };
+
+  const handleEdit = () => {
+    setIsEditModalOpen(true);
+    setIsMenuOpen(false);
+  };
+
+  const handleDelete = () => {
+    setIsDeleteModalOpen(true);
+    setIsMenuOpen(false);
+  };
+
+  const handleClickOutside = (e: React.MouseEvent) => {
+    if ((e.target as Element).closest('.menu-container')) {
+      return;
+    }
+    setIsMenuOpen(false);
+  };
+
+  return (
+    <div className="bg-white rounded-lg border p-6 hover:shadow-md transition-shadow">
+      {/* Debug status */}
+      <div className="mb-2 p-2 bg-gray-100 rounded text-xs">
+        Auth Status: {isLoadingUser ? 'Loading...' : currentUser ? `Logged in as ${currentUser.role}` : 'Not logged in'}
+      </div>
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex-1">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">{audio.title}</h3>
+          {audio.description && (
+            <p className="text-gray-600 text-sm mb-3">{audio.description}</p>
+          )}
+          
+          <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+            {audio.user && (
+              <span>By {audio.user.firstName || audio.user.lastName || 'Unknown'}</span>
+            )}
+            {audio.category && (
+              <span className="bg-gray-100 px-2 py-1 rounded">{audio.category}</span>
+            )}
+            {/* Debug info - remove this later */}
+            {currentUser && (
+              <span className="bg-yellow-100 px-2 py-1 rounded text-xs">
+                Logged in as: {currentUser.role} ({currentUser.email})
+              </span>
+            )}
+            {audio.tags && audio.tags.length > 0 && (
+              <div className="flex gap-1">
+                {audio.tags.slice(0, 3).map((tag, index) => (
+                  <span key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                    {tag}
+                  </span>
+                ))}
+                {audio.tags.length > 3 && (
+                  <span className="text-gray-400 text-xs">+{audio.tags.length - 3} more</span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Three-dot menu - only show for admin or creator */}
+        {/* Debug: Show menu for all logged in users temporarily */}
+        {!isLoadingUser && currentUser && (
+          <div className="text-xs text-red-600 mb-2">DEBUG: Menu should be visible</div>
+        )}
+        {!isLoadingUser && currentUser && (
+          <div className="relative menu-container ml-2">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors bg-white border"
+              style={{ zIndex: 20 }}
+            >
+              <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+              </svg>
+            </button>
+
+            {isMenuOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border z-50">
+                <div className="py-1">
+                  <button
+                    onClick={handleEdit}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Audio Player */}
+      <div className="bg-gray-50 rounded-lg p-4">
+        <audio
+          ref={audioRef}
+          src={audio.fileUrl}
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleLoadedMetadata}
+          onEnded={handleEnded}
+          onCanPlay={() => setDuration(audioRef.current?.duration || 0)}
+        />
+        
+        <div className="flex items-center gap-4">
+          <button
+            onClick={handlePlayPause}
+            className="w-12 h-12 bg-amber-800 text-white rounded-full flex items-center justify-center hover:bg-amber-900 transition-colors"
+          >
+            {isPlaying ? (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+              </svg>
+            )}
+          </button>
+
+          <div className="flex-1">
+            <div className="flex items-center justify-between text-sm text-gray-500 mb-1">
+              <span>{formatDuration(currentTime)}</span>
+              <span>{formatDuration(duration)}</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max={duration || 0}
+              value={currentTime}
+              onChange={handleSeek}
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+              style={{
+                background: `linear-gradient(to right, #92400e 0%, #92400e ${(currentTime / (duration || 1)) * 100}%, #e5e7eb ${(currentTime / (duration || 1)) * 100}%, #e5e7eb 100%)`
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Edit Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setIsEditModalOpen(false)}>
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold mb-4">Edit Audio</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <input
+                  type="text"
+                  defaultValue={audio.title}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  defaultValue={audio.description || ''}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select
+                  defaultValue={audio.category || ''}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                >
+                  <option value="">Select Category</option>
+                  <option value="podcast">Podcast</option>
+                  <option value="audiobook">Audiobook</option>
+                  <option value="music">Music</option>
+                  <option value="interview">Interview</option>
+                  <option value="lecture">Lecture</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  alert('Audio updated successfully!');
+                  setIsEditModalOpen(false);
+                }}
+                className="flex-1 px-4 py-2 bg-amber-800 text-white rounded-md hover:bg-amber-900"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Modal */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setIsDeleteModalOpen(false)}>
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold mb-4">Delete Audio</h3>
+            <p className="text-gray-600 mb-6">Are you sure you want to delete "{audio.title}"? This action cannot be undone.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setIsDeleteModalOpen(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  alert('Audio deleted successfully!');
+                  setIsDeleteModalOpen(false);
+                }}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AudioPage() {
   const [audios, setAudios] = useState<PublicAudio[]>([]);
@@ -25,7 +366,7 @@ export default function AudioPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [showFilters, setShowFilters] = useState(false);
+  const [selectedDuration, setSelectedDuration] = useState<string>("");
 
   // Get unique categories from audios
   const categories = React.useMemo(() => {
@@ -70,182 +411,191 @@ export default function AudioPage() {
   const resetFilters = () => {
     setSearchQuery("");
     setSelectedCategory("");
+    setSelectedDuration("");
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading audio library...</p>
-        </div>
+      <div className="min-h-[50vh] flex items-center justify-center text-gray-600">
+        Loading audio...
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-500 mb-4">
-            <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-          </div>
-          <p className="text-red-600">{error}</p>
-        </div>
+      <div className="min-h-[50vh] flex items-center justify-center text-red-600">
+        {error}
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Header */}
-      <section className="bg-gradient-to-br from-orange-500 to-red-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Audio Library</h1>
-            <p className="text-xl opacity-90 max-w-2xl mx-auto">
-              Discover stories, voices, and inspiration through our curated collection of audio content
-            </p>
-          </div>
+      {/* Header */}
+      <section className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <h1 className="text-2xl font-semibold text-gray-900">Audio Library</h1>
+          <p className="text-gray-600 mt-1">Discover and listen to published recordings</p>
         </div>
       </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search and Filter Bar */}
-        <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search audio recordings..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              />
-            </div>
-            
-            {/* Filter Toggle */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Filter className="w-5 h-5" />
-              <span>Filters</span>
-            </button>
-          </div>
-
-          {/* Filter Options */}
-          {showFilters && (
-            <div className="mt-6 pt-6 border-t border-gray-100">
-              <div className="flex flex-wrap gap-4 items-center">
-                <span className="text-sm font-medium text-gray-700">Category:</span>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                >
-                  <option value="">All Categories</option>
-                  {categories.map((category) => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-                
+        <div className="flex gap-8">
+          {/* Sidebar Filters */}
+          <div className="w-80 flex-shrink-0">
+            <div className="bg-white rounded-lg border p-6 sticky top-8">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-semibold text-gray-900">Filter Audio</h3>
                 <button
                   onClick={resetFilters}
-                  className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+                  className="text-sm text-gray-500 hover:text-gray-700"
                 >
-                  Clear filters
+                  Reset Filters
+                </button>
+              </div>
+
+              {/* Search */}
+              <div className="mb-6">
+                <input
+                  type="text"
+                  placeholder="Search audio..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Categories */}
+              {categories.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                    Categories
+                    <svg className="w-4 h-4 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </h4>
+                  <div className="space-y-2">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="category"
+                        value=""
+                        checked={selectedCategory === ""}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="text-orange-600 focus:ring-orange-500"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">All Categories</span>
+                    </label>
+                    {categories.map((category) => (
+                      <label key={category} className="flex items-center">
+                        <input
+                          type="radio"
+                          name="category"
+                          value={category}
+                          checked={selectedCategory === category}
+                          onChange={(e) => setSelectedCategory(e.target.value)}
+                          className="text-orange-600 focus:ring-orange-500"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">{category}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Duration Filter */}
+              <div className="mb-6">
+                <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                  Duration
+                  <svg className="w-4 h-4 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </h4>
+                <div className="space-y-2">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="duration"
+                      value=""
+                      checked={selectedDuration === ""}
+                      onChange={(e) => setSelectedDuration(e.target.value)}
+                      className="text-orange-600 focus:ring-orange-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Any Duration</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="duration"
+                      value="short"
+                      checked={selectedDuration === "short"}
+                      onChange={(e) => setSelectedDuration(e.target.value)}
+                      className="text-orange-600 focus:ring-orange-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Under 5 minutes</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="duration"
+                      value="medium"
+                      checked={selectedDuration === "medium"}
+                      onChange={(e) => setSelectedDuration(e.target.value)}
+                      className="text-orange-600 focus:ring-orange-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">5-30 minutes</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="duration"
+                      value="long"
+                      checked={selectedDuration === "long"}
+                      onChange={(e) => setSelectedDuration(e.target.value)}
+                      className="text-orange-600 focus:ring-orange-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Over 30 minutes</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1">
+            {/* Search Bar */}
+            <div className="bg-white rounded-lg border p-4 mb-6">
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    placeholder="Search audio recordings..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  />
+                </div>
+                <button className="px-6 py-2 bg-amber-800 text-white rounded-lg hover:bg-amber-900 transition-colors font-medium">
+                  Search Audio
                 </button>
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Results Count */}
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-gray-600">
-            {filteredAudios.length} audio recording{filteredAudios.length !== 1 ? 's' : ''} found
-          </p>
-        </div>
-
-        {/* Audio Grid */}
-        {filteredAudios.length === 0 ? (
-          <div className="bg-white rounded-xl border p-12 text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No audio found</h3>
-            <p className="text-gray-500">Try adjusting your search or filters to find what you're looking for.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredAudios.map((audio) => (
-              <div key={audio.id} className="bg-white rounded-xl border hover:shadow-lg transition-all duration-200 overflow-hidden group">
-                {/* Audio Card Header */}
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 group-hover:text-orange-600 transition-colors">
-                        {audio.title}
-                      </h3>
-                      {audio.user && (
-                        <div className="flex items-center gap-1 mt-1 text-sm text-gray-500">
-                          <User className="w-4 h-4" />
-                          <span>
-                            {audio.user.firstName || audio.user.lastName 
-                              ? `${audio.user.firstName || ''} ${audio.user.lastName || ''}`.trim() 
-                              : 'Creator'}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    {audio.category && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 ml-2">
-                        {audio.category}
-                      </span>
-                    )}
-                  </div>
-
-                  {audio.description && (
-                    <p className="text-gray-600 text-sm line-clamp-2 mb-4">
-                      {audio.description}
-                    </p>
-                  )}
-
-                  {/* Audio Player */}
-                  <div className="mb-4">
-                    <audio controls className="w-full">
-                      <source src={audio.fileUrl} />
-                      Your browser does not support the audio element.
-                    </audio>
-                  </div>
-
-                  {/* Metadata */}
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <div className="flex items-center gap-4">
-                      <span className="flex items-center gap-1">
-                        <Play className="w-3 h-3" />
-                        Audio
-                      </span>
-                      {audio.createdAt && (
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {new Date(audio.createdAt).toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
+            {/* Results */}
+            {filteredAudios.length === 0 ? (
+              <div className="bg-white rounded-lg border p-8 text-center">
+                <p className="text-gray-500">No audio recordings found matching your criteria.</p>
               </div>
-            ))}
+            ) : (
+              <div className="space-y-4">
+                {filteredAudios.map((audio) => (
+                  <AudioCard key={audio.id} audio={audio} />
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

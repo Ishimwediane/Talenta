@@ -86,3 +86,4 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
 
 
+

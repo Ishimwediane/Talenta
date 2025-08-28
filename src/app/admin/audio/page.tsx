@@ -681,36 +681,127 @@ export default function AudioManagementPage() {
     }
   };
 
-  const renderAudioCard = (audio: Audio, isDraft = false) => (
-    <Card key={audio.id} className="hover:shadow-md transition-shadow">
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              {audio.title}
-              {isDraft && <Badge variant="secondary">Draft</Badge>}
-            </CardTitle>
-            <CardDescription>
-              {new Date(audio.createdAt).toLocaleDateString()}
-              {audio.user && (
-                <span className="ml-2 text-blue-600">
-                  by {audio.user.firstName} {audio.user.lastName}
-                </span>
+  // State for managing menu and modals for each audio
+  const [menuStates, setMenuStates] = useState<{[key: string]: {isMenuOpen: boolean, isEditModalOpen: boolean, isDeleteModalOpen: boolean}}>({});
+
+  const handleMenuToggle = (audioId: string) => {
+    setMenuStates(prev => ({
+      ...prev,
+      [audioId]: {
+        ...prev[audioId],
+        isMenuOpen: !prev[audioId]?.isMenuOpen
+      }
+    }));
+  };
+
+  const handleEdit = (audioId: string) => {
+    setMenuStates(prev => ({
+      ...prev,
+      [audioId]: {
+        ...prev[audioId],
+        isMenuOpen: false,
+        isEditModalOpen: true
+      }
+    }));
+  };
+
+  const handleDelete = (audioId: string) => {
+    setMenuStates(prev => ({
+      ...prev,
+      [audioId]: {
+        ...prev[audioId],
+        isMenuOpen: false,
+        isDeleteModalOpen: true
+      }
+    }));
+  };
+
+  const closeEditModal = (audioId: string) => {
+    setMenuStates(prev => ({
+      ...prev,
+      [audioId]: {
+        ...prev[audioId],
+        isEditModalOpen: false
+      }
+    }));
+  };
+
+  const closeDeleteModal = (audioId: string) => {
+    setMenuStates(prev => ({
+      ...prev,
+      [audioId]: {
+        ...prev[audioId],
+        isDeleteModalOpen: false
+      }
+    }));
+  };
+
+  const renderAudioCard = (audio: Audio, isDraft = false) => {
+    const audioState = menuStates[audio.id] || {isMenuOpen: false, isEditModalOpen: false, isDeleteModalOpen: false};
+
+    return (
+      <Card key={audio.id} className="hover:shadow-md transition-shadow">
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                {audio.title}
+                {isDraft && <Badge variant="secondary">Draft</Badge>}
+              </CardTitle>
+              <CardDescription>
+                {new Date(audio.createdAt).toLocaleDateString()}
+                {audio.user && (
+                  <span className="ml-2 text-blue-600">
+                    by {audio.user.firstName} {audio.user.lastName}
+                  </span>
+                )}
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              {/* Three-dot menu */}
+              <div className="relative">
+                <button
+                  onClick={() => handleMenuToggle(audio.id)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                  </svg>
+                </button>
+
+                {audioState.isMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border z-50">
+                    <div className="py-1">
+                      <button
+                        onClick={() => handleEdit(audio.id)}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(audio.id)}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {isDraft && (
+                <Button
+                  onClick={() => handlePublishDraft(audio.id)}
+                  size="sm"
+                  className="flex items-center gap-1"
+                >
+                  <Upload className="h-3 w-3" />
+                  Publish
+                </Button>
               )}
-            </CardDescription>
+            </div>
           </div>
-          {isDraft && (
-            <Button
-              onClick={() => handlePublishDraft(audio.id)}
-              size="sm"
-              className="flex items-center gap-1"
-            >
-              <Upload className="h-3 w-3" />
-              Publish
-            </Button>
-          )}
-        </div>
-      </CardHeader>
+        </CardHeader>
       <CardContent>
         {audio.description && (
           <p className="mb-3 text-sm text-gray-600">{audio.description}</p>
@@ -726,8 +817,94 @@ export default function AudioManagementPage() {
         
         <AudioPlayer audio={audio} />
       </CardContent>
+
+      {/* Edit Modal */}
+      {audioState.isEditModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => closeEditModal(audio.id)}>
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold mb-4">Edit Audio</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <input
+                  type="text"
+                  defaultValue={audio.title}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  defaultValue={audio.description || ''}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select
+                  defaultValue={audio.category || ''}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                >
+                  <option value="">Select Category</option>
+                  <option value="podcast">Podcast</option>
+                  <option value="audiobook">Audiobook</option>
+                  <option value="music">Music</option>
+                  <option value="interview">Interview</option>
+                  <option value="lecture">Lecture</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => closeEditModal(audio.id)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  alert('Audio updated successfully!');
+                  closeEditModal(audio.id);
+                }}
+                className="flex-1 px-4 py-2 bg-amber-800 text-white rounded-md hover:bg-amber-900"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Modal */}
+      {audioState.isDeleteModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => closeDeleteModal(audio.id)}>
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold mb-4">Delete Audio</h3>
+            <p className="text-gray-600 mb-6">Are you sure you want to delete "{audio.title}"? This action cannot be undone.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => closeDeleteModal(audio.id)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  alert('Audio deleted successfully!');
+                  closeDeleteModal(audio.id);
+                }}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   );
+};
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
