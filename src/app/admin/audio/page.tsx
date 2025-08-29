@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -636,6 +637,7 @@ const AudioRecorder: React.FC<{
 
 // Main page component
 export default function AudioManagementPage() {
+  const router = useRouter();
   const [audios, setAudios] = useState<Audio[]>([]);
   const [drafts, setDrafts] = useState<Audio[]>([]);
   const [title, setTitle] = useState("");
@@ -825,14 +827,8 @@ export default function AudioManagementPage() {
   };
 
   const handleEdit = (audioId: string) => {
-    setMenuStates(prev => ({
-      ...prev,
-      [audioId]: {
-        ...prev[audioId],
-        isMenuOpen: false,
-        isEditModalOpen: true
-      }
-    }));
+    // Navigate to full-screen edit page
+    router.push(`/admin/audio/${audioId}`);
   };
 
   const handleDelete = (audioId: string) => {
