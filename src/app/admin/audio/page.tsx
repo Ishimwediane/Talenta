@@ -774,6 +774,9 @@ export default function AudioManagementPage() {
     try {
       setPublishingMap(prev => ({ ...prev, [draftId]: true }));
       const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error('Authentication required. Please log in.');
+      }
       const res = await fetch(`${API_BASE_URL}/api/audio/${draftId}/publish`, {
         method: "PATCH",
         headers: { 
@@ -784,7 +787,9 @@ export default function AudioManagementPage() {
       });
 
       if (!res.ok) {
-        throw new Error("Failed to publish draft");
+        let detail = 'Failed to publish draft';
+        try { const err = await res.json(); if (err?.error) detail = err.error; } catch {}
+        throw new Error(detail);
       }
 
       // Refresh the data
@@ -799,7 +804,7 @@ export default function AudioManagementPage() {
       }, 3000);
     } catch (error) {
       console.error('Publish error:', error);
-      setPublishMessageMap(prev => ({ ...prev, [draftId]: { type: 'error', message: 'Publish failed' } }));
+      setPublishMessageMap(prev => ({ ...prev, [draftId]: { type: 'error', message: error instanceof Error ? error.message : 'Publish failed' } }));
       setTimeout(() => {
         setPublishMessageMap(prev => {
           const copy = { ...prev };

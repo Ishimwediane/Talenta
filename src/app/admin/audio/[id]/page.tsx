@@ -225,15 +225,16 @@ export default function EditAudioPage() {
 
           <div className="space-y-2">
             <div className="font-medium">Existing Segments</div>
+            <div className="text-xs text-gray-500">Use Up/Down to change playback order. Top plays first.</div>
             {audio.segmentPublicIds && audio.segmentPublicIds.length > 0 ? (
               <div className="space-y-2">
                 {audio.segmentPublicIds.map((pid: string, idx: number) => (
                   <div key={pid} className="flex items-center justify-between border rounded p-2 text-sm">
                     <div className="truncate mr-2">{pid}</div>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" onClick={() => moveSegment(idx, -1)}><ArrowUp className="h-3 w-3" /></Button>
-                      <Button variant="outline" size="sm" onClick={() => moveSegment(idx, 1)}><ArrowDown className="h-3 w-3" /></Button>
-                      <Button variant="destructive" size="sm" onClick={() => removeSegment(pid)}><Trash2 className="h-3 w-3" /></Button>
+                      <Button title="Move up (play earlier)" variant="outline" size="sm" onClick={() => moveSegment(idx, -1)}><ArrowUp className="h-3 w-3" /></Button>
+                      <Button title="Move down (play later)" variant="outline" size="sm" onClick={() => moveSegment(idx, 1)}><ArrowDown className="h-3 w-3" /></Button>
+                      <Button title="Remove from playlist" variant="destructive" size="sm" onClick={() => removeSegment(pid)}><Trash2 className="h-3 w-3" /></Button>
                     </div>
                   </div>
                 ))}
