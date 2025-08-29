@@ -13,7 +13,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Play, Pause, Volume2, Mic, Square, Trash2, Save, Upload, AlertCircle, CheckCircle, Edit3 } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 const API_BASE_URL = "http://localhost:5000";
 
@@ -852,7 +851,7 @@ export default function AudioManagementPage() {
 
   const handleEdit = (audioId: string) => {
     // Navigate to full-screen edit page
-    router.push(`/admin/audio/${audioId}`);
+    router.push(`/admin/audio/edit/${audioId}`);
   };
 
   const handleDelete = (audioId: string) => {
