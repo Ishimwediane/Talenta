@@ -640,6 +640,9 @@ export default function AudioManagementPage() {
   const router = useRouter();
   const [audios, setAudios] = useState<Audio[]>([]);
   const [drafts, setDrafts] = useState<Audio[]>([]);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all"|"draft"|"published">("all");
+  const [sortBy, setSortBy] = useState<"newest"|"oldest"|"title">("newest");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState("");
@@ -1194,9 +1197,37 @@ export default function AudioManagementPage() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Audio Management</h1>
-        <p className="text-gray-600">Record new audio or upload files to manage your audio content</p>
+        <p className="text-gray-600">Record, upload and manage your audio content with drafts and published items.</p>
       </div>
       
+      {/* Toolbar */}
+      <div className="mb-6 flex flex-col md:flex-row md:items-center gap-3">
+        <input
+          className="w-full md:w-64 border rounded-md px-3 py-2"
+          placeholder="Search title, author, tags"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <select
+          className="border rounded-md px-3 py-2"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as any)}
+        >
+          <option value="all">All statuses</option>
+          <option value="draft">Drafts</option>
+          <option value="published">Published</option>
+        </select>
+        <select
+          className="border rounded-md px-3 py-2"
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as any)}
+        >
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="title">Title A–Z</option>
+        </select>
+      </div>
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="record" className="flex items-center gap-2">
@@ -1316,23 +1347,57 @@ export default function AudioManagementPage() {
       )}
       
       {/* Drafts Section */}
-      {drafts.length > 0 && (
+      {(() => {
+        // filter and sort
+        const normalizedQuery = query.trim().toLowerCase();
+        const base = drafts.filter(a =>
+          (statusFilter === 'all' || statusFilter === 'draft') &&
+          (
+            !normalizedQuery ||
+            a.title?.toLowerCase().includes(normalizedQuery) ||
+            `${a.user?.firstName || ''} ${a.user?.lastName || ''}`.toLowerCase().includes(normalizedQuery) ||
+            (Array.isArray(a.tags) && a.tags.join(',').toLowerCase().includes(normalizedQuery))
+          )
+        );
+        const sorted = [...base].sort((a,b) => {
+          if (sortBy === 'title') return (a.title||'').localeCompare(b.title||'');
+          const aTime = new Date(a.createdAt || '').getTime();
+          const bTime = new Date(b.createdAt || '').getTime();
+          return sortBy === 'oldest' ? aTime - bTime : bTime - aTime;
+        });
+        if (sorted.length === 0) return null;
+        return (
         <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-3">
             <Save className="h-5 w-5" />
-            Drafts ({drafts.length})
+            <span>Drafts</span>
+            <span className="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700 border">{sorted.length}</span>
           </h2>
-          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {drafts.map((draft) => renderAudioCard(draft, true))}
+          <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {sorted.map((draft) => renderAudioCard(draft, true))}
           </div>
         </section>
-      )}
+        );
+      })()}
       
       {/* Published Audio Section */}
       <section>
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-3">
           <CheckCircle className="h-5 w-5 text-green-500" />
-          Published Audio ({audios.length})
+          <span>Published Audio</span>
+          <span className="px-2 py-0.5 text-xs rounded-full bg-green-50 text-green-700 border border-green-200">{(() => {
+            const normalizedQuery = query.trim().toLowerCase();
+            const filtered = audios.filter(a =>
+              (statusFilter === 'all' || statusFilter === 'published') &&
+              (
+                !normalizedQuery ||
+                a.title?.toLowerCase().includes(normalizedQuery) ||
+                `${a.user?.firstName || ''} ${a.user?.lastName || ''}`.toLowerCase().includes(normalizedQuery) ||
+                (Array.isArray(a.tags) && a.tags.join(',').toLowerCase().includes(normalizedQuery))
+              )
+            );
+            return filtered.length;
+          })()}</span>
         </h2>
         
         {audios.length === 0 && !fetchError && (
@@ -1347,9 +1412,29 @@ export default function AudioManagementPage() {
           </div>
         )}
         
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {audios.map((audio) => renderAudioCard(audio))}
-        </div>
+        {(() => {
+          const normalizedQuery = query.trim().toLowerCase();
+          const base = audios.filter(a =>
+            (statusFilter === 'all' || statusFilter === 'published') &&
+            (
+              !normalizedQuery ||
+              a.title?.toLowerCase().includes(normalizedQuery) ||
+              `${a.user?.firstName || ''} ${a.user?.lastName || ''}`.toLowerCase().includes(normalizedQuery) ||
+              (Array.isArray(a.tags) && a.tags.join(',').toLowerCase().includes(normalizedQuery))
+            )
+          );
+          const sorted = [...base].sort((a,b) => {
+            if (sortBy === 'title') return (a.title||'').localeCompare(b.title||'');
+            const aTime = new Date(a.createdAt || '').getTime();
+            const bTime = new Date(b.createdAt || '').getTime();
+            return sortBy === 'oldest' ? aTime - bTime : bTime - aTime;
+          });
+          return (
+            <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              {sorted.map((audio) => renderAudioCard(audio))}
+            </div>
+          );
+        })()}
       </section>
     </div>
   );
