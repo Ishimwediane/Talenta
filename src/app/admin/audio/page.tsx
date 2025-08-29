@@ -205,6 +205,93 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audio, extraSources = [] }) =
   );
 };
 
+// Inline recorder for appending a single segment in the edit modal
+const SegmentRecorder: React.FC<{ onSegmentReady: (file: File) => void, disabled?: boolean }>
+  = ({ onSegmentReady, disabled }) => {
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [segmentBlob, setSegmentBlob] = useState<Blob | null>(null);
+  const [segmentUrl, setSegmentUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const start = async () => {
+    try {
+      setError(null);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      let mimeType = 'audio/webm;codecs=opus';
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'audio/webm';
+      }
+      const recorder = new MediaRecorder(stream, { mimeType });
+      chunksRef.current = [];
+      recorder.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      recorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        setSegmentBlob(blob);
+        const url = URL.createObjectURL(blob);
+        setSegmentUrl(url);
+        // stop tracks
+        stream.getTracks().forEach(t => t.stop());
+      };
+      recorder.start(1000);
+      setMediaRecorder(recorder);
+      setIsRecording(true);
+    } catch (e) {
+      setError('Microphone access failed');
+    }
+  };
+
+  const stop = () => {
+    if (mediaRecorder && isRecording) {
+      mediaRecorder.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const clear = () => {
+    setSegmentBlob(null);
+    if (segmentUrl) URL.revokeObjectURL(segmentUrl);
+    setSegmentUrl(null);
+    setError(null);
+  };
+
+  const save = () => {
+    if (!segmentBlob) return;
+    const file = new File([segmentBlob], `segment_${Date.now()}.webm`, { type: segmentBlob.type || 'audio/webm' });
+    onSegmentReady(file);
+    clear();
+  };
+
+  return (
+    <div className="p-3 border rounded-md">
+      <div className="flex items-center gap-2 mb-2">
+        <Mic className="h-4 w-4" />
+        <span className="text-sm font-medium">Record Segment</span>
+      </div>
+      {error && <div className="text-xs text-red-600 mb-2">{error}</div>}
+      <div className="flex items-center gap-2 mb-2">
+        <Button onClick={isRecording ? stop : start} size="sm" variant={isRecording ? 'destructive' : 'outline'} disabled={disabled}>
+          {isRecording ? 'Stop' : 'Start'}
+        </Button>
+        {segmentUrl && (
+          <>
+            <Button onClick={save} size="sm" className="" disabled={disabled}>Add to Playlist</Button>
+            <Button onClick={clear} size="sm" variant="outline" disabled={disabled}>Clear</Button>
+          </>
+        )}
+      </div>
+      {segmentUrl && (
+        <audio controls className="w-full">
+          <source src={segmentUrl} />
+        </audio>
+      )}
+    </div>
+  );
+};
+
 const AudioRecorder: React.FC<{ 
   onRecordingComplete: (audioBlob: Blob) => void,
   onRecordingSaved: () => void 
@@ -923,6 +1010,16 @@ export default function AudioManagementPage() {
                   <div className="mt-2 text-xs text-gray-600">{extraForAudio.length} segment(s) appended (not yet saved)</div>
                 )}
               </div>
+
+              {/* Record a new segment */}
+              <SegmentRecorder
+                onSegmentReady={(file) => {
+                  setExtraSegments(prev => ({
+                    ...prev,
+                    [audio.id]: [...(prev[audio.id] || []), file]
+                  }));
+                }}
+              />
 
               {/* Playlist manager (owner only) */}
               {audio.user && (
