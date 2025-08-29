@@ -35,15 +35,17 @@ interface Audio {
 
 interface AudioPlayerProps {
   audio: Audio;
+  extraSources?: string[];
 }
 
-const AudioPlayer: React.FC<AudioPlayerProps> = ({ audio }) => {
+const AudioPlayer: React.FC<AudioPlayerProps> = ({ audio, extraSources = [] }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentSourceIndex, setCurrentSourceIndex] = useState(0);
 
   // Determine audio URL - prioritize Cloudinary URLs, fallback to local storage
   const audioUrl = audio.fileUrl?.startsWith('http') 
@@ -53,6 +55,8 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audio }) => {
       : audio.fileUrl?.startsWith('/') 
         ? `${API_BASE_URL}${audio.fileUrl}` // Relative local URL
         : audio.fileUrl; // Direct URL
+
+  const playlist = [audioUrl, ...extraSources];
 
   const togglePlayPause = async () => {
     if (!audioRef.current) return;
@@ -89,9 +93,26 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audio }) => {
     }
   };
 
-  const handleEnded = () => {
-    setIsPlaying(false);
-    setCurrentTime(0);
+  const handleEnded = async () => {
+    const nextIndex = currentSourceIndex + 1;
+    if (nextIndex < playlist.length && audioRef.current) {
+      setCurrentSourceIndex(nextIndex);
+      setCurrentTime(0);
+      try {
+        setIsLoading(true);
+        await audioRef.current.play();
+        setIsPlaying(true);
+      } catch (e) {
+        setError('Failed to play next segment');
+        setIsPlaying(false);
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      setIsPlaying(false);
+      setCurrentTime(0);
+      setCurrentSourceIndex(0);
+    }
   };
 
   const handleError = () => {
@@ -134,7 +155,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ audio }) => {
         onCanPlay={handleCanPlay}
         preload="metadata"
       >
-        <source src={audioUrl} />
+        <source src={playlist[currentSourceIndex]} />
         Your browser does not support the audio element.
       </audio>
       
@@ -541,6 +562,8 @@ export default function AudioManagementPage() {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("record");
   const [uploadMessage, setUploadMessage] = useState<{type: 'success' | 'error', message: string} | null>(null);
+  const [publishingMap, setPublishingMap] = useState<{[id: string]: boolean}>({});
+  const [publishMessageMap, setPublishMessageMap] = useState<{[id: string]: {type: 'success' | 'error', message: string}} >({});
 
   useEffect(() => {
     fetchAudios();
@@ -660,6 +683,7 @@ export default function AudioManagementPage() {
 
   const handlePublishDraft = async (draftId: string) => {
     try {
+      setPublishingMap(prev => ({ ...prev, [draftId]: true }));
       const token = localStorage.getItem("token");
       const res = await fetch(`${API_BASE_URL}/api/audio/${draftId}/publish`, {
         method: "PATCH",
@@ -676,13 +700,32 @@ export default function AudioManagementPage() {
 
       // Refresh the data
       fetchAudios();
+      setPublishMessageMap(prev => ({ ...prev, [draftId]: { type: 'success', message: 'Published & merged' } }));
+      setTimeout(() => {
+        setPublishMessageMap(prev => {
+          const copy = { ...prev };
+          delete copy[draftId];
+          return copy;
+        });
+      }, 3000);
     } catch (error) {
       console.error('Publish error:', error);
+      setPublishMessageMap(prev => ({ ...prev, [draftId]: { type: 'error', message: 'Publish failed' } }));
+      setTimeout(() => {
+        setPublishMessageMap(prev => {
+          const copy = { ...prev };
+          delete copy[draftId];
+          return copy;
+        });
+      }, 4000);
+    } finally {
+      setPublishingMap(prev => ({ ...prev, [draftId]: false }));
     }
   };
 
   // State for managing menu and modals for each audio
   const [menuStates, setMenuStates] = useState<{[key: string]: {isMenuOpen: boolean, isEditModalOpen: boolean, isDeleteModalOpen: boolean}}>({});
+  const [extraSegments, setExtraSegments] = useState<{[key: string]: (File | string)[]}>({});
 
   const handleMenuToggle = (audioId: string) => {
     setMenuStates(prev => ({
@@ -738,6 +781,7 @@ export default function AudioManagementPage() {
 
   const renderAudioCard = (audio: Audio, isDraft = false) => {
     const audioState = menuStates[audio.id] || {isMenuOpen: false, isEditModalOpen: false, isDeleteModalOpen: false};
+    const extraForAudio = (extraSegments[audio.id] || []).map(s => typeof s === 'string' ? s : URL.createObjectURL(s));
 
     return (
       <Card key={audio.id} className="hover:shadow-md transition-shadow">
@@ -794,10 +838,16 @@ export default function AudioManagementPage() {
                   onClick={() => handlePublishDraft(audio.id)}
                   size="sm"
                   className="flex items-center gap-1"
+                  disabled={!!publishingMap[audio.id]}
                 >
                   <Upload className="h-3 w-3" />
-                  Publish
+                  {publishingMap[audio.id] ? 'Publishing & merging...' : 'Publish'}
                 </Button>
+              )}
+              {isDraft && publishMessageMap[audio.id] && (
+                <div className={`ml-2 text-xs px-2 py-1 rounded ${publishMessageMap[audio.id].type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+                  {publishMessageMap[audio.id].message}
+                </div>
               )}
             </div>
           </div>
@@ -815,7 +865,7 @@ export default function AudioManagementPage() {
           </div>
         )}
         
-        <AudioPlayer audio={audio} />
+        <AudioPlayer audio={audio} extraSources={extraForAudio} />
       </CardContent>
 
       {/* Edit Modal */}
@@ -854,6 +904,120 @@ export default function AudioManagementPage() {
                   <option value="lecture">Lecture</option>
                 </select>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Append Segment</label>
+                <input
+                  type="file"
+                  accept="audio/*"
+                  onChange={(e) => {
+                    const file = e.target.files && e.target.files[0];
+                    if (!file) return;
+                    setExtraSegments(prev => ({
+                      ...prev,
+                      [audio.id]: [...(prev[audio.id] || []), file]
+                    }));
+                  }}
+                  className="w-full text-sm text-gray-500"
+                />
+                {extraForAudio.length > 0 && (
+                  <div className="mt-2 text-xs text-gray-600">{extraForAudio.length} segment(s) appended (not yet saved)</div>
+                )}
+              </div>
+
+              {/* Playlist manager (owner only) */}
+              {audio.user && (
+                <div className="mt-4">
+                  <div className="text-sm font-medium mb-2">Playlist Segments</div>
+                  <div className="space-y-2">
+                    {(audio as any).segmentPublicIds && (audio as any).segmentPublicIds.length > 0 ? (
+                      (audio as any).segmentPublicIds.map((pid: string, idx: number) => (
+                        <div key={pid} className="flex items-center justify-between text-xs border rounded p-2">
+                          <div className="truncate">{pid}</div>
+                          <div className="flex items-center gap-1">
+                            <button
+                              className="px-2 py-1 border rounded"
+                              onClick={async () => {
+                                try {
+                                  const token = localStorage.getItem('token');
+                                  const newOrder = [...(audio as any).segmentPublicIds];
+                                  if (idx > 0) {
+                                    [newOrder[idx-1], newOrder[idx]] = [newOrder[idx], newOrder[idx-1]];
+                                    const res = await fetch(`${API_BASE_URL}/api/audio/${audio.id}/segments/order`, {
+                                      method: 'PATCH',
+                                      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                                      body: JSON.stringify({ segmentPublicIds: newOrder })
+                                    });
+                                    if (!res.ok) throw new Error('Failed to move segment');
+                                    fetchAudios();
+                                  }
+                                } catch (e) { alert((e as Error).message); }
+                              }}
+                            >Up</button>
+                            <button
+                              className="px-2 py-1 border rounded"
+                              onClick={async () => {
+                                try {
+                                  const token = localStorage.getItem('token');
+                                  const newOrder = [...(audio as any).segmentPublicIds];
+                                  if (idx < newOrder.length - 1) {
+                                    [newOrder[idx+1], newOrder[idx]] = [newOrder[idx], newOrder[idx+1]];
+                                    const res = await fetch(`${API_BASE_URL}/api/audio/${audio.id}/segments/order`, {
+                                      method: 'PATCH',
+                                      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                                      body: JSON.stringify({ segmentPublicIds: newOrder })
+                                    });
+                                    if (!res.ok) throw new Error('Failed to move segment');
+                                    fetchAudios();
+                                  }
+                                } catch (e) { alert((e as Error).message); }
+                              }}
+                            >Down</button>
+                            <button
+                              className="px-2 py-1 border rounded text-red-600"
+                              onClick={async () => {
+                                try {
+                                  const token = localStorage.getItem('token');
+                                  const res = await fetch(`${API_BASE_URL}/api/audio/${audio.id}/segments`, {
+                                    method: 'DELETE',
+                                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                                    body: JSON.stringify({ publicId: pid })
+                                  });
+                                  if (!res.ok) throw new Error('Failed to remove segment');
+                                  fetchAudios();
+                                } catch (e) { alert((e as Error).message); }
+                              }}
+                            >Remove</button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-xs text-gray-500">No segments yet</div>
+                    )}
+                  </div>
+                  {(audio as any).segmentPublicIds && (audio as any).segmentPublicIds.length > 0 && (
+                    <div className="mt-3">
+                      <Button
+                        onClick={async () => {
+                          try {
+                            const token = localStorage.getItem('token');
+                            const res = await fetch(`${API_BASE_URL}/api/audio/${audio.id}/segments/merge`, {
+                              method: 'POST',
+                              headers: { Authorization: `Bearer ${token}` }
+                            });
+                            if (!res.ok) throw new Error('Failed to merge segments');
+                            alert('Merged successfully');
+                            fetchAudios();
+                          } catch (e) { alert((e as Error).message); }
+                        }}
+                        variant="outline"
+                        size="sm"
+                      >
+                        Merge into Single File
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             <div className="flex gap-3 mt-6">
               <button
@@ -863,9 +1027,31 @@ export default function AudioManagementPage() {
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  alert('Audio updated successfully!');
-                  closeEditModal(audio.id);
+                onClick={async () => {
+                  try {
+                    const pending = extraSegments[audio.id]?.filter(s => s instanceof File) as File[] | undefined;
+                    if (pending && pending.length > 0) {
+                      const token = localStorage.getItem("token");
+                      const form = new FormData();
+                      pending.forEach(f => form.append('segments', f));
+                      const res = await fetch(`${API_BASE_URL}/api/audio/${audio.id}/segments`, {
+                        method: 'POST',
+                        headers: { Authorization: `Bearer ${token}` },
+                        body: form
+                      });
+                      if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        throw new Error(err.error || 'Failed to upload segments');
+                      }
+                    }
+                    alert('Audio updated successfully!');
+                    closeEditModal(audio.id);
+                    // Clear local extras for this audio and refresh
+                    setExtraSegments(prev => ({ ...prev, [audio.id]: [] }));
+                    fetchAudios();
+                  } catch (e) {
+                    alert(`Update failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
+                  }
                 }}
                 className="flex-1 px-4 py-2 bg-amber-800 text-white rounded-md hover:bg-amber-900"
               >
