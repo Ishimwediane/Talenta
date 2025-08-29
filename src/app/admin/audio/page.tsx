@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Play, Pause, Volume2, Mic, Square, Trash2, Save, Upload, AlertCircle, CheckCircle } from "lucide-react";
+import { Play, Pause, Volume2, Mic, Square, Trash2, Save, Upload, AlertCircle, CheckCircle, Edit3 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const API_BASE_URL = "http://localhost:5000";
 
@@ -541,6 +542,7 @@ export default function AudioManagementPage() {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("record");
   const [uploadMessage, setUploadMessage] = useState<{type: 'success' | 'error', message: string} | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetchAudios();
@@ -549,16 +551,41 @@ export default function AudioManagementPage() {
   const fetchAudios = async () => {
     try {
       setFetchError(null);
-      const res = await fetch(`${API_BASE_URL}/api/audio`);
+      
+      // Check if we're in the browser environment
+      if (typeof window === 'undefined') {
+        return;
+      }
+      
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setFetchError('Authentication required. Please log in.');
+        return;
+      }
+
+      const res = await fetch(`${API_BASE_URL}/api/audio/user/all`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
       if (!res.ok) {
         throw new Error(`Failed to fetch audios. Status: ${res.status}`);
       }
+      
       const data = await res.json();
       const allAudios = data.audios || [];
       
       // Separate published and draft audios (normalize case)
-      setAudios(allAudios.filter((audio: Audio) => (audio.status || '').toString().toUpperCase() === 'PUBLISHED'));
-      setDrafts(allAudios.filter((audio: Audio) => (audio.status || '').toString().toUpperCase() === 'DRAFT'));
+      const publishedAudios = allAudios.filter((audio: Audio) => {
+        const status = (audio.status || '').toString().toUpperCase();
+        return status === 'PUBLISHED';
+      });
+      const draftAudios = allAudios.filter((audio: Audio) => {
+        const status = (audio.status || '').toString().toUpperCase();
+        return status === 'DRAFT';
+      });
+      
+      setAudios(publishedAudios);
+      setDrafts(draftAudios);
     } catch (error) {
       console.error('Fetch error:', error);
       setFetchError('Could not load audios from the server. Please check your connection.');
@@ -601,6 +628,11 @@ export default function AudioManagementPage() {
     }
 
     try {
+      // Check if we're in the browser environment
+      if (typeof window === 'undefined') {
+        throw new Error('Cannot upload in server environment.');
+      }
+      
       const token = localStorage.getItem("token");
       if (!token) {
         throw new Error('Authentication required. Please log in.');
@@ -653,6 +685,11 @@ export default function AudioManagementPage() {
 
   const handlePublishDraft = async (draftId: string) => {
     try {
+      // Check if we're in the browser environment
+      if (typeof window === 'undefined') {
+        return;
+      }
+      
       const token = localStorage.getItem("token");
       const res = await fetch(`${API_BASE_URL}/api/audio/${draftId}/publish`, {
         method: "PATCH",
@@ -674,6 +711,15 @@ export default function AudioManagementPage() {
     }
   };
 
+  const handleEditDraft = (draftId: string) => {
+    router.push(`/admin/audio/edit/${draftId}`);
+  };
+
+  const handleDeleteDraft = (draftId: string) => {
+    // Instead of deleting, redirect to edit page
+    router.push(`/admin/audio/edit/${draftId}`);
+  };
+
   const renderAudioCard = (audio: Audio, isDraft = false) => (
     <Card key={audio.id} className="hover:shadow-md transition-shadow">
       <CardHeader>
@@ -693,14 +739,34 @@ export default function AudioManagementPage() {
             </CardDescription>
           </div>
           {isDraft && (
-            <Button
-              onClick={() => handlePublishDraft(audio.id)}
-              size="sm"
-              className="flex items-center gap-1"
-            >
-              <Upload className="h-3 w-3" />
-              Publish
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => handleEditDraft(audio.id)}
+                size="sm"
+                variant="outline"
+                className="flex items-center gap-1"
+              >
+                <Edit3 className="h-3 w-3" />
+                Edit
+              </Button>
+              <Button
+                onClick={() => handleDeleteDraft(audio.id)}
+                size="sm"
+                variant="destructive"
+                className="flex items-center gap-1"
+              >
+                <Trash2 className="h-3 w-3" />
+                Delete
+              </Button>
+              <Button
+                onClick={() => handlePublishDraft(audio.id)}
+                size="sm"
+                className="flex items-center gap-1"
+              >
+                <Upload className="h-3 w-3" />
+                Publish
+              </Button>
+            </div>
           )}
         </div>
       </CardHeader>
@@ -847,15 +913,34 @@ export default function AudioManagementPage() {
         </div>
       )}
       
+
+      
       {/* Drafts Section */}
-      {drafts.length > 0 && (
+      {drafts.length > 0 ? (
         <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Save className="h-5 w-5" />
-            Drafts ({drafts.length})
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold flex items-center gap-2">
+              <Save className="h-5 w-5" />
+              Drafts ({drafts.length})
+            </h2>
+            <p className="text-sm text-gray-500">
+              💡 Click "Delete" to go to edit page • Click "Edit" to modify directly
+            </p>
+          </div>
           <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {drafts.map((draft) => renderAudioCard(draft, true))}
+          </div>
+        </section>
+      ) : (
+        <section className="mb-8">
+          <div className="text-center py-8 bg-gray-50 rounded-lg">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+                <Save className="h-8 w-8 text-gray-400" />
+              </div>
+              <p className="text-gray-500">No draft audio yet.</p>
+              <p className="text-sm text-gray-400">Record or upload audio and save as draft to get started!</p>
+            </div>
           </div>
         </section>
       )}
