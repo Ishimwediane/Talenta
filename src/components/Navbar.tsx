@@ -288,7 +288,7 @@ export default function Navbar() {
                     >
                       <Link href="/read" className="block px-4 py-2 hover:bg-orange-50 text-gray-700">Read</Link>
                       <Link href="/dashboard/write" className="block px-4 py-2 hover:bg-orange-50 text-gray-700">Write</Link>
-                      <Link href="/record" className="block px-4 py-2 hover:bg-orange-50 text-gray-700">Record</Link>
+                      <Link href="/dashboard/audio" className="block px-4 py-2 hover:bg-orange-50 text-gray-700">Record</Link>
                       <Link href="/listen" className="block px-4 py-2 hover:bg-orange-50 text-gray-700">Listen</Link>
                     </div>
                   )}

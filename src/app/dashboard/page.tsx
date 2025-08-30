@@ -90,7 +90,7 @@ export default function DashboardPage() {
       title: "Record Audio",
       description: "Record a podcast or poetry reading",
       icon: Mic,
-      href: "/record",
+      href: "/dashboard/audio",
       color: "from-purple-500 to-purple-600",
       bgColor: "from-purple-50 to-purple-100",
       borderColor: "border-purple-200"
