@@ -7,29 +7,25 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, ArrowLeft, Save, Upload, BookOpen, Plus } from "lucide-react";
+import { TiptapEditor } from "@/components/TiptapEditor";
+import { ArrowLeft, Save, BookOpen, Edit3, FileUp } from "lucide-react";
 import Link from "next/link";
-
-const API_BASE_URL = "http://localhost:5000";
+import apiService from '@/lib/bookapi';
 
 export default function CreateNewBook() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [contentMethod, setContentMethod] = useState<'text' | 'file'>('text');
   
-  const [formData, setFormData] = useState({
-    title: "",
-    authors: "",
-    description: "",
-    category: "",
-    tags: "",
-    pageCount: "",
-    language: "English",
-    isPublished: false
-  });
-
-  const [coverImage, setCoverImage] = useState<File | null>(null);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [content, setContent] = useState("");
+  const [category, setCategory] = useState("");
+  const [subCategories, setSubCategories] = useState("");
+  const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
+  const [coverImagePreview, setCoverImagePreview] = useState<string | null>(null);
   const [bookFile, setBookFile] = useState<File | null>(null);
 
   useEffect(() => {
@@ -39,81 +35,73 @@ export default function CreateNewBook() {
     }
   }, [isAuthenticated, router]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-    }));
+  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCoverImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setCoverImagePreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleBookFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setBookFile(file);
+      setContentMethod('file');
+      setContent('');
+    }
+  };
+
+  const handleContentMethodChange = (method: 'text' | 'file') => {
+    setContentMethod(method);
+    if (method === 'file') {
+      setContent('');
+    }
+  };
+
+  const handleSubmit = async (status: 'DRAFT' | 'PUBLISHED') => {
+    if (!title) {
+      setError("Title is required.");
+      return;
+    }
+
+    if (contentMethod === 'text' && !content.trim()) {
+      setError("Please write some content or upload a file.");
+      return;
+    }
+
+    if (contentMethod === 'file' && !bookFile) {
+      setError("Please upload a book file or write content manually.");
+      return;
+    }
     
-    if (!formData.title.trim()) {
-      setMessage({ type: 'error', text: 'Title is required' });
-      return;
-    }
-
-    if (!bookFile) {
-      setMessage({ type: 'error', text: 'Book file is required' });
-      return;
-    }
-
     setIsLoading(true);
-    setMessage(null);
+    setError(null);
+    
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("status", status);
+    if (category) formData.append("category", category);
+    if (subCategories.trim()) formData.append("subCategories", subCategories);
+    
+    // Only add content if using text method
+    if (contentMethod === 'text') {
+      formData.append("content", content);
+    }
+    
+    if (coverImageFile) formData.append("coverImage", coverImageFile);
+    if (bookFile) formData.append("bookFile", bookFile);
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error('Authentication required');
-      }
-
-      const data = new FormData();
-      data.append("title", formData.title.trim());
-      data.append("authors", formData.authors.trim());
-      data.append("description", formData.description.trim());
-      data.append("category", formData.category.trim());
-      data.append("language", formData.language);
-      data.append("pageCount", formData.pageCount);
-      data.append("isPublished", formData.isPublished.toString());
-      
-      if (formData.tags.trim()) {
-        const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
-        data.append("tags", JSON.stringify(tagsArray));
-      }
-
-      if (coverImage) {
-        data.append("coverImage", coverImage);
-      }
-      
-      data.append("bookFile", bookFile);
-
-      const res = await fetch(`${API_BASE_URL}/api/books`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: data,
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to create book");
-      }
-
-      const result = await res.json();
-      setMessage({ type: 'success', text: 'Book created successfully!' });
-      
-      // Redirect to the book management page after a short delay
-      setTimeout(() => {
-        router.push('/dashboard/write');
-      }, 2000);
-
-    } catch (error) {
-      console.error('Create book error:', error);
-      setMessage({ 
-        type: 'error', 
-        text: `Failed to create book: ${error instanceof Error ? error.message : 'Unknown error'}` 
-      });
+      await apiService.createBook(formData);
+      alert(`Book successfully ${status.toLowerCase()}!`);
+      router.push("/dashboard/write");
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -121,286 +109,310 @@ export default function CreateNewBook() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent"></div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-4 border-orange-500 border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-100">
-      <div className="p-6 max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      <div className="p-6 max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/dashboard/write" className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 mb-4">
+          <Link href="/dashboard/write" className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 mb-4">
             <ArrowLeft className="h-4 w-4" />
             Back to Books Dashboard
           </Link>
           
           <div className="text-center">
-            <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm px-6 py-3 rounded-full border border-white/20 shadow-lg mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+            <div className="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-full border border-orange-200 shadow-lg mb-6">
+              <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
                 <BookOpen className="h-5 w-5 text-white" />
               </div>
-              <span className="text-sm font-medium text-gray-600">Create New Book</span>
+              <span className="text-sm font-medium text-gray-700">Write Your Book</span>
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-800 via-green-800 to-emerald-800 bg-clip-text text-transparent mb-4">
-              Write Your Book
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Write Your Book on Our Platform
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Start your writing journey with a new book project
+              Start writing your book directly here, or upload an existing file. Use our powerful editor to create your masterpiece.
             </p>
           </div>
         </div>
 
-        {/* Form */}
-        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
-          <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg">
-            <CardTitle className="flex items-center gap-3 text-xl">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                <Plus className="h-5 w-5" />
-              </div>
-              Book Information
-            </CardTitle>
-            <CardDescription className="text-green-100">
-              Fill in the details for your new book
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Message Display */}
-              {message && (
-                <div className={`p-4 rounded-lg flex items-center gap-3 ${
-                  message.type === 'success' 
-                    ? 'bg-green-50 text-green-700 border border-green-200' 
-                    : 'bg-red-50 text-red-700 border border-red-200'
-                }`}>
-                  {message.type === 'success' ? (
-                    <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
-                    </div>
-                  ) : (
-                    <AlertCircle className="h-5 w-5" />
-                  )}
-                  <span className="font-medium">{message.text}</span>
-                </div>
-              )}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
+            {error}
+          </div>
+        )}
 
-              {/* Basic Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Sidebar - Book Details */}
+          <div className="lg:col-span-1 flex flex-col gap-6">
+            <Card className="border border-gray-200 shadow-sm">
+              <CardHeader className="bg-orange-500 text-white rounded-t-lg">
+                <CardTitle className="flex items-center gap-3 text-lg">
+                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                    <BookOpen className="h-4 w-4" />
+                  </div>
+                  Book Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                <div>
                   <Label htmlFor="title" className="text-sm font-semibold text-gray-700">
                     Book Title *
                   </Label>
                   <Input
                     id="title"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    placeholder="Enter your book title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="The Adventure Begins"
                     required
-                    className="border-gray-300 focus:border-green-500 focus:ring-green-500"
+                    className="border-gray-300 focus:border-orange-500 focus:ring-orange-500"
                   />
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="authors" className="text-sm font-semibold text-gray-700">
-                    Author(s)
+                
+                <div>
+                  <Label htmlFor="description" className="text-sm font-semibold text-gray-700">
+                    Short Description
                   </Label>
-                  <Input
-                    id="authors"
-                    name="authors"
-                    value={formData.authors}
-                    onChange={handleInputChange}
-                    placeholder="Your name or pen name"
-                    className="border-gray-300 focus:border-green-500 focus:ring-green-500"
+                  <Textarea
+                    id="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="A short summary of your book..."
+                    rows={3}
+                    className="border-gray-300 focus:border-orange-500 focus:ring-orange-500"
                   />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description" className="text-sm font-semibold text-gray-700">
-                  Description
-                </Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Brief description of your book"
-                  rows={4}
-                  className="border-gray-300 focus:border-green-500 focus:ring-green-500"
-                />
-              </div>
-
-              {/* Category and Language */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
+                
+                <div>
                   <Label htmlFor="category" className="text-sm font-semibold text-gray-700">
                     Category
                   </Label>
-                  <select
-                    id="category"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  >
-                    <option value="">Select Category</option>
-                    <option value="fiction">Fiction</option>
-                    <option value="non-fiction">Non-Fiction</option>
-                    <option value="mystery">Mystery</option>
-                    <option value="romance">Romance</option>
-                    <option value="science-fiction">Science Fiction</option>
-                    <option value="fantasy">Fantasy</option>
-                    <option value="biography">Biography</option>
-                    <option value="history">History</option>
-                    <option value="self-help">Self-Help</option>
-                    <option value="business">Business</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="language" className="text-sm font-semibold text-gray-700">
-                    Language
-                  </Label>
-                  <select
-                    id="language"
-                    name="language"
-                    value={formData.language}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  >
-                    <option value="English">English</option>
-                    <option value="Spanish">Spanish</option>
-                    <option value="French">French</option>
-                    <option value="German">German</option>
-                    <option value="Italian">Italian</option>
-                    <option value="Portuguese">Portuguese</option>
-                    <option value="Russian">Russian</option>
-                    <option value="Chinese">Chinese</option>
-                    <option value="Japanese">Japanese</option>
-                    <option value="Korean">Korean</option>
-                    <option value="Arabic">Arabic</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="pageCount" className="text-sm font-semibold text-gray-700">
-                    Page Count
-                  </Label>
                   <Input
-                    id="pageCount"
-                    name="pageCount"
-                    type="number"
-                    value={formData.pageCount}
-                    onChange={handleInputChange}
-                    placeholder="Estimated pages"
-                    className="border-gray-300 focus:border-green-500 focus:ring-green-500"
+                    id="category"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    placeholder="e.g., Books & Novels"
+                    className="border-gray-300 focus:border-orange-500 focus:ring-orange-500"
                   />
                 </div>
-              </div>
+                
+                <div>
+                  <Label htmlFor="subCategories" className="text-sm font-semibold text-gray-700">
+                    Subcategories (comma separated)
+                  </Label>
+                  <Input
+                    id="subCategories"
+                    value={subCategories}
+                    onChange={(e) => setSubCategories(e.target.value)}
+                    placeholder="e.g., Romance, Adult"
+                    className="border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-              <div className="space-y-2">
-                <Label htmlFor="tags" className="text-sm font-semibold text-gray-700">
-                  Tags
-                </Label>
+            {/* Cover Image */}
+            <Card className="border border-gray-200 shadow-sm">
+              <CardHeader className="bg-orange-500 text-white rounded-t-lg">
+                <CardTitle className="flex items-center gap-3 text-lg">
+                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                    <BookOpen className="h-4 w-4" />
+                  </div>
+                  Cover Image
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                {coverImagePreview ? (
+                  <img src={coverImagePreview} alt="Cover preview" className="w-full h-auto object-cover rounded-md aspect-[2/3]" />
+                ) : (
+                  <div className="w-full h-48 bg-gray-200 rounded-md flex items-center justify-center text-gray-500">
+                    <BookOpen className="w-8 h-8" />
+                  </div>
+                )}
                 <Input
-                  id="tags"
-                  name="tags"
-                  value={formData.tags}
-                  onChange={handleInputChange}
-                  placeholder="Enter tags separated by commas (e.g., adventure, mystery, romance)"
-                  className="border-gray-300 focus:border-green-500 focus:ring-green-500"
+                  id="coverImage"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleCoverImageChange}
+                  className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
                 />
-                <p className="text-xs text-gray-500">Tags help readers discover your book</p>
-              </div>
+                <p className="text-xs text-gray-500">Recommended: 1200x1800 pixels, JPG or PNG</p>
+              </CardContent>
+            </Card>
 
-              {/* File Uploads */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="coverImage" className="text-sm font-semibold text-gray-700">
-                    Cover Image (Optional)
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="coverImage"
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setCoverImage(e.target.files?.[0] || null)}
-                      className="border-gray-300 focus:border-green-500 focus:ring-green-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
-                    />
+            {/* Content Method Selection */}
+            <Card className="border border-gray-200 shadow-sm">
+              <CardHeader className="bg-orange-500 text-white rounded-t-lg">
+                <CardTitle className="flex items-center gap-3 text-lg">
+                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                    <Edit3 className="h-4 w-4" />
                   </div>
-                  <p className="text-xs text-gray-500">Recommended: 1200x1800 pixels, JPG or PNG</p>
+                  Content Method
+                </CardTitle>
+                <CardDescription className="text-orange-100">
+                  Choose how you want to add your book content
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant={contentMethod === 'text' ? 'default' : 'outline'}
+                    onClick={() => handleContentMethodChange('text')}
+                    className="flex-1 bg-orange-500 hover:bg-orange-600 border-orange-500"
+                  >
+                    <Edit3 className="w-4 h-4 mr-2" />
+                    Write Here
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={contentMethod === 'file' ? 'default' : 'outline'}
+                    onClick={() => handleContentMethodChange('file')}
+                    className="flex-1 border-orange-500 text-orange-600 hover:bg-orange-50"
+                  >
+                    <FileUp className="w-4 h-4 mr-2" />
+                    Upload File
+                  </Button>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="bookFile" className="text-sm font-semibold text-gray-700">
-                    Book File *
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="bookFile"
-                      type="file"
-                      accept=".pdf,.doc,.docx,.txt"
-                      onChange={(e) => setBookFile(e.target.files?.[0] || null)}
-                      required
-                      className="border-gray-300 focus:border-green-500 focus:ring-green-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                {contentMethod === 'file' && (
+                  <div className="space-y-4">
+                    <Input 
+                      id="bookFile" 
+                      type="file" 
+                      accept=".docx,.txt,.epub,.pdf" 
+                      onChange={handleBookFileChange}
+                      placeholder="Upload your book file"
+                      className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
                     />
+                    <div className="text-sm text-gray-600 space-y-1">
+                      <p><strong>Supported formats:</strong></p>
+                      <ul className="list-disc list-inside space-y-1 ml-2">
+                        <li><strong>.docx</strong> - Microsoft Word documents</li>
+                        <li><strong>.txt</strong> - Plain text files</li>
+                        <li><strong>.epub</strong> - E-book format</li>
+                        <li><strong>.pdf</strong> - PDF documents</li>
+                      </ul>
+                      <p className="mt-2 text-orange-600">
+                        Content will be automatically extracted when you save.
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-500">Accepted formats: PDF, DOC, DOCX, TXT</p>
-                </div>
-              </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
-              {/* Publish Option */}
-              <div className="flex items-center space-x-2">
-                <input
-                  id="isPublished"
-                  name="isPublished"
-                  type="checkbox"
-                  checked={formData.isPublished}
-                  onChange={handleInputChange}
-                  className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-                />
-                <Label htmlFor="isPublished" className="text-sm font-medium text-gray-700">
-                  Publish immediately (uncheck to save as draft)
-                </Label>
-              </div>
+          {/* Right Side - Content Editor or File Upload */}
+          <div className="lg:col-span-2">
+            {contentMethod === 'text' ? (
+              <Card className="border border-gray-200 shadow-sm">
+                <CardHeader className="bg-orange-500 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center gap-3 text-lg">
+                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                      <Edit3 className="h-4 w-4" />
+                    </div>
+                    Write Your Book Content
+                  </CardTitle>
+                  <CardDescription className="text-orange-100">
+                    Use the rich text editor below to write your book content
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <TiptapEditor content={content} onChange={(newContent: string) => setContent(newContent)} />
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border border-gray-200 shadow-sm">
+                <CardHeader className="bg-orange-500 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center gap-3 text-lg">
+                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                      <FileUp className="h-4 w-4" />
+                    </div>
+                    Upload Book from Device
+                  </CardTitle>
+                  <CardDescription className="text-orange-100">
+                    Upload a file and the content will be automatically extracted
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                    <FileUp className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                    <p className="text-lg font-medium text-gray-900 mb-2">
+                      {bookFile ? bookFile.name : "Upload your book file"}
+                    </p>
+                    <p className="text-gray-600 mb-4">
+                      Drag and drop your file here, or click to browse
+                    </p>
+                    <Input 
+                      type="file" 
+                      accept=".docx,.txt,.epub,.pdf" 
+                      onChange={handleBookFileChange}
+                      className="max-w-xs mx-auto"
+                    />
+                    {bookFile && (
+                      <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
+                        <p className="text-green-800 text-sm">
+                          ✓ File selected: {bookFile.name}
+                        </p>
+                        <p className="text-green-600 text-xs mt-1">
+                          Content will be extracted automatically when you save
+                        </p>
+                      </div>
+                    )}
+                    <div className="mt-4 text-xs text-gray-500">
+                      <p><strong>Supported:</strong> DOCX, TXT, EPUB, PDF</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
 
-              {/* Submit Buttons */}
-              <div className="flex gap-4 pt-6 border-t border-gray-200">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => router.push('/dashboard/write')}
-                  className="flex-1 border-gray-300 hover:border-green-400 hover:text-green-600"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg"
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4 mr-2" />
-                      {formData.isPublished ? 'Create & Publish' : 'Create Book'}
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+        {/* Submit Buttons */}
+        <div className="mt-8 flex justify-end gap-4">
+          <Button 
+            variant="outline" 
+            onClick={() => handleSubmit('DRAFT')} 
+            disabled={isLoading || !title}
+            className="border-gray-300 hover:border-orange-400 hover:text-orange-600"
+          >
+            {isLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500 mr-2"></div>
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Save as Draft
+              </>
+            )}
+          </Button>
+          <Button 
+            onClick={() => handleSubmit('PUBLISHED')} 
+            disabled={isLoading || !title}
+            className="bg-orange-500 hover:bg-orange-600 text-white"
+          >
+            {isLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Publishing...
+              </>
+            ) : (
+              <>
+                <BookOpen className="h-4 w-4 mr-2" />
+                Publish Book
+              </>
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );

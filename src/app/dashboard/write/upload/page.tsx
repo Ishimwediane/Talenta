@@ -51,9 +51,7 @@ export default function UploadExistingBook() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSubmit = async (status: 'draft' | 'published') => {
     if (!formData.title.trim()) {
       setMessage({ type: 'error', text: 'Title is required' });
       return;
@@ -84,7 +82,7 @@ export default function UploadExistingBook() {
       data.append("publisher", formData.publisher.trim());
       data.append("publicationDate", formData.publicationDate);
       data.append("isbn", formData.isbn.trim());
-      data.append("isPublished", formData.isPublished.toString());
+      data.append("status", status);
       
       if (formData.tags.trim()) {
         const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
@@ -123,7 +121,7 @@ export default function UploadExistingBook() {
       }
 
       const result = await res.json();
-      setMessage({ type: 'success', text: 'Book uploaded successfully!' });
+      setMessage({ type: 'success', text: `Book successfully ${status === 'published' ? 'uploaded and published' : 'uploaded and saved as draft'}!` });
       
       // Reset form
       setFormData({
@@ -161,347 +159,350 @@ export default function UploadExistingBook() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent"></div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-4 border-orange-500 border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gray-50">
       <div className="p-6 max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/dashboard/write" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-4">
+          <Link href="/dashboard/write" className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 mb-4">
             <ArrowLeft className="h-4 w-4" />
             Back to Books Dashboard
           </Link>
           
           <div className="text-center">
-            <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm px-6 py-3 rounded-full border border-white/20 shadow-lg mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+            <div className="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-full border border-orange-200 shadow-lg mb-6">
+              <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
                 <Upload className="h-5 w-5 text-white" />
               </div>
-              <span className="text-sm font-medium text-gray-600">Upload Existing Book</span>
+              <span className="text-sm font-medium text-gray-700">Upload Existing Book</span>
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-800 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-4">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
               Upload Your Book
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Share your existing book files with the community
+              Share your existing book files with the community. Content will be automatically extracted when you save.
             </p>
           </div>
         </div>
 
         {/* Form */}
-        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
+        <Card className="border border-gray-200 shadow-sm bg-white">
+          <CardHeader className="bg-orange-500 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-3 text-xl">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                 <FileText className="h-5 w-5" />
               </div>
               Book Information
             </CardTitle>
-            <CardDescription className="text-blue-100">
+            <CardDescription className="text-orange-100">
               Fill in the details for your book upload
             </CardDescription>
           </CardHeader>
           
           <CardContent className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Message Display */}
-              {message && (
-                <div className={`p-4 rounded-lg flex items-center gap-3 ${
-                  message.type === 'success' 
-                    ? 'bg-green-50 text-green-700 border border-green-200' 
-                    : 'bg-red-50 text-red-700 border border-red-200'
-                }`}>
-                  {message.type === 'success' ? (
-                    <CheckCircle className="h-5 w-5" />
-                  ) : (
-                    <AlertCircle className="h-5 w-5" />
-                  )}
-                  <span className="font-medium">{message.text}</span>
-                </div>
-              )}
+            {/* Message Display */}
+            {message && (
+              <div className={`p-4 rounded-lg flex items-center gap-3 ${
+                message.type === 'success' 
+                  ? 'bg-green-50 text-green-700 border border-green-200' 
+                  : 'bg-red-50 text-red-700 border border-red-200'
+              }`}>
+                {message.type === 'success' ? (
+                  <CheckCircle className="h-5 w-5" />
+                ) : (
+                  <AlertCircle className="h-5 w-5" />
+                )}
+                <span className="font-medium">{message.text}</span>
+              </div>
+            )}
 
-              {/* Upload Progress */}
-              {isLoading && uploadProgress > 0 && (
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>Uploading...</span>
-                    <span>{uploadProgress}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${uploadProgress}%` }}
-                    ></div>
-                  </div>
+            {/* Upload Progress */}
+            {isLoading && uploadProgress > 0 && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Uploading...</span>
+                  <span>{uploadProgress}%</span>
                 </div>
-              )}
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-orange-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
 
-              {/* Basic Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="title" className="text-sm font-semibold text-gray-700">
-                    Book Title *
-                  </Label>
-                  <Input
-                    id="title"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    placeholder="Enter your book title"
-                    required
-                    className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="authors" className="text-sm font-semibold text-gray-700">
-                    Author(s)
-                  </Label>
-                  <Input
-                    id="authors"
-                    name="authors"
-                    value={formData.authors}
-                    onChange={handleInputChange}
-                    placeholder="Author names"
-                    className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
+            {/* Basic Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="title" className="text-sm font-semibold text-gray-700">
+                  Book Title *
+                </Label>
+                <Input
+                  id="title"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  placeholder="Enter your book title"
+                  required
+                  className="border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-sm font-semibold text-gray-700">
-                  Description
+                <Label htmlFor="authors" className="text-sm font-semibold text-gray-700">
+                  Author(s)
                 </Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
+                <Input
+                  id="authors"
+                  name="authors"
+                  value={formData.authors}
                   onChange={handleInputChange}
-                  placeholder="Brief description of your book"
-                  rows={4}
-                  className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="Author names"
+                  className="border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-sm font-semibold text-gray-700">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder="Brief description of your book"
+                rows={4}
+                className="border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+              />
+            </div>
+
+            {/* Category, Language, and Page Count */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="category" className="text-sm font-semibold text-gray-700">
+                  Category
+                </Label>
+                <select
+                  id="category"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                >
+                  <option value="">Select Category</option>
+                  <option value="fiction">Fiction</option>
+                  <option value="non-fiction">Non-Fiction</option>
+                  <option value="mystery">Mystery</option>
+                  <option value="romance">Romance</option>
+                  <option value="science-fiction">Science Fiction</option>
+                  <option value="fantasy">Fantasy</option>
+                  <option value="biography">Biography</option>
+                  <option value="history">History</option>
+                  <option value="self-help">Self-Help</option>
+                  <option value="business">Business</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="language" className="text-sm font-semibold text-gray-700">
+                  Language
+                </Label>
+                <select
+                  id="language"
+                  name="language"
+                  value={formData.language}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                >
+                  <option value="English">English</option>
+                  <option value="Spanish">Spanish</option>
+                  <option value="French">French</option>
+                  <option value="German">German</option>
+                  <option value="Italian">Italian</option>
+                  <option value="Portuguese">Portuguese</option>
+                  <option value="Russian">Russian</option>
+                  <option value="Chinese">Chinese</option>
+                  <option value="Japanese">Japanese</option>
+                  <option value="Korean">Korean</option>
+                  <option value="Arabic">Arabic</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pageCount" className="text-sm font-semibold text-gray-700">
+                  Page Count
+                </Label>
+                <Input
+                  id="pageCount"
+                  name="pageCount"
+                  type="number"
+                  value={formData.pageCount}
+                  onChange={handleInputChange}
+                  placeholder="Number of pages"
+                  className="border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                />
+              </div>
+            </div>
+
+            {/* Publisher and Publication Details */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="publisher" className="text-sm font-semibold text-gray-700">
+                  Publisher
+                </Label>
+                <Input
+                  id="publisher"
+                  name="publisher"
+                  value={formData.publisher}
+                  onChange={handleInputChange}
+                  placeholder="Publisher name"
+                  className="border-gray-300 focus:border-orange-500 focus:ring-orange-500"
                 />
               </div>
 
-              {/* Category, Language, and Page Count */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="category" className="text-sm font-semibold text-gray-700">
-                    Category
-                  </Label>
-                  <select
-                    id="category"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Select Category</option>
-                    <option value="fiction">Fiction</option>
-                    <option value="non-fiction">Non-Fiction</option>
-                    <option value="mystery">Mystery</option>
-                    <option value="romance">Romance</option>
-                    <option value="science-fiction">Science Fiction</option>
-                    <option value="fantasy">Fantasy</option>
-                    <option value="biography">Biography</option>
-                    <option value="history">History</option>
-                    <option value="self-help">Self-Help</option>
-                    <option value="business">Business</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="language" className="text-sm font-semibold text-gray-700">
-                    Language
-                  </Label>
-                  <select
-                    id="language"
-                    name="language"
-                    value={formData.language}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="English">English</option>
-                    <option value="Spanish">Spanish</option>
-                    <option value="French">French</option>
-                    <option value="German">German</option>
-                    <option value="Italian">Italian</option>
-                    <option value="Portuguese">Portuguese</option>
-                    <option value="Russian">Russian</option>
-                    <option value="Chinese">Chinese</option>
-                    <option value="Japanese">Japanese</option>
-                    <option value="Korean">Korean</option>
-                    <option value="Arabic">Arabic</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="pageCount" className="text-sm font-semibold text-gray-700">
-                    Page Count
-                  </Label>
-                  <Input
-                    id="pageCount"
-                    name="pageCount"
-                    type="number"
-                    value={formData.pageCount}
-                    onChange={handleInputChange}
-                    placeholder="Number of pages"
-                    className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              {/* Publisher and Publication Details */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="publisher" className="text-sm font-semibold text-gray-700">
-                    Publisher
-                  </Label>
-                  <Input
-                    id="publisher"
-                    name="publisher"
-                    value={formData.publisher}
-                    onChange={handleInputChange}
-                    placeholder="Publisher name"
-                    className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="publicationDate" className="text-sm font-semibold text-gray-700">
-                    Publication Date
-                  </Label>
-                  <Input
-                    id="publicationDate"
-                    name="publicationDate"
-                    type="date"
-                    value={formData.publicationDate}
-                    onChange={handleInputChange}
-                    className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              {/* ISBN and Tags */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="isbn" className="text-sm font-semibold text-gray-700">
-                    ISBN
-                  </Label>
-                  <Input
-                    id="isbn"
-                    name="isbn"
-                    value={formData.isbn}
-                    onChange={handleInputChange}
-                    placeholder="ISBN number (optional)"
-                    className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                  />
-                  <p className="text-xs text-gray-500">10 or 13 digit ISBN</p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="tags" className="text-sm font-semibold text-gray-700">
-                    Tags
-                  </Label>
-                  <Input
-                    id="tags"
-                    name="tags"
-                    value={formData.tags}
-                    onChange={handleInputChange}
-                    placeholder="Enter tags separated by commas"
-                    className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                  />
-                  <p className="text-xs text-gray-500">Tags help readers discover your book</p>
-                </div>
-              </div>
-
-              {/* File Uploads */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="coverImage" className="text-sm font-semibold text-gray-700">
-                    Cover Image (Optional)
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="coverImage"
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setCoverImage(e.target.files?.[0] || null)}
-                      className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500">Recommended: 1200x1800 pixels, JPG or PNG</p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="bookFile" className="text-sm font-semibold text-gray-700">
-                    Book File *
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="bookFile"
-                      type="file"
-                      accept=".pdf,.doc,.docx,.txt,.epub"
-                      onChange={(e) => setBookFile(e.target.files?.[0] || null)}
-                      required
-                      className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500">Accepted formats: PDF, DOC, DOCX, TXT, EPUB</p>
-                </div>
-              </div>
-
-              {/* Publish Option */}
-              <div className="flex items-center space-x-2">
-                <input
-                  id="isPublished"
-                  name="isPublished"
-                  type="checkbox"
-                  checked={formData.isPublished}
-                  onChange={handleInputChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <Label htmlFor="isPublished" className="text-sm font-medium text-gray-700">
-                  Publish immediately (uncheck to save as draft)
+              <div className="space-y-2">
+                <Label htmlFor="publicationDate" className="text-sm font-semibold text-gray-700">
+                  Publication Date
                 </Label>
+                <Input
+                  id="publicationDate"
+                  name="publicationDate"
+                  type="date"
+                  value={formData.publicationDate}
+                  onChange={handleInputChange}
+                  className="border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                />
+              </div>
+            </div>
+
+            {/* ISBN and Tags */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="isbn" className="text-sm font-semibold text-gray-700">
+                  ISBN
+                </Label>
+                <Input
+                  id="isbn"
+                  name="isbn"
+                  value={formData.isbn}
+                  onChange={handleInputChange}
+                  placeholder="ISBN number (optional)"
+                  className="border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                />
+                <p className="text-xs text-gray-500">10 or 13 digit ISBN</p>
               </div>
 
-              {/* Submit Buttons */}
-              <div className="flex gap-4 pt-6 border-t border-gray-200">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => router.push('/dashboard/write')}
-                  className="flex-1 border-gray-300 hover:border-blue-400 hover:text-blue-600"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg"
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Uploading...
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="h-4 w-4 mr-2" />
-                      {formData.isPublished ? 'Upload & Publish' : 'Upload Book'}
-                    </>
-                  )}
-                </Button>
+              <div className="space-y-2">
+                <Label htmlFor="tags" className="text-sm font-semibold text-gray-700">
+                  Tags
+                </Label>
+                <Input
+                  id="tags"
+                  name="tags"
+                  value={formData.tags}
+                  onChange={handleInputChange}
+                  placeholder="Enter tags separated by commas"
+                  className="border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                />
+                <p className="text-xs text-gray-500">Tags help readers discover your book</p>
               </div>
-            </form>
+            </div>
+
+            {/* File Uploads */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="coverImage" className="text-sm font-semibold text-gray-700">
+                  Cover Image (Optional)
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="coverImage"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setCoverImage(e.target.files?.[0] || null)}
+                    className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                  />
+                </div>
+                <p className="text-xs text-gray-500">Recommended: 1200x1800 pixels, JPG or PNG</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="bookFile" className="text-sm font-semibold text-gray-700">
+                  Book File *
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="bookFile"
+                    type="file"
+                    accept=".pdf,.doc,.docx,.txt,.epub"
+                    onChange={(e) => setBookFile(e.target.files?.[0] || null)}
+                    required
+                    className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                  />
+                </div>
+                <p className="text-xs text-gray-500">Accepted formats: PDF, DOC, DOCX, TXT, EPUB</p>
+                <p className="text-xs text-orange-600 mt-1">Content will be automatically extracted when you save</p>
+              </div>
+            </div>
+
+            {/* Submit Buttons */}
+            <div className="flex gap-4 pt-6 border-t border-gray-200">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push('/dashboard/write')}
+                className="flex-1 border-gray-300 hover:border-orange-400 hover:text-orange-600"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={() => handleSubmit('draft')}
+                disabled={isLoading}
+                className="flex-1 border-gray-300 hover:border-orange-400 hover:text-orange-600"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500 mr-2"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save as Draft
+                  </>
+                )}
+              </Button>
+              <Button
+                type="button"
+                onClick={() => handleSubmit('published')}
+                disabled={isLoading}
+                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Publishing...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload & Publish
+                  </>
+                )}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
