@@ -1,38 +1,34 @@
 'use client';
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Upload, Plus, Search, Filter, Edit3, Eye, Trash2, Calendar, User, Tag } from "lucide-react";
+import { BookOpen, Upload, Plus, Search, Filter, Edit3, Eye, Trash2, Calendar, User, Tag, FileText } from "lucide-react";
 import Link from "next/link";
-
-const API_BASE_URL = "http://localhost:5000";
+import apiService from '@/lib/bookapi';
 
 interface Book {
   id: string;
   title: string;
-  authors?: string[];
-  description?: string;
   status: 'DRAFT' | 'PUBLISHED';
   updatedAt: string;
-  createdAt: string;
   coverImage?: string | null;
-  category?: string;
-  tags?: string[];
-  pageCount?: number;
 }
 
 export default function UserBooksDashboard() {
   const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<'all' | 'DRAFT' | 'PUBLISHED'>('all');
-  const [sortBy, setSortBy] = useState<'title' | 'createdAt' | 'updatedAt'>('updatedAt');
+  const [sortBy, setSortBy] = useState<'title' | 'updatedAt'>('updatedAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -41,17 +37,8 @@ export default function UserBooksDashboard() {
 
   const fetchUserBooks = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-
-      const response = await fetch(`${API_BASE_URL}/api/books/user`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setBooks(data);
-      }
+      const booksData = await apiService.getMyBooks();
+      setBooks(booksData);
     } catch (error) {
       console.error('Error fetching books:', error);
     } finally {
@@ -60,32 +47,32 @@ export default function UserBooksDashboard() {
   };
 
   const handleDeleteBook = async (bookId: string) => {
-    if (!confirm('Are you sure you want to delete this book?')) return;
+    if (!confirm('Are you sure you want to delete this book? This action cannot be undone.')) return;
 
+    setDeletingId(bookId);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-
-      const response = await fetch(`${API_BASE_URL}/api/books/${bookId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (response.ok) {
-        setBooks(books.filter(book => book.id !== bookId));
-      }
+      await apiService.deleteBook(bookId);
+      setBooks(books.filter(book => book.id !== bookId));
+      alert('Book deleted successfully!');
     } catch (error) {
       console.error('Error deleting book:', error);
+      alert('Failed to delete book. Please try again.');
+    } finally {
+      setDeletingId(null);
     }
+  };
+
+  const handleEditBook = (bookId: string) => {
+    router.push(`/dashboard/write/edit/${bookId}`);
+  };
+
+  const handleViewBook = (bookId: string) => {
+    router.push(`/dashboard/write/read/${bookId}`);
   };
 
   const filteredAndSortedBooks = books
     .filter(book => {
-      const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           (book.authors && book.authors.some(author => 
-                             author.toLowerCase().includes(searchTerm.toLowerCase()))) ||
-                           (book.description && book.description.toLowerCase().includes(searchTerm.toLowerCase()));
-      
+      const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'all' || book.status === statusFilter;
       
       return matchesSearch && matchesStatus;
@@ -97,10 +84,6 @@ export default function UserBooksDashboard() {
         case 'title':
           aValue = a.title.toLowerCase();
           bValue = b.title.toLowerCase();
-          break;
-        case 'createdAt':
-          aValue = new Date(a.createdAt).getTime();
-          bValue = new Date(b.createdAt).getTime();
           break;
         case 'updatedAt':
           aValue = new Date(a.updatedAt).getTime();
@@ -288,7 +271,7 @@ export default function UserBooksDashboard() {
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                       <Input
-                        placeholder="Search books by title, author, or description..."
+                        placeholder="Search books by title..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-10 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
@@ -311,13 +294,12 @@ export default function UserBooksDashboard() {
                       value={`${sortBy}-${sortOrder}`}
                       onChange={(e) => {
                         const [sort, order] = e.target.value.split('-');
-                        setSortBy(sort as 'title' | 'createdAt' | 'updatedAt');
+                        setSortBy(sort as 'title' | 'updatedAt');
                         setSortOrder(order as 'asc' | 'desc');
                       }}
                       className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     >
                       <option value="updatedAt-desc">Latest Updated</option>
-                      <option value="createdAt-desc">Latest Created</option>
                       <option value="title-asc">Title A-Z</option>
                       <option value="title-desc">Title Z-A</option>
                     </select>
@@ -364,27 +346,7 @@ export default function UserBooksDashboard() {
                               </Badge>
                             </div>
                             
-                            {book.authors && book.authors.length > 0 && (
-                              <p className="text-gray-600 mb-2 flex items-center gap-2">
-                                <User className="h-4 w-4" />
-                                {book.authors.join(', ')}
-                              </p>
-                            )}
-                            
-                            {book.description && (
-                              <p className="text-gray-600 mb-3 line-clamp-2">{book.description}</p>
-                            )}
-                            
                             <div className="flex items-center gap-4 text-sm text-gray-500">
-                              {book.category && (
-                                <span className="flex items-center gap-1">
-                                  <Tag className="h-4 w-4" />
-                                  {book.category}
-                                </span>
-                              )}
-                              {book.pageCount && (
-                                <span>{book.pageCount} pages</span>
-                              )}
                               <span className="flex items-center gap-1">
                                 <Calendar className="h-4 w-4" />
                                 {new Date(book.updatedAt).toLocaleDateString()}
@@ -393,24 +355,33 @@ export default function UserBooksDashboard() {
                           </div>
                           
                           <div className="flex gap-2 ml-4">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleViewBook(book.id)}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              Read
+                            </Button>
                             <Link href={`/dashboard/write/edit/${book.id}`}>
                               <Button variant="outline" size="sm">
                                 <Edit3 className="h-4 w-4 mr-1" />
                                 Edit
                               </Button>
                             </Link>
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4 mr-1" />
-                              View
-                            </Button>
                             <Button 
                               variant="outline" 
                               size="sm"
                               onClick={() => handleDeleteBook(book.id)}
+                              disabled={deletingId === book.id}
                               className="text-red-600 hover:text-red-700 hover:border-red-300"
                             >
-                              <Trash2 className="h-4 w-4 mr-1" />
-                              Delete
+                              {deletingId === book.id ? (
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500 mr-1"></div>
+                              ) : (
+                                <Trash2 className="h-4 w-4 mr-1" />
+                              )}
+                              {deletingId === book.id ? 'Deleting...' : 'Delete'}
                             </Button>
                           </div>
                         </div>
