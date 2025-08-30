@@ -1208,6 +1208,29 @@ export default function AudioManagementPage() {
   );
 };
 
+  const filterAndSortAudios = (audios: Audio[], status: "all" | "draft" | "published") => {
+    const normalizedQuery = query.trim().toLowerCase();
+    return [...audios].sort((a,b) => {
+      if (sortBy === 'title') return (a.title||'').localeCompare(b.title||'');
+      const aTime = new Date(a.createdAt || '').getTime();
+      const bTime = new Date(b.createdAt || '').getTime();
+      return sortBy === 'oldest' ? aTime - bTime : bTime - aTime;
+    }).filter(a => {
+      // First filter by status
+      const statusMatch = status === 'all' || 
+        (status === 'draft' && a.status?.toLowerCase() === 'draft') ||
+        (status === 'published' && a.status?.toLowerCase() === 'published');
+      
+      // Then filter by search query
+      const searchMatch = !normalizedQuery ||
+        a.title?.toLowerCase().includes(normalizedQuery) ||
+        `${a.user?.firstName || ''} ${a.user?.lastName || ''}`.toLowerCase().includes(normalizedQuery) ||
+        (Array.isArray(a.tags) && a.tags.join(',').toLowerCase().includes(normalizedQuery));
+      
+      return statusMatch && searchMatch;
+    });
+  };
+
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <div className="mb-8">
@@ -1243,216 +1266,225 @@ export default function AudioManagementPage() {
         </select>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="record" className="flex items-center gap-2">
-            <Mic className="h-4 w-4" />
-            Record Audio
-          </TabsTrigger>
-          <TabsTrigger value="upload" className="flex items-center gap-2">
-            <Upload className="h-4 w-4" />
-            Upload File
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="record" className="space-y-4">
-          <AudioRecorder 
-            onRecordingComplete={setRecordedBlob} 
-            onRecordingSaved={fetchAudios}
-          />
-        </TabsContent>
-        
-        <TabsContent value="upload" className="space-y-4">
-          <section className="space-y-4 border p-6 rounded-lg shadow-sm bg-white">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Upload className="h-5 w-5" />
-              Upload Audio File
-            </h2>
-            
-            <div className="space-y-4">
-              <Input 
-                placeholder="Title *" 
-                value={title} 
-                onChange={(e) => setTitle(e.target.value)}
-                disabled={isLoading}
-              />
-              <Input 
-                placeholder="Description" 
-                value={description} 
-                onChange={(e) => setDescription(e.target.value)}
-                disabled={isLoading}
-              />
-              <Input 
-                placeholder="Tags (comma separated)" 
-                value={tags} 
-                onChange={(e) => setTags(e.target.value)}
-                disabled={isLoading}
-              />
-              <Input 
-                placeholder="Subcategories (comma separated)" 
-                value={subCategories} 
-                onChange={(e) => setSubCategories(e.target.value)}
-                disabled={isLoading}
-              />
-              <Input 
-                placeholder="Category (e.g., Podcasts)"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                disabled={isLoading}
-              />
-              
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Audio File (MP3, WAV, WebM, etc.) *
-                </label>
-                <input
-                  type="file"
-                  accept="audio/*"
-                  onChange={(e) => setAudioFile(e.target.files ? e.target.files[0] : null)}
-                  disabled={isLoading}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 disabled:opacity-50"
-                />
-              </div>
-            </div>
-            
-            {uploadMessage && (
-              <div className={`p-3 rounded-lg flex items-center gap-2 ${
-                uploadMessage.type === 'success' 
-                  ? 'bg-green-50 text-green-700 border border-green-200' 
-                  : 'bg-red-50 text-red-700 border border-red-200'
-              }`}>
-                {uploadMessage.type === 'success' ? (
-                  <CheckCircle className="h-4 w-4" />
-                ) : (
-                  <AlertCircle className="h-4 w-4" />
-                )}
-                <span className="text-sm">{uploadMessage.message}</span>
-              </div>
-            )}
-            
-            <div className="flex gap-2">
-              <Button 
-                onClick={() => handleUpload(true)} 
-                variant="outline" 
-                disabled={isLoading}
-                className="flex items-center gap-1"
+        {/* Creation Tabs */}
+        <div className="mb-12">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 bg-white/80 backdrop-blur-sm p-1 rounded-xl shadow-lg border border-white/20">
+              <TabsTrigger 
+                value="record" 
+                className="flex items-center gap-3 py-3 px-6 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
               >
-                <Save className="h-4 w-4" />
-                {isLoading ? "Saving..." : "Save as Draft"}
-              </Button>
-              <Button 
-                onClick={() => handleUpload(false)} 
-                variant="default" 
-                disabled={isLoading}
-                className="flex items-center gap-1"
+                <Mic className="h-5 w-5" />
+                <span className="font-semibold">Record Audio</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="upload" 
+                className="flex items-center gap-3 py-3 px-6 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
               >
-                <Upload className="h-4 w-4" />
-                {isLoading ? "Publishing..." : "Publish"}
-              </Button>
-            </div>
-          </section>
-        </TabsContent>
-      </Tabs>
-      
-      {fetchError && (
-        <div className="text-red-500 p-4 bg-red-50 rounded-lg mb-6 flex items-center gap-2">
-          <AlertCircle className="h-5 w-5" />
-          <span>{fetchError}</span>
+                <Upload className="h-5 w-5" />
+                <span className="font-semibold">Upload File</span>
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="record" className="mt-6">
+              <AudioRecorder 
+                onRecordingComplete={setRecordedBlob} 
+                onRecordingSaved={fetchAudios}
+              />
+            </TabsContent>
+            
+            <TabsContent value="upload" className="mt-6">
+              <Card className="border-0 shadow-xl bg-gradient-to-br from-purple-50 to-pink-50">
+                <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center gap-3 text-xl">
+                    <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                      <Upload className="h-5 w-5" />
+                    </div>
+                    Upload Audio File
+                  </CardTitle>
+                  <CardDescription className="text-purple-100">
+                    Upload your existing audio files and add metadata
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-8 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <Input 
+                        placeholder="Audio title *" 
+                        value={title} 
+                        onChange={(e) => setTitle(e.target.value)}
+                        disabled={isLoading}
+                        className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                      />
+                      <Input 
+                        placeholder="Description" 
+                        value={description} 
+                        onChange={(e) => setDescription(e.target.value)}
+                        disabled={isLoading}
+                        className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                      />
+                      <Input 
+                        placeholder="Category (e.g., Podcast, Music)"
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        disabled={isLoading}
+                        className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <Input 
+                        placeholder="Tags (comma separated)" 
+                        value={tags} 
+                        onChange={(e) => setTags(e.target.value)}
+                        disabled={isLoading}
+                        className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                      />
+                      <Input 
+                        placeholder="Subcategories (comma separated)" 
+                        value={subCategories} 
+                        onChange={(e) => setSubCategories(e.target.value)}
+                        disabled={isLoading}
+                        className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                      />
+                      
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">
+                          Audio File (MP3, WAV, WebM, etc.) *
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="file"
+                            accept="audio/*"
+                            onChange={(e) => setAudioFile(e.target.files ? e.target.files[0] : null)}
+                            disabled={isLoading}
+                            className="block w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-purple-500 file:to-pink-600 file:text-white hover:file:from-purple-600 hover:file:to-pink-700 file:cursor-pointer file:shadow-md disabled:opacity-50 border border-gray-300 rounded-xl p-3 focus:border-purple-500 focus:ring-purple-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {uploadMessage && (
+                    <div className={`p-4 rounded-xl flex items-center gap-3 ${
+                      uploadMessage.type === 'success' 
+                        ? 'bg-green-50 text-green-700 border border-green-200' 
+                        : 'bg-red-50 text-red-700 border border-red-200'
+                    }`}>
+                      {uploadMessage.type === 'success' ? (
+                        <CheckCircle className="h-5 w-5" />
+                      ) : (
+                        <AlertCircle className="h-5 w-5" />
+                      )}
+                      <span className="font-medium">{uploadMessage.message}</span>
+                    </div>
+                  )}
+                  
+                  <div className="flex gap-4 pt-4 border-t border-gray-200">
+                    <Button 
+                      onClick={() => handleUpload(true)} 
+                      variant="outline" 
+                      disabled={isLoading}
+                      className="flex-1 border-gray-300 hover:border-purple-400 hover:text-purple-600"
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      {isLoading ? "Saving..." : "Save as Draft"}
+                    </Button>
+                    <Button 
+                      onClick={() => handleUpload(false)} 
+                      disabled={isLoading}
+                      className="flex-1 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 shadow-lg"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      {isLoading ? "Publishing..." : "Publish Now"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
-      )}
-      
-
-      
-      {/* Drafts Section */}
-      {(() => {
-        // filter and sort
-        const normalizedQuery = query.trim().toLowerCase();
-        const base = drafts.filter(a =>
-          (statusFilter === 'all' || statusFilter === 'draft') &&
-          (
-            !normalizedQuery ||
-            a.title?.toLowerCase().includes(normalizedQuery) ||
-            `${a.user?.firstName || ''} ${a.user?.lastName || ''}`.toLowerCase().includes(normalizedQuery) ||
-            (Array.isArray(a.tags) && a.tags.join(',').toLowerCase().includes(normalizedQuery))
-          )
-        );
-        const sorted = [...base].sort((a,b) => {
-          if (sortBy === 'title') return (a.title||'').localeCompare(b.title||'');
-          const aTime = new Date(a.createdAt || '').getTime();
-          const bTime = new Date(b.createdAt || '').getTime();
-          return sortBy === 'oldest' ? aTime - bTime : bTime - aTime;
-        });
-        if (sorted.length === 0) return null;
-        return (
-        <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-3">
-            <Save className="h-5 w-5" />
-            <span>Drafts</span>
-            <span className="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700 border">{sorted.length}</span>
-          </h2>
-          <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {sorted.map((draft) => renderAudioCard(draft, true))}
-          </div>
-        </section>
-        );
-      })()}
-      
-      {/* Published Audio Section */}
-      <section>
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-3">
-          <CheckCircle className="h-5 w-5 text-green-500" />
-          <span>Published Audio</span>
-          <span className="px-2 py-0.5 text-xs rounded-full bg-green-50 text-green-700 border border-green-200">{(() => {
-            const normalizedQuery = query.trim().toLowerCase();
-            const filtered = audios.filter(a =>
-              (statusFilter === 'all' || statusFilter === 'published') &&
-              (
-                !normalizedQuery ||
-                a.title?.toLowerCase().includes(normalizedQuery) ||
-                `${a.user?.firstName || ''} ${a.user?.lastName || ''}`.toLowerCase().includes(normalizedQuery) ||
-                (Array.isArray(a.tags) && a.tags.join(',').toLowerCase().includes(normalizedQuery))
-              )
-            );
-            return filtered.length;
-          })()}</span>
-        </h2>
         
-        {audios.length === 0 && !fetchError && (
-          <div className="text-center py-12 bg-gray-50 rounded-lg">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-                <Volume2 className="h-8 w-8 text-gray-400" />
-              </div>
-              <p className="text-gray-500">No published audio yet.</p>
-              <p className="text-sm text-gray-400">Record or upload your first audio file to get started!</p>
+        {fetchError && (
+          <div className="text-red-600 p-6 bg-red-50 rounded-2xl mb-8 flex items-center gap-3 border border-red-200 shadow-lg">
+            <AlertCircle className="h-6 w-6" />
+            <div>
+              <div className="font-semibold">Connection Error</div>
+              <div className="text-sm">{fetchError}</div>
             </div>
           </div>
         )}
-        
+
+        {/* Drafts Section */}
         {(() => {
-          const normalizedQuery = query.trim().toLowerCase();
-          const base = audios.filter(a =>
-            (statusFilter === 'all' || statusFilter === 'published') &&
-            (
-              !normalizedQuery ||
-              a.title?.toLowerCase().includes(normalizedQuery) ||
-              `${a.user?.firstName || ''} ${a.user?.lastName || ''}`.toLowerCase().includes(normalizedQuery) ||
-              (Array.isArray(a.tags) && a.tags.join(',').toLowerCase().includes(normalizedQuery))
-            )
-          );
-          const sorted = [...base].sort((a,b) => {
-            if (sortBy === 'title') return (a.title||'').localeCompare(b.title||'');
-            const aTime = new Date(a.createdAt || '').getTime();
-            const bTime = new Date(b.createdAt || '').getTime();
-            return sortBy === 'oldest' ? aTime - bTime : bTime - aTime;
-          });
+          const sortedDrafts = filterAndSortAudios(drafts, 'draft');
+          if (sortedDrafts.length === 0) return null;
+          
           return (
-            <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {sorted.map((audio) => renderAudioCard(audio))}
-            </div>
+            <section className="mb-12">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Edit3 className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">Draft Collection</h2>
+                  <p className="text-gray-600">Work in progress - {sortedDrafts.length} item{sortedDrafts.length !== 1 ? 's' : ''}</p>
+                </div>
+                <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm px-3 py-1 shadow-md">
+                  {sortedDrafts.length}
+                </Badge>
+              </div>
+              <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                {sortedDrafts.map((draft) => renderAudioCard(draft, true))}
+              </div>
+            </section>
           );
         })()}
-      </section>
-    </div>
+        
+        {/* Published Audio Section */}
+        <section>
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+              <CheckCircle className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800">Published Library</h2>
+              <p className="text-gray-600">Live content - {filterAndSortAudios(audios, 'published').length} item{filterAndSortAudios(audios, 'published').length !== 1 ? 's' : ''}</p>
+            </div>
+            <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm px-3 py-1 shadow-md">
+              {filterAndSortAudios(audios, 'published').length}
+            </Badge>
+          </div>
+          
+          {audios.length === 0 && !fetchError && (
+            <div className="text-center py-20 bg-white/60 backdrop-blur-sm rounded-2xl border border-white/20 shadow-lg">
+              <div className="flex flex-col items-center gap-6">
+                <div className="w-24 h-24 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center shadow-inner">
+                  <Volume2 className="h-12 w-12 text-gray-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-700 mb-2">No Published Audio Yet</h3>
+                  <p className="text-gray-500 max-w-md">
+                    Record or upload your first audio file to get started with your audio library!
+                  </p>
+                </div>
+                <Button 
+                  onClick={() => setActiveTab('record')}
+                  className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg"
+                >
+                  <Mic className="h-4 w-4 mr-2" />
+                  Start Recording
+                </Button>
+              </div>
+            </div>
+          )}
+          
+          {filterAndSortAudios(audios, 'published').length > 0 && (
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+              {filterAndSortAudios(audios, 'published').map((audio) => renderAudioCard(audio))}
+            </div>
+          )}
+        </section>
+      </div>
+    
   );
 }
