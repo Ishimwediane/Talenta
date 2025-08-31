@@ -110,50 +110,38 @@ export default function ReadBook() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="p-6 max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
+      {/* Header */}
+      <section className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Link href="/dashboard/write" className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 mb-4">
             <ArrowLeft className="h-4 w-4" />
             Back to Books Dashboard
           </Link>
-          
-          <div className="text-center">
-            <div className="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-full border border-orange-200 shadow-lg mb-6">
-              <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
-                <Eye className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-sm font-medium text-gray-700">Reading Your Book</span>
-            </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              {book.title}
-            </h1>
-            <div className="flex items-center justify-center gap-4 mb-4">
-              <Badge variant={book.status === 'PUBLISHED' ? 'default' : 'secondary'}>
-                {book.status}
-              </Badge>
-              <span className="text-gray-600 flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                {new Date(book.updatedAt).toLocaleDateString()}
-              </span>
-            </div>
+          <h1 className="text-2xl font-semibold text-gray-900">{book.title}</h1>
+          <div className="flex items-center gap-4 mt-2">
+            <Badge variant={book.status === 'PUBLISHED' ? 'default' : 'secondary'}>
+              {book.status}
+            </Badge>
+            <span className="text-gray-600 flex items-center gap-1">
+              <Calendar className="h-4 w-4" />
+              {new Date(book.updatedAt).toLocaleDateString()}
+            </span>
           </div>
         </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Book Details */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Sidebar - Book Info */}
           <div className="lg:col-span-1">
-            <Card className="border border-gray-200 shadow-sm">
-              <CardHeader className="bg-orange-500 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-3 text-lg">
-                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                    <BookOpen className="h-4 w-4" />
-                  </div>
-                  Book Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
+            <div className="bg-white rounded-lg border p-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Book Information</h2>
+                <p className="text-gray-600">Details about your book</p>
+              </div>
+              <div className="space-y-4">
                 {book.description && (
                   <div>
                     <h4 className="font-semibold text-gray-700 mb-2">Description</h4>
@@ -201,22 +189,18 @@ export default function ReadBook() {
                     )}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
           {/* Right Side - Book Content */}
           <div className="lg:col-span-2">
-            <Card className="border border-gray-200 shadow-sm">
-              <CardHeader className="bg-orange-500 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-3 text-lg">
-                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                    <FileText className="h-4 w-4" />
-                  </div>
-                  Book Content
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
+            <div className="bg-white rounded-lg border p-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Book Content</h2>
+                <p className="text-gray-600">Read your book content</p>
+              </div>
+              <div>
                 {bookContent ? (
                   <div className="prose max-w-none">
                     <div 
@@ -246,8 +230,8 @@ export default function ReadBook() {
                     </Link>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
       </div>
