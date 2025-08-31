@@ -128,14 +128,14 @@ const AudioRecorder: React.FC<{
   }, [recordedAudioUrl]);
 
   return (
-    <div className="border rounded-lg p-4 bg-gradient-to-r from-orange-50 to-amber-50">
+    <div className="border rounded-lg p-4 bg-white">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Mic className="h-5 w-5 text-amber-600" />
+          <Mic className="h-5 w-5 text-orange-600" />
           <h4 className="font-semibold text-gray-800">Record New Segment</h4>
         </div>
         {(isRecording || recordingTime > 0) && (
-          <div className="text-lg font-mono font-bold text-red-600 bg-white px-3 py-1 rounded-lg shadow-sm">
+          <div className="text-lg font-mono font-bold text-red-600 bg-gray-50 px-3 py-1 rounded-lg border">
             {formatRecordingTime(recordingTime)}
           </div>
         )}
@@ -161,7 +161,7 @@ const AudioRecorder: React.FC<{
       </div>
       
       {recordedAudioUrl && (
-        <div className="mt-4 p-3 bg-white rounded-lg border">
+        <div className="mt-4 p-3 bg-gray-50 rounded-lg border">
           <h5 className="font-medium mb-2 text-gray-700">Preview Recording</h5>
           <audio controls className="w-full">
             <source src={recordedAudioUrl} type="audio/webm" />
@@ -430,7 +430,7 @@ export default function EditAudioPage() {
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-4 border-amber-500 border-t-transparent"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-4 border-orange-500 border-t-transparent"></div>
       </div>
     );
   }
@@ -441,7 +441,7 @@ export default function EditAudioPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
               <h2 className="text-xl font-semibold text-gray-700">Loading Audio Editor...</h2>
               <p className="text-gray-500 mt-2">Preparing your workspace</p>
             </div>
@@ -462,7 +462,7 @@ export default function EditAudioPage() {
             <Button 
               onClick={() => router.push('/dashboard/audio')}
               size="sm"
-              className="bg-amber-800 hover:bg-amber-900"
+              className="bg-orange-500 hover:bg-orange-600"
             >
               Back to Audio Dashboard
             </Button>
@@ -474,23 +474,11 @@ export default function EditAudioPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Header */}
-      <section className="bg-gradient-to-r from-orange-600 to-amber-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <div className="inline-flex items-center gap-3 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full border border-white/30 mb-4">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                </svg>
-              </div>
-              <span className="text-xs font-medium">Audio Editor</span>
-            </div>
-            <h1 className="text-3xl font-bold mb-2">Edit Audio</h1>
-            <p className="text-base text-orange-100 max-w-2xl mx-auto">
-              Manage your audio content and playlist segments
-            </p>
-          </div>
+      {/* Header */}
+      <section className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <h1 className="text-2xl font-semibold text-gray-900">Edit Audio</h1>
+          <p className="text-gray-600 mt-1">Manage your audio content and playlist segments</p>
         </div>
       </section>
 
@@ -535,7 +523,7 @@ export default function EditAudioPage() {
                   onClick={handlePublishWithMerge} 
                   disabled={saving}
                   size="sm"
-                  className="bg-amber-800 hover:bg-amber-900 text-white"
+                  className="bg-orange-500 hover:bg-orange-600 text-white"
                 >
                   <Upload className="h-4 w-4 mr-2" />
                   Publish & Auto-Merge
@@ -545,300 +533,267 @@ export default function EditAudioPage() {
           </div>
         </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column - Basic Info & Recording */}
-            <div className="space-y-6">
-              {/* Basic Information */}
-              <Card className="border bg-white">
-                <CardHeader className="bg-amber-800 text-white">
-                  <CardTitle className="flex items-center gap-2">
-                    <Edit3 className="h-5 w-5" />
-                    Basic Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 space-y-4">
-                  <div>
-                    <Label htmlFor="title" className="text-gray-700 font-medium">Title</Label>
-                    <Input
-                      id="title"
-                      value={audio.title || ''}
-                      onChange={(e) => setAudio(prev => prev ? { ...prev, title: e.target.value } : null)}
-                      className="mt-1 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
-                      placeholder="Enter audio title..."
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="description" className="text-gray-700 font-medium">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={audio.description || ''}
-                      onChange={(e) => setAudio(prev => prev ? { ...prev, description: e.target.value } : null)}
-                      className="mt-1 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
-                      rows={3}
-                      placeholder="Describe your audio content..."
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="tags" className="text-gray-700 font-medium">Tags</Label>
-                    <Input
-                      id="tags"
-                      value={audio.tags?.join(', ') || ''}
-                      onChange={(e) => setAudio(prev => prev ? { ...prev, tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) } : null)}
-                      className="mt-1 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
-                      placeholder="tag1, tag2, tag3..."
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="category" className="text-gray-700 font-medium">Category</Label>
-                    <Input
-                      id="category"
-                      value={audio.category || ''}
-                      onChange={(e) => setAudio(prev => prev ? { ...prev, category: e.target.value } : null)}
-                      className="mt-1 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
-                      placeholder="e.g., Podcast, Music, Interview..."
-                    />
-                  </div>
-
-                  <div className="pt-2">
-                    <Badge 
-                      variant={audio.status === 'PUBLISHED' ? 'default' : 'secondary'}
-                      className="text-sm font-medium"
-                    >
-                      {audio.status || 'DRAFT'}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Recording Section */}
-              <Card className="border bg-white">
-                <CardHeader className="bg-amber-800 text-white">
-                  <CardTitle className="flex items-center gap-2">
-                    <Mic className="h-5 w-5" />
-                    Record New Segment
-                  </CardTitle>
-                  <CardDescription className="text-amber-100">
-                    Add new audio segments to your playlist
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <AudioRecorder 
-                    onRecordingComplete={(blob) => {
-                      setRecordedSegments(prev => [...prev, blob]);
-                    }}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Basic Info & Recording */}
+          <div className="space-y-6">
+            {/* Basic Information */}
+            <div className="bg-white rounded-lg border p-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Basic Information</h2>
+                <p className="text-gray-600">Update your audio details and metadata</p>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="title" className="text-gray-700 font-medium">Title</Label>
+                  <Input
+                    id="title"
+                    value={audio.title || ''}
+                    onChange={(e) => setAudio(prev => prev ? { ...prev, title: e.target.value } : null)}
+                    className="mt-1 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                    placeholder="Enter audio title..."
                   />
-                </CardContent>
-              </Card>
+                </div>
 
-              {/* File Upload */}
-              <Card className="border bg-white">
-                <CardHeader className="bg-amber-800 text-white">
-                  <CardTitle className="flex items-center gap-2">
-                    <Upload className="h-5 w-5" />
-                    Upload Audio Files
-                  </CardTitle>
-                  <CardDescription className="text-amber-100">
-                    Upload existing audio files as segments
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div>
-                    <Label htmlFor="segment-file" className="text-gray-700 font-medium">Select Audio File</Label>
-                    <Input
-                      id="segment-file"
-                      type="file"
-                      accept="audio/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          setNewSegments(prev => [...prev, file]);
-                        }
-                      }}
-                      className="mt-1 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+                <div>
+                  <Label htmlFor="description" className="text-gray-700 font-medium">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={audio.description || ''}
+                    onChange={(e) => setAudio(prev => prev ? { ...prev, description: e.target.value } : null)}
+                    className="mt-1 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                    rows={3}
+                    placeholder="Describe your audio content..."
+                  />
+                </div>
 
-              {/* Pending Segments */}
-              {(newSegments.length > 0 || recordedSegments.length > 0) && (
-                <Card className="border bg-white">
-                  <CardHeader className="bg-amber-800 text-white">
-                    <CardTitle className="flex items-center gap-2">
-                      <Plus className="h-5 w-5" />
-                      Pending Segments ({newSegments.length + recordedSegments.length})
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="space-y-3">
-                      {newSegments.map((segment, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-orange-50 rounded-lg border border-orange-200">
-                          <div className="flex items-center gap-3">
-                            <Upload className="h-4 w-4 text-orange-600" />
-                            <span className="font-medium text-gray-700">
-                              {segment instanceof File ? segment.name : 'Uploaded file'}
-                            </span>
-                          </div>
-                          <Button
-                            onClick={() => setNewSegments(prev => prev.filter((_, i) => i !== index))}
-                            size="sm"
-                            variant="outline"
-                            className="text-red-600 hover:text-red-800 border-red-300"
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ))}
-                      {recordedSegments.map((_, index) => (
-                        <div key={`recorded-${index}`} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
-                          <div className="flex items-center gap-3">
-                            <Mic className="h-4 w-4 text-green-600" />
-                            <span className="font-medium text-gray-700">Recorded Segment {index + 1}</span>
-                          </div>
-                          <Button
-                            onClick={() => setRecordedSegments(prev => prev.filter((_, i) => i !== index))}
-                            size="sm"
-                            variant="outline"
-                            className="text-red-600 hover:text-red-800 border-red-300"
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ))}
+                <div>
+                  <Label htmlFor="tags" className="text-gray-700 font-medium">Tags</Label>
+                  <Input
+                    id="tags"
+                    value={audio.tags?.join(', ') || ''}
+                    onChange={(e) => setAudio(prev => prev ? { ...prev, tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) } : null)}
+                    className="mt-1 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                    placeholder="tag1, tag2, tag3..."
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="category" className="text-gray-700 font-medium">Category</Label>
+                  <Input
+                    id="category"
+                    value={audio.category || ''}
+                    onChange={(e) => setAudio(prev => prev ? { ...prev, category: e.target.value } : null)}
+                    className="mt-1 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                    placeholder="e.g., Podcast, Music, Interview..."
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <Badge 
+                    variant={audio.status === 'PUBLISHED' ? 'default' : 'secondary'}
+                    className="text-sm font-medium"
+                  >
+                    {audio.status || 'DRAFT'}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+
+            {/* Recording Section */}
+            <div className="bg-white rounded-lg border p-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Record New Segment</h2>
+                <p className="text-gray-600">Add new audio segments to your playlist</p>
+              </div>
+              <AudioRecorder 
+                onRecordingComplete={(blob) => {
+                  setRecordedSegments(prev => [...prev, blob]);
+                }}
+              />
+            </div>
+
+            {/* File Upload */}
+            <div className="bg-white rounded-lg border p-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Upload Audio Files</h2>
+                <p className="text-gray-600">Upload existing audio files as segments</p>
+              </div>
+              <div>
+                <Label htmlFor="segment-file" className="text-gray-700 font-medium">Select Audio File</Label>
+                <Input
+                  id="segment-file"
+                  type="file"
+                  accept="audio/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setNewSegments(prev => [...prev, file]);
+                    }
+                  }}
+                  className="mt-1 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                />
+              </div>
+            </div>
+
+            {/* Pending Segments */}
+            {(newSegments.length > 0 || recordedSegments.length > 0) && (
+              <div className="bg-white rounded-lg border p-6">
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-2">Pending Segments ({newSegments.length + recordedSegments.length})</h2>
+                </div>
+                <div className="space-y-3">
+                  {newSegments.map((segment, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-orange-50 rounded-lg border border-orange-200">
+                      <div className="flex items-center gap-3">
+                        <Upload className="h-4 w-4 text-orange-600" />
+                        <span className="font-medium text-gray-700">
+                          {segment instanceof File ? segment.name : 'Uploaded file'}
+                        </span>
+                      </div>
+                      <Button
+                        onClick={() => setNewSegments(prev => prev.filter((_, i) => i !== index))}
+                        size="sm"
+                        variant="outline"
+                        className="text-red-600 hover:text-red-800 border-red-300"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
+                  ))}
+                  {recordedSegments.map((_, index) => (
+                    <div key={`recorded-${index}`} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div className="flex items-center gap-3">
+                        <Mic className="h-4 w-4 text-green-600" />
+                        <span className="font-medium text-gray-700">Recorded Segment {index + 1}</span>
+                      </div>
+                      <Button
+                        onClick={() => setRecordedSegments(prev => prev.filter((_, i) => i !== index))}
+                        size="sm"
+                        variant="outline"
+                        className="text-red-600 hover:text-red-800 border-red-300"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column - Playlist Management */}
+          <div className="space-y-6">
+            {/* Current Playlist */}
+            <div className="bg-white rounded-lg border p-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Current Playlist</h2>
+                <p className="text-gray-600">Manage the order of audio segments. They will be merged in this order when published.</p>
+              </div>
+              
+              {/* Main Audio */}
+              <div className="border-2 border-blue-200 rounded-lg p-4 mb-4 bg-blue-50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">1</span>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-800">Main Audio</div>
+                      <div className="text-sm text-gray-600">Original recording</div>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="border-blue-300 text-blue-700">
+                    Original
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Segments */}
+              {audio.segmentUrls && audio.segmentUrls.length > 0 ? (
+                <div className="space-y-3">
+                  {audio.segmentUrls.map((url, index) => (
+                    <div key={index} className="border-2 border-gray-200 rounded-lg p-4 bg-gray-50 hover:border-green-300 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">{index + 2}</span>
+                          </div>
+                          <div>
+                            <div className="font-semibold text-gray-800">Segment {index + 1}</div>
+                            <div className="text-sm text-gray-600">Additional audio</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            onClick={() => handleMoveSegment(index, 'up')}
+                            size="sm"
+                            variant="outline"
+                            disabled={index === 0}
+                            className="border-gray-300 hover:border-orange-400"
+                          >
+                            <ArrowUp className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            onClick={() => handleMoveSegment(index, 'down')}
+                            size="sm"
+                            variant="outline"
+                            disabled={index === audio.segmentUrls!.length - 1}
+                            className="border-gray-300 hover:border-orange-400"
+                          >
+                            <ArrowDown className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            onClick={() => handleDeleteSegment(audio.segmentPublicIds?.[index] || '')}
+                            size="sm"
+                            variant="outline"
+                            className="text-red-600 hover:text-red-800 border-red-300 hover:border-red-400"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-gray-500">
+                  <Volume2 className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-lg font-medium mb-2">No Additional Segments</h3>
+                  <p className="text-sm">Add segments using the recording and upload tools on the left</p>
+                </div>
+              )}
+
+              {audio.segmentUrls && audio.segmentUrls.length > 0 && (
+                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="flex items-center gap-3 text-yellow-800">
+                    <AlertCircle className="h-5 w-5" />
+                    <span className="font-semibold">Auto-merge on Publish</span>
+                  </div>
+                  <p className="text-sm text-yellow-700 mt-2">
+                    When you publish this audio, all segments will be automatically merged into a single file in the order shown above.
+                  </p>
+                </div>
               )}
             </div>
 
-            {/* Right Column - Playlist Management */}
-            <div className="space-y-6">
-              {/* Current Playlist */}
-              <Card className="border bg-white">
-                <CardHeader className="bg-amber-800 text-white">
-                  <CardTitle className="flex items-center gap-2">
-                    <Volume2 className="h-5 w-5" />
-                    Current Playlist
-                  </CardTitle>
-                  <CardDescription className="text-amber-100">
-                    Manage the order of audio segments. They will be merged in this order when published.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6">
-                  {/* Main Audio */}
-                  <div className="border-2 border-blue-200 rounded-lg p-4 mb-4 bg-gradient-to-r from-blue-50 to-indigo-50">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">1</span>
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-800">Main Audio</div>
-                          <div className="text-sm text-gray-600">Original recording</div>
-                        </div>
-                      </div>
-                      <Badge variant="outline" className="border-blue-300 text-blue-700">
-                        Original
-                      </Badge>
-                    </div>
-                  </div>
-
-                  {/* Segments */}
-                  {audio.segmentUrls && audio.segmentUrls.length > 0 ? (
-                    <div className="space-y-3">
-                      {audio.segmentUrls.map((url, index) => (
-                        <div key={index} className="border-2 border-gray-200 rounded-lg p-4 bg-gradient-to-r from-gray-50 to-slate-50 hover:border-green-300 transition-colors">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
-                                <span className="text-white text-xs font-bold">{index + 2}</span>
-                              </div>
-                              <div>
-                                <div className="font-semibold text-gray-800">Segment {index + 1}</div>
-                                <div className="text-sm text-gray-600">Additional audio</div>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                onClick={() => handleMoveSegment(index, 'up')}
-                                size="sm"
-                                variant="outline"
-                                disabled={index === 0}
-                                className="border-gray-300 hover:border-orange-400"
-                              >
-                                <ArrowUp className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                onClick={() => handleMoveSegment(index, 'down')}
-                                size="sm"
-                                variant="outline"
-                                disabled={index === audio.segmentUrls!.length - 1}
-                                className="border-gray-300 hover:border-orange-400"
-                              >
-                                <ArrowDown className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                onClick={() => handleDeleteSegment(audio.segmentPublicIds?.[index] || '')}
-                                size="sm"
-                                variant="outline"
-                                className="text-red-600 hover:text-red-800 border-red-300 hover:border-red-400"
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12 text-gray-500">
-                      <Volume2 className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                      <h3 className="text-lg font-medium mb-2">No Additional Segments</h3>
-                      <p className="text-sm">Add segments using the recording and upload tools on the left</p>
-                    </div>
-                  )}
-
-                  {audio.segmentUrls && audio.segmentUrls.length > 0 && (
-                    <div className="mt-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg">
-                      <div className="flex items-center gap-3 text-yellow-800">
-                        <AlertCircle className="h-5 w-5" />
-                        <span className="font-semibold">Auto-merge on Publish</span>
-                      </div>
-                      <p className="text-sm text-yellow-700 mt-2">
-                        When you publish this audio, all segments will be automatically merged into a single file in the order shown above.
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Audio Preview */}
-              <Card className="border bg-white">
-                <CardHeader className="bg-amber-800 text-white">
-                  <CardTitle className="flex items-center gap-2">
-                    <Play className="h-5 w-5" />
-                    Audio Preview
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="bg-gradient-to-r from-gray-50 to-slate-50 p-4 rounded-lg border border-gray-200">
-                    <audio controls className="w-full">
-                      <source src={audio.fileUrl} />
-                      Your browser does not support the audio element.
-                    </audio>
-                    <div className="mt-3 text-sm text-gray-600 text-center">
-                      Main audio file - additional segments will be appended when published
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            {/* Audio Preview */}
+            <div className="bg-white rounded-lg border p-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Audio Preview</h2>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <audio controls className="w-full">
+                  <source src={audio.fileUrl} />
+                  Your browser does not support the audio element.
+                </audio>
+                <div className="mt-3 text-sm text-gray-600 text-center">
+                  Main audio file - additional segments will be appended when published
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    
+    </div>
   );
 }
