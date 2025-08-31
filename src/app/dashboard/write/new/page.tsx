@@ -117,29 +117,19 @@ export default function CreateNewBook() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="p-6 max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
+      {/* Header */}
+      <section className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Link href="/dashboard/write" className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 mb-4">
             <ArrowLeft className="h-4 w-4" />
             Back to Books Dashboard
           </Link>
-          
-          <div className="text-center">
-            <div className="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-full border border-orange-200 shadow-lg mb-6">
-              <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
-                <BookOpen className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-sm font-medium text-gray-700">Write Your Book</span>
-            </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Write Your Book on Our Platform
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Start writing your book directly here, or upload an existing file. Use our powerful editor to create your masterpiece.
-            </p>
-          </div>
+          <h1 className="text-2xl font-semibold text-gray-900">Write Your Book</h1>
+          <p className="text-gray-600 mt-1">Start writing your book directly here, or upload an existing file</p>
         </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
@@ -150,16 +140,12 @@ export default function CreateNewBook() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Sidebar - Book Details */}
           <div className="lg:col-span-1 flex flex-col gap-6">
-            <Card className="border border-gray-200 shadow-sm">
-              <CardHeader className="bg-orange-500 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-3 text-lg">
-                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                    <BookOpen className="h-4 w-4" />
-                  </div>
-                  Book Details
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
+            <div className="bg-white rounded-lg border p-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Book Details</h2>
+                <p className="text-gray-600">Add your book information and metadata</p>
+              </div>
+              <div className="space-y-4">
                 <div>
                   <Label htmlFor="title" className="text-sm font-semibold text-gray-700">
                     Book Title *
@@ -212,21 +198,17 @@ export default function CreateNewBook() {
                     placeholder="e.g., Romance, Adult"
                     className="border-gray-300 focus:border-orange-500 focus:ring-orange-500"
                   />
-                </div>
-              </CardContent>
-            </Card>
+                                  </div>
+              </div>
+            </div>
 
             {/* Cover Image */}
-            <Card className="border border-gray-200 shadow-sm">
-              <CardHeader className="bg-orange-500 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-3 text-lg">
-                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                    <BookOpen className="h-4 w-4" />
-                  </div>
-                  Cover Image
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
+            <div className="bg-white rounded-lg border p-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Cover Image</h2>
+                <p className="text-gray-600">Upload a cover image for your book</p>
+              </div>
+              <div className="space-y-4">
                 {coverImagePreview ? (
                   <img src={coverImagePreview} alt="Cover preview" className="w-full h-auto object-cover rounded-md aspect-[2/3]" />
                 ) : (
@@ -242,23 +224,16 @@ export default function CreateNewBook() {
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
                 />
                 <p className="text-xs text-gray-500">Recommended: 1200x1800 pixels, JPG or PNG</p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Content Method Selection */}
-            <Card className="border border-gray-200 shadow-sm">
-              <CardHeader className="bg-orange-500 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-3 text-lg">
-                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                    <Edit3 className="h-4 w-4" />
-                  </div>
-                  Content Method
-                </CardTitle>
-                <CardDescription className="text-orange-100">
-                  Choose how you want to add your book content
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
+            <div className="bg-white rounded-lg border p-6">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Content Method</h2>
+                <p className="text-gray-600">Choose how you want to add your book content</p>
+              </div>
+              <div className="space-y-4">
                 <div className="flex gap-2">
                   <Button
                     type="button"
@@ -304,43 +279,29 @@ export default function CreateNewBook() {
                     </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
           {/* Right Side - Content Editor or File Upload */}
           <div className="lg:col-span-2">
             {contentMethod === 'text' ? (
-              <Card className="border border-gray-200 shadow-sm">
-                <CardHeader className="bg-orange-500 text-white rounded-t-lg">
-                  <CardTitle className="flex items-center gap-3 text-lg">
-                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                      <Edit3 className="h-4 w-4" />
-                    </div>
-                    Write Your Book Content
-                  </CardTitle>
-                  <CardDescription className="text-orange-100">
-                    Use the rich text editor below to write your book content
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6">
+              <div className="bg-white rounded-lg border p-6">
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-2">Write Your Book Content</h2>
+                  <p className="text-gray-600">Use the rich text editor below to write your book content</p>
+                </div>
+                <div>
                   <TiptapEditor content={content} onChange={(newContent: string) => setContent(newContent)} />
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ) : (
-              <Card className="border border-gray-200 shadow-sm">
-                <CardHeader className="bg-orange-500 text-white rounded-t-lg">
-                  <CardTitle className="flex items-center gap-3 text-lg">
-                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                      <FileUp className="h-4 w-4" />
-                    </div>
-                    Upload Book from Device
-                  </CardTitle>
-                  <CardDescription className="text-orange-100">
-                    Upload a file and the content will be automatically extracted
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6">
+              <div className="bg-white rounded-lg border p-6">
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-2">Upload Book from Device</h2>
+                  <p className="text-gray-600">Upload a file and the content will be automatically extracted</p>
+                </div>
+                <div>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                     <FileUp className="w-12 h-12 mx-auto text-gray-400 mb-4" />
                     <p className="text-lg font-medium text-gray-900 mb-2">
@@ -369,8 +330,8 @@ export default function CreateNewBook() {
                       <p><strong>Supported:</strong> DOCX, TXT, EPUB, PDF</p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
           </div>
         </div>
