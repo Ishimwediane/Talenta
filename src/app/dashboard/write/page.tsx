@@ -117,7 +117,7 @@ export default function UserBooksDashboard() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-16 w-16 border-4 border-orange-500 border-t-transparent"></div>
       </div>
     );
@@ -125,25 +125,15 @@ export default function UserBooksDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Header */}
-      <section className="bg-gradient-to-r from-orange-600 to-amber-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <div className="inline-flex items-center gap-3 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full border border-white/30 mb-4">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                <BookOpen className="w-4 h-4" />
-              </div>
-              <span className="text-xs font-medium">Your Personal Writing Studio</span>
-            </div>
-            <h1 className="text-3xl font-bold mb-2">My Books</h1>
-            <p className="text-base text-orange-100 max-w-2xl mx-auto">
-              Create, write, and manage your personal book library with professional tools
-            </p>
-          </div>
+      {/* Header */}
+      <section className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <h1 className="text-2xl font-semibold text-gray-900">My Books</h1>
+          <p className="text-gray-600 mt-1">Create, write, and manage your personal book library</p>
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8">
           {/* Sidebar Filters */}
           <div className="w-80 flex-shrink-0">
@@ -165,15 +155,13 @@ export default function UserBooksDashboard() {
 
               {/* Search */}
               <div className="mb-6">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input 
-                    className="pl-10 border-gray-200 focus:border-orange-500 focus:ring-orange-500 bg-white shadow-sm" 
-                    placeholder="Search your books..." 
-                    value={searchTerm} 
-                    onChange={(e) => setSearchTerm(e.target.value)} 
-                  />
-                </div>
+                <input
+                  type="text"
+                  placeholder="Search your books..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
               </div>
 
               {/* Status Filter */}
@@ -304,19 +292,17 @@ export default function UserBooksDashboard() {
             <div className="bg-white rounded-lg border p-4 mb-6">
               <div className="flex gap-4">
                 <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <Input 
-                      className="pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" 
-                      placeholder="Search your book content..." 
-                      value={searchTerm} 
-                      onChange={(e) => setSearchTerm(e.target.value)} 
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search your book content..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  />
                 </div>
-                <Button className="px-6 py-2 bg-amber-800 text-white rounded-lg hover:bg-amber-900 transition-colors font-medium">
+                <button className="px-6 py-2 bg-amber-800 text-white rounded-lg hover:bg-amber-900 transition-colors font-medium">
                   Search Books
-                </Button>
+                </button>
               </div>
             </div>
 
@@ -341,52 +327,43 @@ export default function UserBooksDashboard() {
                 </TabsList>
                 
                 <TabsContent value="write" className="mt-6">
-                  <Card className="border bg-white">
-                    <CardHeader className="bg-amber-800 text-white rounded-t-lg">
-                      <CardTitle className="flex items-center gap-3 text-xl">
-                        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                          <Edit3 className="h-5 w-5" />
+                  <div className="bg-white rounded-lg border p-6">
+                    <div className="mb-6">
+                      <h2 className="text-xl font-semibold text-gray-900 mb-2">Create New Book</h2>
+                      <p className="text-gray-600">Start writing your next masterpiece with our powerful editor</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <Link href="/dashboard/write/new">
+                        <div className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow cursor-pointer group">
+                          <div className="text-center">
+                            <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-600 transition-colors">
+                              <Plus className="h-8 w-8 text-white" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">Write New Book</h3>
+                            <p className="text-gray-600">Start writing your book directly on our platform using our powerful editor</p>
+                          </div>
                         </div>
-                        Create New Book
-                      </CardTitle>
-                      <CardDescription className="text-amber-100">
-                        Start writing your next masterpiece with our powerful editor
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Link href="/dashboard/write/new">
-                          <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
-                            <CardContent className="p-6 text-center">
-                              <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-600 transition-colors">
-                                <Plus className="h-8 w-8 text-white" />
-                              </div>
-                              <h3 className="text-xl font-semibold text-gray-900 mb-2">Write New Book</h3>
-                              <p className="text-gray-600">Start writing your book directly on our platform using our powerful editor</p>
-                            </CardContent>
-                          </Card>
-                        </Link>
+                      </Link>
 
-                        <Link href="/dashboard/write/upload">
-                          <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
-                            <CardContent className="p-6 text-center">
-                              <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-600 transition-colors">
-                                <Upload className="h-8 w-8 text-white" />
-                              </div>
-                              <h3 className="text-xl font-semibold text-gray-900 mb-2">Upload Existing Book</h3>
-                              <p className="text-gray-600">Upload your existing book files and share them with the community</p>
-                            </CardContent>
-                          </Card>
-                        </Link>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      <Link href="/dashboard/write/upload">
+                        <div className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow cursor-pointer group">
+                          <div className="text-center">
+                            <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-600 transition-colors">
+                              <Upload className="h-8 w-8 text-white" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">Upload Existing Book</h3>
+                            <p className="text-gray-600">Upload your existing book files and share them with the community</p>
+                          </div>
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
                 </TabsContent>
                 
                 <TabsContent value="manage" className="mt-6">
                   {/* User's Book Content */}
                   {fetchError && (
-                    <div className="text-red-600 p-6 bg-red-50 rounded-2xl mb-8 flex items-center gap-3 border border-red-200 shadow-lg">
+                    <div className="text-red-600 p-6 bg-red-50 rounded-lg mb-8 flex items-center gap-3 border border-red-200">
                       <AlertCircle className="h-6 w-6" />
                       <div>
                         <div className="font-semibold">Connection Error</div>
@@ -403,77 +380,64 @@ export default function UserBooksDashboard() {
                     return (
                       <section className="mb-12">
                         <div className="flex items-center gap-4 mb-6">
-                          <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center">
-                            <Edit3 className="h-6 w-6 text-white" />
-                          </div>
-                          <div>
-                            <h2 className="text-2xl font-bold text-gray-800">Your Drafts</h2>
-                            <p className="text-gray-600">Work in progress - {sortedDrafts.length} item{sortedDrafts.length !== 1 ? 's' : ''}</p>
-                          </div>
-                          <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm px-3 py-1">
-                            {sortedDrafts.length}
-                          </Badge>
+                          <h2 className="text-2xl font-bold text-gray-800">Your Drafts</h2>
+                          <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm">
+                            {sortedDrafts.length} item{sortedDrafts.length !== 1 ? 's' : ''}
+                          </span>
                         </div>
-                        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                        <div className="space-y-4">
                           {sortedDrafts.map((draft) => (
-                            <Card key={draft.id} className="group hover:shadow-md transition-all duration-300 border-0 bg-white hover:-translate-y-1">
-                              <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-t-lg">
-                                <div className="flex justify-between items-start">
-                                  <div className="flex-1">
-                                    <CardTitle className="flex items-center gap-3 text-lg font-bold">
-                                      <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                                        <BookOpen className="h-4 w-4" />
-                                      </div>
-                                      {draft.title}
-                                      <Badge variant="secondary" className="bg-white/20 text-white border-white/30">Draft</Badge>
-                                    </CardTitle>
-                                    <CardDescription className="text-orange-100 mt-2 flex items-center gap-4">
-                                      <span className="flex items-center gap-1">
-                                        <Clock className="h-3 w-3" />
-                                        {new Date(draft.updatedAt).toLocaleDateString()}
-                                      </span>
-                                    </CardDescription>
+                            <div key={draft.id} className="bg-white rounded-lg border p-6 hover:shadow-md transition-shadow">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <h3 className="text-lg font-semibold text-gray-900">{draft.title}</h3>
+                                    <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs">Draft</span>
+                                  </div>
+                                  
+                                  {draft.description && (
+                                    <p className="text-gray-600 mb-3 line-clamp-2">
+                                      {draft.description}
+                                    </p>
+                                  )}
+                                  
+                                  <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                                    <span className="flex items-center gap-1">
+                                      <Calendar className="h-4 w-4" />
+                                      {new Date(draft.updatedAt).toLocaleDateString()}
+                                    </span>
+                                  </div>
+                                  
+                                  {draft.tags && draft.tags.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 mb-4">
+                                      {draft.tags.map((tag, i) => (
+                                        <span key={i} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
+                                          {tag}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                  
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleEditBook(draft.id)}
+                                    >
+                                      <Edit3 className="h-4 w-4 mr-1" />
+                                      Edit
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                    >
+                                      <Upload className="h-4 w-4 mr-1" />
+                                      Publish
+                                    </Button>
                                   </div>
                                 </div>
-                              </CardHeader>
-                              <CardContent className="p-6 space-y-4">
-                                {draft.description && (
-                                  <p className="text-gray-700 text-sm leading-relaxed bg-gray-50 p-3 rounded-lg border-l-4 border-orange-400">
-                                    {draft.description}
-                                  </p>
-                                )}
-                                
-                                {draft.tags && draft.tags.length > 0 && (
-                                  <div className="flex flex-wrap gap-2">
-                                    {draft.tags.map((tag, i) => (
-                                      <Badge key={i} variant="secondary" className="text-xs bg-orange-100 text-orange-700 hover:bg-orange-200 transition-colors">
-                                        {tag}
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                )}
-                                
-                                <div className="flex gap-2">
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="flex-1"
-                                    onClick={() => handleEditBook(draft.id)}
-                                  >
-                                    <Edit3 className="h-4 w-4 mr-1" />
-                                    Edit
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="flex-1"
-                                  >
-                                    <Upload className="h-4 w-4 mr-1" />
-                                    Publish
-                                  </Button>
-                                </div>
-                              </CardContent>
-                            </Card>
+                              </div>
+                            </div>
                           ))}
                         </div>
                       </section>
@@ -483,33 +447,25 @@ export default function UserBooksDashboard() {
                   {/* Published Books Section */}
                   <section>
                     <div className="flex items-center gap-4 mb-6">
-                      <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
-                        <CheckCircle className="h-6 w-6 text-white" />
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-gray-800">Published Books</h2>
-                        <p className="text-gray-600">Live content - {filterAndSortBooks(books, 'PUBLISHED').length} item{filterAndSortBooks(books, 'PUBLISHED').length !== 1 ? 's' : ''}</p>
-                      </div>
-                      <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm px-3 py-1">
-                        {filterAndSortBooks(books, 'PUBLISHED').length}
-                      </Badge>
+                      <h2 className="text-2xl font-bold text-gray-800">Published Books</h2>
+                      <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
+                        {filterAndSortBooks(books, 'PUBLISHED').length} item{filterAndSortBooks(books, 'PUBLISHED').length !== 1 ? 's' : ''}
+                      </span>
                     </div>
                     
                     {filterAndSortBooks(books, 'PUBLISHED').length === 0 && !fetchError && (
-                      <div className="text-center py-20 bg-white rounded-lg">
-                        <div className="flex flex-col items-center gap-6">
-                          <div className="w-24 h-24 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center">
-                            <BookOpen className="h-12 w-12 text-gray-400" />
+                      <div className="bg-white rounded-lg border p-8 text-center">
+                        <div className="flex flex-col items-center gap-4">
+                          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                            <BookOpen className="h-8 w-8 text-gray-400" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-semibold text-gray-700 mb-2">No Published Books Yet</h3>
-                            <p className="text-gray-500 max-w-md">
-                              Start writing your first book to build your personal library!
-                            </p>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">No Published Books Yet</h3>
+                            <p className="text-gray-500">Start writing your first book to build your personal library!</p>
                           </div>
                           <Button 
                             onClick={() => setActiveTab('write')}
-                            className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700"
+                            className="bg-orange-500 hover:bg-orange-600"
                           >
                             <Edit3 className="h-4 w-4 mr-2" />
                             Start Writing
@@ -519,80 +475,74 @@ export default function UserBooksDashboard() {
                     )}
                     
                     {filterAndSortBooks(books, 'PUBLISHED').length > 0 && (
-                      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                      <div className="space-y-4">
                         {filterAndSortBooks(books, 'PUBLISHED').map((book) => (
-                          <Card key={book.id} className="group hover:shadow-md transition-all duration-300 border-0 bg-white hover:-translate-y-1">
-                            <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-t-lg">
-                              <div className="flex justify-between items-start">
-                                <div className="flex-1">
-                                  <CardTitle className="flex items-center gap-3 text-lg font-bold">
-                                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                                      <BookOpen className="h-4 w-4" />
-                                    </div>
-                                    {book.title}
-                                  </CardTitle>
-                                  <CardDescription className="text-orange-100 mt-2 flex items-center gap-4">
-                                    <span className="flex items-center gap-1">
-                                      <Clock className="h-3 w-3" />
-                                      {new Date(book.updatedAt).toLocaleDateString()}
-                                    </span>
-                                  </CardDescription>
+                          <div key={book.id} className="bg-white rounded-lg border p-6 hover:shadow-md transition-shadow">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <h3 className="text-lg font-semibold text-gray-900">{book.title}</h3>
+                                  <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">Published</span>
+                                </div>
+                                
+                                {book.description && (
+                                  <p className="text-gray-600 mb-3 line-clamp-2">
+                                    {book.description}
+                                  </p>
+                                )}
+                                
+                                <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                                  <span className="flex items-center gap-1">
+                                    <Calendar className="h-4 w-4" />
+                                    {new Date(book.updatedAt).toLocaleDateString()}
+                                  </span>
+                                </div>
+                                
+                                {book.tags && book.tags.length > 0 && (
+                                  <div className="flex flex-wrap gap-2 mb-4">
+                                    {book.tags.map((tag, i) => (
+                                      <span key={i} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
+                                        {tag}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                                
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleViewBook(book.id)}
+                                  >
+                                    <Eye className="h-4 w-4 mr-1" />
+                                    Read
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleEditBook(book.id)}
+                                  >
+                                    <Edit3 className="h-4 w-4 mr-1" />
+                                    Edit
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => handleDeleteBook(book.id)}
+                                    disabled={deletingId === book.id}
+                                    className="text-red-600 hover:text-red-700 hover:border-red-300"
+                                  >
+                                    {deletingId === book.id ? (
+                                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500 mr-1"></div>
+                                    ) : (
+                                      <Trash2 className="h-4 w-4 mr-1" />
+                                    )}
+                                    {deletingId === book.id ? 'Deleting...' : 'Delete'}
+                                  </Button>
                                 </div>
                               </div>
-                            </CardHeader>
-                            <CardContent className="p-6 space-y-4">
-                              {book.description && (
-                                <p className="text-gray-700 text-sm leading-relaxed bg-gray-50 p-3 rounded-lg border-l-4 border-orange-400">
-                                  {book.description}
-                                </p>
-                              )}
-                              
-                              {book.tags && book.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-2">
-                                  {book.tags.map((tag, i) => (
-                                    <Badge key={i} variant="secondary" className="text-xs bg-orange-100 text-orange-700 hover:bg-orange-200 transition-colors">
-                                      {tag}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              )}
-                              
-                              <div className="flex gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="flex-1"
-                                  onClick={() => handleViewBook(book.id)}
-                                >
-                                  <Eye className="h-4 w-4 mr-1" />
-                                  Read
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="flex-1"
-                                  onClick={() => handleEditBook(book.id)}
-                                >
-                                  <Edit3 className="h-4 w-4 mr-1" />
-                                  Edit
-                                </Button>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => handleDeleteBook(book.id)}
-                                  disabled={deletingId === book.id}
-                                  className="text-red-600 hover:text-red-700 hover:border-red-300"
-                                >
-                                  {deletingId === book.id ? (
-                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500 mr-1"></div>
-                                  ) : (
-                                    <Trash2 className="h-4 w-4 mr-1" />
-                                  )}
-                                  {deletingId === book.id ? 'Deleting...' : 'Delete'}
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
+                            </div>
+                          </div>
                         ))}
                       </div>
                     )}
