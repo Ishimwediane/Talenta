@@ -642,21 +642,21 @@ export default function UserAudioDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-100">
+    <div className="min-h-screen bg-gray-50">
       {/* Hero Header */}
       <section className="bg-gradient-to-r from-orange-600 to-amber-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
-            <div className="inline-flex items-center gap-3 bg-white/20 backdrop-blur-sm px-6 py-3 rounded-full border border-white/30 mb-6">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="inline-flex items-center gap-3 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full border border-white/30 mb-4">
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                 </svg>
               </div>
-              <span className="text-sm font-medium">Your Personal Audio Studio</span>
+              <span className="text-xs font-medium">Your Personal Audio Studio</span>
             </div>
-            <h1 className="text-5xl font-bold mb-4">My Audio Content</h1>
-            <p className="text-xl text-orange-100 max-w-2xl mx-auto">
+            <h1 className="text-3xl font-bold mb-2">My Audio Content</h1>
+            <p className="text-base text-orange-100 max-w-2xl mx-auto">
               Create, record, and manage your personal audio library with professional tools
             </p>
           </div>
@@ -667,7 +667,7 @@ export default function UserAudioDashboard() {
         <div className="flex gap-8">
           {/* Sidebar Filters */}
           <div className="w-80 flex-shrink-0">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-6 sticky top-8 shadow-lg">
+            <div className="bg-white rounded-lg border p-6 sticky top-8">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-semibold text-gray-900">Filter Audio</h3>
                 <button
@@ -676,7 +676,7 @@ export default function UserAudioDashboard() {
                     setStatusFilter('all');
                     setSortBy('newest');
                   }}
-                  className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+                  className="text-sm text-gray-500 hover:text-gray-700"
                 >
                   Reset Filters
                 </button>
@@ -810,7 +810,7 @@ export default function UserAudioDashboard() {
           {/* Main Content */}
           <div className="flex-1">
             {/* Search Bar */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-4 mb-6 shadow-lg">
+            <div className="bg-white rounded-lg border p-4 mb-6">
               <div className="flex gap-4">
                 <div className="flex-1">
                   <div className="relative">
@@ -818,18 +818,15 @@ export default function UserAudioDashboard() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <Input 
-                      className="pl-10 border-gray-200 focus:border-orange-500 focus:ring-orange-500 bg-white shadow-sm" 
+                      className="pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent" 
                       placeholder="Search your audio content..." 
                       value={query} 
                       onChange={(e) => setQuery(e.target.value)} 
                     />
                   </div>
                 </div>
-                <Button className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 shadow-lg">
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  Search
+                <Button className="px-6 py-2 bg-amber-800 text-white rounded-lg hover:bg-amber-900 transition-colors font-medium">
+                  Search Audio
                 </Button>
               </div>
             </div>
@@ -837,17 +834,17 @@ export default function UserAudioDashboard() {
         {/* Main Content Tabs */}
         <div className="mb-12">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-white/80 backdrop-blur-sm p-1 rounded-xl shadow-lg border border-white/20">
+            <TabsList className="grid w-full grid-cols-2 bg-white p-1 rounded-lg border">
               <TabsTrigger 
                 value="record" 
-                className="flex items-center gap-3 py-3 px-6 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+                className="flex items-center gap-3 py-3 px-6 rounded-lg data-[state=active]:bg-amber-800 data-[state=active]:text-white transition-all duration-200"
               >
                 <Mic className="h-5 w-5" />
                 <span className="font-semibold">Record Audio</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="manage" 
-                className="flex items-center gap-3 py-3 px-6 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+                className="flex items-center gap-3 py-3 px-6 rounded-lg data-[state=active]:bg-amber-800 data-[state=active]:text-white transition-all duration-200"
               >
                 <Music className="h-5 w-5" />
                 <span className="font-semibold">Manage Content</span>
@@ -855,15 +852,15 @@ export default function UserAudioDashboard() {
             </TabsList>
             
             <TabsContent value="record" className="mt-6">
-              <Card className="border-0 shadow-xl bg-gradient-to-br from-orange-50 to-amber-50">
-                <CardHeader className="bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-t-lg">
+              <Card className="border bg-white">
+                <CardHeader className="bg-amber-800 text-white rounded-t-lg">
                   <CardTitle className="flex items-center gap-3 text-xl">
                     <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                       <Mic className="h-5 w-5" />
                     </div>
                     Record New Audio
                   </CardTitle>
-                  <CardDescription className="text-orange-100">
+                  <CardDescription className="text-amber-100">
                     Create high-quality audio recordings with built-in noise suppression
                   </CardDescription>
                 </CardHeader>
@@ -896,20 +893,20 @@ export default function UserAudioDashboard() {
                 return (
                   <section className="mb-12">
                     <div className="flex items-center gap-4 mb-6">
-                      <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center">
                         <Edit3 className="h-6 w-6 text-white" />
                       </div>
                       <div>
                         <h2 className="text-2xl font-bold text-gray-800">Your Drafts</h2>
                         <p className="text-gray-600">Work in progress - {sortedDrafts.length} item{sortedDrafts.length !== 1 ? 's' : ''}</p>
                       </div>
-                      <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm px-3 py-1 shadow-md">
+                      <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm px-3 py-1">
                         {sortedDrafts.length}
                       </Badge>
                     </div>
                     <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                       {sortedDrafts.map((draft) => (
-                        <Card key={draft.id} className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-white hover:-translate-y-1">
+                        <Card key={draft.id} className="group hover:shadow-md transition-all duration-300 border-0 bg-white hover:-translate-y-1">
                           <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-t-lg">
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
@@ -978,22 +975,22 @@ export default function UserAudioDashboard() {
               {/* Published Audio Section */}
               <section>
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
                     <CheckCircle className="h-6 w-6 text-white" />
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold text-gray-800">Published Content</h2>
                     <p className="text-gray-600">Live content - {filterAndSortAudios(audios, 'published').length} item{filterAndSortAudios(audios, 'published').length !== 1 ? 's' : ''}</p>
                   </div>
-                  <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm px-3 py-1 shadow-md">
+                  <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm px-3 py-1">
                     {filterAndSortAudios(audios, 'published').length}
                   </Badge>
                 </div>
                 
                 {filterAndSortAudios(audios, 'published').length === 0 && !fetchError && (
-                  <div className="text-center py-20 bg-white/60 backdrop-blur-sm rounded-2xl border border-white/20 shadow-lg">
+                  <div className="text-center py-20 bg-white rounded-lg">
                     <div className="flex flex-col items-center gap-6">
-                      <div className="w-24 h-24 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center shadow-inner">
+                      <div className="w-24 h-24 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center">
                         <Volume2 className="h-12 w-12 text-gray-400" />
                       </div>
                       <div>
@@ -1004,7 +1001,7 @@ export default function UserAudioDashboard() {
                       </div>
                       <Button 
                         onClick={() => setActiveTab('record')}
-                        className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 shadow-lg"
+                        className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700"
                       >
                         <Mic className="h-4 w-4 mr-2" />
                         Start Recording
@@ -1016,7 +1013,7 @@ export default function UserAudioDashboard() {
                 {filterAndSortAudios(audios, 'published').length > 0 && (
                   <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                     {filterAndSortAudios(audios, 'published').map((audio) => (
-                      <Card key={audio.id} className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-white hover:-translate-y-1">
+                      <Card key={audio.id} className="group hover:shadow-md transition-all duration-300 border-0 bg-white hover:-translate-y-1">
                         <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-t-lg">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
