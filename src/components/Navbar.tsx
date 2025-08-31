@@ -262,14 +262,7 @@ export default function Navbar() {
                 </div>
               )}
             </div>
-             {/* Search */}
-                <Link href="/books" className="text-gray-700 hover:text-orange-500 font-medium transition-colors">
-                  Books
-                </Link>
-                <Link href="/audio" className="text-gray-700 hover:text-orange-500 font-medium transition-colors">
-                  Audio
-                </Link>
-                
+             {/* Search */}               
                 {/* Create Dropdown */}
                 <div className="relative" ref={createRef}>
                   <button
@@ -286,10 +279,10 @@ export default function Navbar() {
                       onMouseLeave={() => setCreateOpen(false)}
                       className="absolute top-full mt-2 min-w-[160px] bg-white shadow-lg border border-gray-200 rounded-lg z-50"
                     >
-                      <Link href="/read" className="block px-4 py-2 hover:bg-orange-50 text-gray-700">Read</Link>
+                      <Link href="/books" className="block px-4 py-2 hover:bg-orange-50 text-gray-700">Read</Link>
                       <Link href="/dashboard/write" className="block px-4 py-2 hover:bg-orange-50 text-gray-700">Write</Link>
                       <Link href="/dashboard/audio" className="block px-4 py-2 hover:bg-orange-50 text-gray-700">Record</Link>
-                      <Link href="/listen" className="block px-4 py-2 hover:bg-orange-50 text-gray-700">Listen</Link>
+                      <Link href="/audio" className="block px-4 py-2 hover:bg-orange-50 text-gray-700">Listen</Link>
                     </div>
                   )}
                 </div>
