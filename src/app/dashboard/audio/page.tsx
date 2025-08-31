@@ -642,57 +642,197 @@ export default function UserAudioDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <div className="p-6 max-w-7xl mx-auto">
-        {/* Hero Header */}
-        <div className="mb-12 text-center">
-          <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm px-6 py-3 rounded-full border border-white/20 shadow-lg mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-              <Music className="h-5 w-5 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-100">
+      {/* Hero Header */}
+      <section className="bg-gradient-to-r from-orange-600 to-amber-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-3 bg-white/20 backdrop-blur-sm px-6 py-3 rounded-full border border-white/30 mb-6">
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium">Your Personal Audio Studio</span>
             </div>
-            <span className="text-sm font-medium text-gray-600">Your Audio Studio</span>
+            <h1 className="text-5xl font-bold mb-4">My Audio Content</h1>
+            <p className="text-xl text-orange-100 max-w-2xl mx-auto">
+              Create, record, and manage your personal audio library with professional tools
+            </p>
           </div>
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-gray-800 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-4">
-            My Audio Content
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Create, record, and manage your personal audio library
-          </p>
         </div>
+      </section>
 
-        {/* Search and Filter Bar */}
-        <div className="mb-8 bg-white/80 backdrop-blur-sm p-6 rounded-2xl border border-white/20 shadow-lg">
-          <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-            <div className="relative flex-1">
-              <Input 
-                className="pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500 bg-white shadow-sm" 
-                placeholder="Search your audio content..." 
-                value={query} 
-                onChange={(e) => setQuery(e.target.value)} 
-              />
-            </div>
-            <div className="flex gap-3">
-              <select 
-                className="px-4 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-blue-500 bg-white shadow-sm" 
-                value={statusFilter} 
-                onChange={(e) => setStatusFilter(e.target.value as any)}
-              >
-                <option value="all">All Statuses</option>
-                <option value="draft">Drafts Only</option>
-                <option value="published">Published Only</option>
-              </select>
-              <select 
-                className="px-4 py-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-blue-500 bg-white shadow-sm" 
-                value={sortBy} 
-                onChange={(e) => setSortBy(e.target.value as any)}
-              >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="title">Title A–Z</option>
-              </select>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="flex gap-8">
+          {/* Sidebar Filters */}
+          <div className="w-80 flex-shrink-0">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-6 sticky top-8 shadow-lg">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-semibold text-gray-900">Filter Audio</h3>
+                <button
+                  onClick={() => {
+                    setQuery('');
+                    setStatusFilter('all');
+                    setSortBy('newest');
+                  }}
+                  className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+                >
+                  Reset Filters
+                </button>
+              </div>
+
+              {/* Search */}
+              <div className="mb-6">
+                <div className="relative">
+                  <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <Input 
+                    className="pl-10 border-gray-200 focus:border-orange-500 focus:ring-orange-500 bg-white shadow-sm" 
+                    placeholder="Search your audio..." 
+                    value={query} 
+                    onChange={(e) => setQuery(e.target.value)} 
+                  />
+                </div>
+              </div>
+
+              {/* Status Filter */}
+              <div className="mb-6">
+                <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                  Status
+                  <svg className="w-4 h-4 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </h4>
+                <div className="space-y-2">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="status"
+                      value="all"
+                      checked={statusFilter === "all"}
+                      onChange={(e) => setStatusFilter(e.target.value as any)}
+                      className="text-orange-600 focus:ring-orange-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">All Statuses</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="status"
+                      value="draft"
+                      checked={statusFilter === "draft"}
+                      onChange={(e) => setStatusFilter(e.target.value as any)}
+                      className="text-orange-600 focus:ring-orange-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Drafts Only</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="status"
+                      value="published"
+                      checked={statusFilter === "published"}
+                      onChange={(e) => setStatusFilter(e.target.value as any)}
+                      className="text-orange-600 focus:ring-orange-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Published Only</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Sort Options */}
+              <div className="mb-6">
+                <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                  Sort By
+                  <svg className="w-4 h-4 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </h4>
+                <div className="space-y-2">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="sort"
+                      value="newest"
+                      checked={sortBy === "newest"}
+                      onChange={(e) => setSortBy(e.target.value as any)}
+                      className="text-orange-600 focus:ring-orange-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Newest First</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="sort"
+                      value="oldest"
+                      checked={sortBy === "oldest"}
+                      onChange={(e) => setSortBy(e.target.value as any)}
+                      className="text-orange-600 focus:ring-orange-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Oldest First</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="sort"
+                      value="title"
+                      checked={sortBy === "title"}
+                      onChange={(e) => setSortBy(e.target.value as any)}
+                      className="text-orange-600 focus:ring-orange-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Title A–Z</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Quick Stats */}
+              <div className="pt-4 border-t border-gray-200">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Total Audio:</span>
+                    <span className="text-sm font-medium text-gray-900">{audios.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Drafts:</span>
+                    <span className="text-sm font-medium text-orange-600">{drafts.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Published:</span>
+                    <span className="text-sm font-medium text-green-600">{filterAndSortAudios(audios, 'published').length}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+
+          {/* Main Content */}
+          <div className="flex-1">
+            {/* Search Bar */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-4 mb-6 shadow-lg">
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <Input 
+                      className="pl-10 border-gray-200 focus:border-orange-500 focus:ring-orange-500 bg-white shadow-sm" 
+                      placeholder="Search your audio content..." 
+                      value={query} 
+                      onChange={(e) => setQuery(e.target.value)} 
+                    />
+                  </div>
+                </div>
+                <Button className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 shadow-lg">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  Search
+                </Button>
+              </div>
+            </div>
 
         {/* Main Content Tabs */}
         <div className="mb-12">
@@ -700,14 +840,14 @@ export default function UserAudioDashboard() {
             <TabsList className="grid w-full grid-cols-2 bg-white/80 backdrop-blur-sm p-1 rounded-xl shadow-lg border border-white/20">
               <TabsTrigger 
                 value="record" 
-                className="flex items-center gap-3 py-3 px-6 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+                className="flex items-center gap-3 py-3 px-6 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
               >
                 <Mic className="h-5 w-5" />
                 <span className="font-semibold">Record Audio</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="manage" 
-                className="flex items-center gap-3 py-3 px-6 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+                className="flex items-center gap-3 py-3 px-6 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
               >
                 <Music className="h-5 w-5" />
                 <span className="font-semibold">Manage Content</span>
@@ -715,15 +855,15 @@ export default function UserAudioDashboard() {
             </TabsList>
             
             <TabsContent value="record" className="mt-6">
-              <Card className="border-0 shadow-xl bg-gradient-to-br from-blue-50 to-indigo-50">
-                <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
+              <Card className="border-0 shadow-xl bg-gradient-to-br from-orange-50 to-amber-50">
+                <CardHeader className="bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-t-lg">
                   <CardTitle className="flex items-center gap-3 text-xl">
                     <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                       <Mic className="h-5 w-5" />
                     </div>
                     Record New Audio
                   </CardTitle>
-                  <CardDescription className="text-blue-100">
+                  <CardDescription className="text-orange-100">
                     Create high-quality audio recordings with built-in noise suppression
                   </CardDescription>
                 </CardHeader>
@@ -756,21 +896,21 @@ export default function UserAudioDashboard() {
                 return (
                   <section className="mb-12">
                     <div className="flex items-center gap-4 mb-6">
-                      <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
                         <Edit3 className="h-6 w-6 text-white" />
                       </div>
                       <div>
                         <h2 className="text-2xl font-bold text-gray-800">Your Drafts</h2>
                         <p className="text-gray-600">Work in progress - {sortedDrafts.length} item{sortedDrafts.length !== 1 ? 's' : ''}</p>
                       </div>
-                      <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm px-3 py-1 shadow-md">
+                      <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm px-3 py-1 shadow-md">
                         {sortedDrafts.length}
                       </Badge>
                     </div>
                     <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                       {sortedDrafts.map((draft) => (
                         <Card key={draft.id} className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-white hover:-translate-y-1">
-                          <CardHeader className="bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-t-lg">
+                          <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-t-lg">
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
                                 <CardTitle className="flex items-center gap-3 text-lg font-bold">
@@ -780,7 +920,7 @@ export default function UserAudioDashboard() {
                                   {draft.title}
                                   <Badge variant="secondary" className="bg-white/20 text-white border-white/30">Draft</Badge>
                                 </CardTitle>
-                                <CardDescription className="text-amber-100 mt-2 flex items-center gap-4">
+                                <CardDescription className="text-orange-100 mt-2 flex items-center gap-4">
                                   <span className="flex items-center gap-1">
                                     <Clock className="h-3 w-3" />
                                     {new Date(draft.createdAt).toLocaleDateString()}
@@ -791,7 +931,7 @@ export default function UserAudioDashboard() {
                           </CardHeader>
                           <CardContent className="p-6 space-y-4">
                             {draft.description && (
-                              <p className="text-gray-700 text-sm leading-relaxed bg-gray-50 p-3 rounded-lg border-l-4 border-amber-400">
+                              <p className="text-gray-700 text-sm leading-relaxed bg-gray-50 p-3 rounded-lg border-l-4 border-orange-400">
                                 {draft.description}
                               </p>
                             )}
@@ -799,7 +939,7 @@ export default function UserAudioDashboard() {
                             {draft.tags && draft.tags.length > 0 && (
                               <div className="flex flex-wrap gap-2">
                                 {draft.tags.map((tag, i) => (
-                                  <Badge key={i} variant="secondary" className="text-xs bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors">
+                                  <Badge key={i} variant="secondary" className="text-xs bg-orange-100 text-orange-700 hover:bg-orange-200 transition-colors">
                                     {tag}
                                   </Badge>
                                 ))}
@@ -864,7 +1004,7 @@ export default function UserAudioDashboard() {
                       </div>
                       <Button 
                         onClick={() => setActiveTab('record')}
-                        className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-lg"
+                        className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 shadow-lg"
                       >
                         <Mic className="h-4 w-4 mr-2" />
                         Start Recording
@@ -877,7 +1017,7 @@ export default function UserAudioDashboard() {
                   <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                     {filterAndSortAudios(audios, 'published').map((audio) => (
                       <Card key={audio.id} className="group hover:shadow-xl transition-all duration-300 border-0 shadow-lg bg-white hover:-translate-y-1">
-                        <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-lg">
+                        <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-t-lg">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <CardTitle className="flex items-center gap-3 text-lg font-bold">
@@ -886,7 +1026,7 @@ export default function UserAudioDashboard() {
                                 </div>
                                 {audio.title}
                               </CardTitle>
-                              <CardDescription className="text-blue-100 mt-2 flex items-center gap-4">
+                              <CardDescription className="text-orange-100 mt-2 flex items-center gap-4">
                                 <span className="flex items-center gap-1">
                                   <Clock className="h-3 w-3" />
                                   {new Date(audio.createdAt).toLocaleDateString()}
@@ -897,18 +1037,20 @@ export default function UserAudioDashboard() {
                         </CardHeader>
                         <CardContent className="p-6 space-y-4">
                           {audio.description && (
-                            <p className="text-gray-700 text-sm leading-relaxed bg-gray-50 p-3 rounded-lg border-l-4 border-blue-400">
+                            <p className="text-gray-700 text-sm leading-relaxed bg-gray-50 p-3 rounded-lg border-l-4 border-orange-400">
                               {audio.description}
                             </p>
                           )}
                           
                           {audio.tags && audio.tags.length > 0 && (
                             <div className="flex flex-wrap gap-2">
-                              {audio.tags.map((tag, i) => (
-                                <Badge key={i} variant="secondary" className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors">
-                                  {tag}
-                                </Badge>
-                              ))}
+                              <div className="flex flex-wrap gap-2">
+                                {audio.tags.map((tag, i) => (
+                                  <Badge key={i} variant="secondary" className="text-xs bg-orange-100 text-orange-700 hover:bg-orange-200 transition-colors">
+                                    {tag}
+                                  </Badge>
+                                ))}
+                              </div>
                             </div>
                           )}
                           
@@ -942,6 +1084,8 @@ export default function UserAudioDashboard() {
               </section>
             </TabsContent>
           </Tabs>
+        </div>
+          </div>
         </div>
       </div>
     </div>
