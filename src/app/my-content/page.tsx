@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import apiService from '@/lib/bookapi';
 import { 
   Plus, 
   Edit, 
@@ -103,7 +104,7 @@ const translations = {
 interface ContentItem {
   id: string;
   title: string;
-  type: 'poem' | 'story' | 'audio' | 'video' | 'image' | 'article';
+  type: 'poem' | 'story' | 'audio' | 'video' | 'image' | 'article' | 'book';
   status: 'draft' | 'published' | 'archived';
   createdAt: string;
   updatedAt: string;
@@ -270,6 +271,19 @@ export default function MyContentPage() {
            comments: 12,
            excerpt: "Exploring the rich tradition of oral storytelling in Rwanda...",
            tags: ["Culture", "Education", "Heritage"]
+         },
+         {
+           id: "6",
+           title: "My First Book",
+           type: "book",
+           status: "published",
+           createdAt: "2024-01-20",
+           updatedAt: "2024-01-25",
+           views: 1234,
+           likes: 78,
+           comments: 19,
+           excerpt: "A journey through the pages of my first published book...",
+           tags: ["Book", "Writing", "Publishing"]
          }
        ];
       
@@ -326,6 +340,8 @@ export default function MyContentPage() {
          return <FileText className="w-4 h-4" />;
        case "story":
          return <BookOpen className="w-4 h-4" />;
+       case "book":
+         return <BookOpen className="w-4 h-4" />;
        case "audio":
          return <Mic className="w-4 h-4" />;
        case "video":
@@ -345,6 +361,8 @@ export default function MyContentPage() {
          return t.poem;
        case "story":
          return t.story;
+       case "book":
+         return "Book";
        case "audio":
          return t.audio;
        case "video":
@@ -385,17 +403,41 @@ export default function MyContentPage() {
    };
 
   const handleEdit = (id: string) => {
-    router.push(`/dashboard/write?id=${id}`);
+    // Check if this is a book type content and route accordingly
+    const item = content.find(c => c.id === id);
+    if (item && item.type === 'book') {
+      router.push(`/dashboard/write/edit/${id}`);
+    } else {
+      // For other content types, route to appropriate edit page
+      router.push(`/dashboard/${item?.type}/edit/${id}`);
+    }
   };
 
-     const handleDelete = (id: string) => {
-     if (confirm(t.deleteConfirm)) {
-       setContent(prev => prev.filter(item => item.id !== id));
-     }
-   };
+     const handleDelete = async (id: string) => {
+       if (!confirm(t.deleteConfirm)) return;
+       
+       try {
+         const item = content.find(c => c.id === id);
+         if (item && item.type === 'book') {
+           // Use the book API service for book deletion
+           await apiService.deleteBook(id);
+         }
+         // Remove from local state
+         setContent(prev => prev.filter(item => item.id !== id));
+         setFilteredContent(prev => prev.filter(item => item.id !== id));
+       } catch (error) {
+         console.error('Error deleting content:', error);
+         alert('Failed to delete content. Please try again.');
+       }
+     };
 
   const handleView = (id: string) => {
-    router.push(`/content/${id}`);
+    const item = content.find(c => c.id === id);
+    if (item && item.type === 'book') {
+      router.push(`/dashboard/write/read/${id}`);
+    } else {
+      router.push(`/content/${id}`);
+    }
   };
 
   if (loading) {
@@ -539,6 +581,7 @@ export default function MyContentPage() {
                    <option value="all">{t.allTypes}</option>
                    <option value="poem">{t.poems}</option>
                    <option value="story">{t.stories}</option>
+                   <option value="book">Books</option>
                    <option value="audio">{t.audio}</option>
                    <option value="video">{t.video}</option>
                    <option value="image">{t.images}</option>

@@ -18,9 +18,9 @@ interface Book {
   description?: string;
   status: 'DRAFT' | 'PUBLISHED';
   category?: string;
-  subCategories?: string;
+  subCategories?: string[];
   content?: string;
-  bookFileName?: string;
+  bookFile?: string;
   coverImage?: string | null;
 }
 
@@ -61,13 +61,18 @@ export default function EditBook() {
       setDescription(bookData.description || '');
       setContent(bookData.content || '');
       setCategory(bookData.category || '');
-      setSubCategories(bookData.subCategories || '');
-      setExistingBookFileName(bookData.bookFileName || null);
+      // Handle subCategories - it might be an array or string
+      if (Array.isArray(bookData.subCategories)) {
+        setSubCategories(bookData.subCategories.join(', '));
+      } else {
+        setSubCategories(bookData.subCategories || '');
+      }
+      setExistingBookFileName(bookData.bookFile || null);
       
       // Set content method based on what's available
       if (bookData.content && bookData.content.trim()) {
         setContentMethod('text');
-      } else if (bookData.bookFileName) {
+      } else if (bookData.bookFile) {
         setContentMethod('file');
       }
       
@@ -111,12 +116,19 @@ export default function EditBook() {
   };
 
   const handleSubmit = async (status: 'DRAFT' | 'PUBLISHED') => {
-    if (!title) {
+    // Force convert all fields to strings immediately to prevent any .trim() errors
+    const safeTitle = String(title || '');
+    const safeSubCategories = String(subCategories || '');
+    const safeCategory = String(category || '');
+    const safeDescription = String(description || '');
+    const safeContent = String(content || '');
+    
+    if (!safeTitle.trim()) {
       setError("Title is required.");
       return;
     }
 
-    if (contentMethod === 'text' && !content.trim()) {
+    if (contentMethod === 'text' && !safeContent.trim()) {
       setError("Please write some content or upload a file.");
       return;
     }
@@ -130,15 +142,15 @@ export default function EditBook() {
     setError(null);
     
     const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
+    formData.append("title", safeTitle);
+    if (safeDescription.trim()) formData.append("description", safeDescription);
     formData.append("status", status);
-    if (category) formData.append("category", category);
-    if (subCategories.trim()) formData.append("subCategories", subCategories);
+    if (safeCategory.trim()) formData.append("category", safeCategory);
+    if (safeSubCategories.trim()) formData.append("subCategories", safeSubCategories);
     
     // Only add content if using text method
-    if (contentMethod === 'text') {
-      formData.append("content", content);
+    if (contentMethod === 'text' && safeContent.trim()) {
+      formData.append("content", safeContent);
     }
     
     if (coverImageFile) formData.append("coverImage", coverImageFile);
