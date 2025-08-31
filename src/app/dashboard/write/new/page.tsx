@@ -62,32 +62,12 @@ export default function CreateNewBook() {
   };
 
   const handleSubmit = async (status: 'DRAFT' | 'PUBLISHED') => {
-    // Force convert all fields to strings immediately to prevent any .trim() errors
-    const safeTitle = String(title || '');
-    const safeSubCategories = String(subCategories || '');
-    const safeCategory = String(category || '');
-    const safeDescription = String(description || '');
-    const safeContent = String(content || '');
-    
-    // Debug logging
-    console.log('=== DEBUG INFO ===');
-    console.log('Original title type:', typeof title, 'value:', title);
-    console.log('Original subCategories type:', typeof subCategories, 'value:', subCategories);
-    console.log('Original subCategories constructor:', subCategories?.constructor?.name);
-    console.log('Safe subCategories type:', typeof safeSubCategories, 'value:', safeSubCategories);
-    console.log('Original category type:', typeof category, 'value:', category);
-    console.log('Original description type:', typeof description, 'value:', description);
-    console.log('Original content type:', typeof content, 'value:', content);
-    console.log('contentMethod:', contentMethod);
-    console.log('bookFile:', bookFile);
-    console.log('=== END DEBUG ===');
-    
-    if (!safeTitle.trim()) {
+    if (!title) {
       setError("Title is required.");
       return;
     }
 
-    if (contentMethod === 'text' && !safeContent.trim()) {
+    if (contentMethod === 'text' && !content.trim()) {
       setError("Please write some content or upload a file.");
       return;
     }
@@ -100,32 +80,20 @@ export default function CreateNewBook() {
     setIsLoading(true);
     setError(null);
     
-    let formData: FormData;
-    try {
-      formData = new FormData();
-      formData.append("title", safeTitle);
-      
-      // Use the pre-converted safe variables
-      if (safeDescription.trim()) formData.append("description", safeDescription);
-      formData.append("status", status);
-      if (safeCategory.trim()) formData.append("category", safeCategory);
-      if (safeSubCategories.trim()) formData.append("subCategories", safeSubCategories);
-      
-      console.log('Safe values:', { safeDescription, safeCategory, safeSubCategories });
-      
-      // Only add content if using text method
-      if (contentMethod === 'text' && safeContent.trim()) {
-        formData.append("content", safeContent);
-      }
-      
-      if (coverImageFile) formData.append("coverImage", coverImageFile);
-      if (bookFile) formData.append("bookFile", bookFile);
-    } catch (formDataError) {
-      console.error('Error creating FormData:', formDataError);
-      setError(`Error preparing form data: ${formDataError}`);
-      setIsLoading(false);
-      return;
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("status", status);
+    if (category) formData.append("category", category);
+    if (subCategories.trim()) formData.append("subCategories", subCategories);
+    
+    // Only add content if using text method
+    if (contentMethod === 'text') {
+      formData.append("content", content);
     }
+    
+    if (coverImageFile) formData.append("coverImage", coverImageFile);
+    if (bookFile) formData.append("bookFile", bookFile);
 
     try {
       await apiService.createBook(formData);
