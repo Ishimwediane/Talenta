@@ -24,6 +24,7 @@ import {
 const links = [
   { href: "/admin/analytics", label: "Analytics", icon: TrendingUp },
   { href: "/admin", label: "Admin Panel", icon: Shield },
+  { href: "/admin/users", label: "Users", icon: User },
   { href: "/admin/books", label: "Books", icon: Book },
   { href: "/admin/audio", label: "Audios", icon: Mic2 },
 ]
