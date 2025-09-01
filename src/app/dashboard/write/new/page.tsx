@@ -8,16 +8,27 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { TiptapEditor } from "@/components/TiptapEditor";
-import { ArrowLeft, Save, BookOpen, Edit3, FileUp } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, Save, BookOpen, Edit3, FileUp, Plus, Trash2, FileText, Clock } from "lucide-react";
 import Link from "next/link";
 import apiService from '@/lib/bookapi';
+
+interface Chapter {
+  id?: string;
+  title: string;
+  content: string;
+  order: number;
+  wordCount?: number;
+  readingTime?: number;
+}
 
 export default function CreateNewBook() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [contentMethod, setContentMethod] = useState<'text' | 'file'>('text');
+  const [contentMethod, setContentMethod] = useState<'text' | 'file' | 'chapters'>('text');
+  const [activeTab, setActiveTab] = useState('details');
   
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -27,6 +38,14 @@ export default function CreateNewBook() {
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   const [coverImagePreview, setCoverImagePreview] = useState<string | null>(null);
   const [bookFile, setBookFile] = useState<File | null>(null);
+  
+  // Chapter management
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [currentChapter, setCurrentChapter] = useState<Chapter>({
+    title: '',
+    content: '',
+    order: 1
+  });
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -54,11 +73,60 @@ export default function CreateNewBook() {
     }
   };
 
-  const handleContentMethodChange = (method: 'text' | 'file') => {
+  const handleContentMethodChange = (method: 'text' | 'file' | 'chapters') => {
     setContentMethod(method);
     if (method === 'file') {
       setContent('');
     }
+  };
+
+  // Chapter management functions
+  const calculateWordCount = (content: string) => {
+    return content.replace(/<[^>]*>/g, '').split(/\s+/).filter(word => word.length > 0).length;
+  };
+
+  const calculateReadingTime = (wordCount: number) => {
+    return Math.ceil(wordCount / 200); // Assuming 200 words per minute
+  };
+
+  const addChapter = () => {
+    if (!currentChapter.title.trim() || !currentChapter.content.trim()) {
+      setError('Chapter title and content are required');
+      return;
+    }
+
+    const wordCount = calculateWordCount(currentChapter.content);
+    const readingTime = calculateReadingTime(wordCount);
+
+    const newChapter: Chapter = {
+      ...currentChapter,
+      wordCount,
+      readingTime
+    };
+
+    setChapters([...chapters, newChapter]);
+    setCurrentChapter({
+      title: '',
+      content: '',
+      order: chapters.length + 2
+    });
+    setError(null);
+  };
+
+  const removeChapter = (index: number) => {
+    const updatedChapters = chapters.filter((_, i) => i !== index);
+    // Update order numbers
+    const reorderedChapters = updatedChapters.map((chapter, i) => ({
+      ...chapter,
+      order: i + 1
+    }));
+    setChapters(reorderedChapters);
+  };
+
+  const updateChapter = (index: number, updatedChapter: Chapter) => {
+    const updatedChapters = [...chapters];
+    updatedChapters[index] = updatedChapter;
+    setChapters(updatedChapters);
   };
 
   const handleSubmit = async (status: 'DRAFT' | 'PUBLISHED') => {
@@ -76,27 +144,61 @@ export default function CreateNewBook() {
       setError("Please upload a book file or write content manually.");
       return;
     }
+
+    if (contentMethod === 'chapters' && chapters.length === 0) {
+      setError("Please add at least one chapter.");
+      return;
+    }
     
     setIsLoading(true);
     setError(null);
     
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("status", status);
-    if (category) formData.append("category", category);
-    if (subCategories.trim()) formData.append("subCategories", subCategories);
-    
-    // Only add content if using text method
-    if (contentMethod === 'text') {
-      formData.append("content", content);
-    }
-    
-    if (coverImageFile) formData.append("coverImage", coverImageFile);
-    if (bookFile) formData.append("bookFile", bookFile);
-
     try {
-      await apiService.createBook(formData);
+      // First create the book
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("description", description);
+      formData.append("status", status);
+      if (category) formData.append("category", category);
+      if (subCategories.trim()) formData.append("subCategories", subCategories);
+      
+      // Only add content if using text method
+      if (contentMethod === 'text') {
+        formData.append("content", content);
+      }
+      
+      if (coverImageFile) formData.append("coverImage", coverImageFile);
+      if (bookFile) formData.append("bookFile", bookFile);
+
+      const bookResponse = await apiService.createBook(formData);
+      const bookId = bookResponse.id;
+
+      // If using chapters method, create chapters
+      if (contentMethod === 'chapters' && chapters.length > 0) {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error('Authentication required');
+        }
+
+        // Create each chapter
+        for (const chapter of chapters) {
+          await fetch(`/api/books/${bookId}/chapters`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              title: chapter.title,
+              content: chapter.content,
+              order: chapter.order,
+              status: status,
+              isPublished: status === 'PUBLISHED'
+            })
+          });
+        }
+      }
+
       alert(`Book successfully ${status.toLowerCase()}!`);
       router.push("/dashboard/write");
       router.refresh();
@@ -234,12 +336,12 @@ export default function CreateNewBook() {
                 <p className="text-gray-600">Choose how you want to add your book content</p>
               </div>
               <div className="space-y-4">
-                <div className="flex gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <Button
                     type="button"
                     variant={contentMethod === 'text' ? 'default' : 'outline'}
                     onClick={() => handleContentMethodChange('text')}
-                    className="flex-1 bg-orange-500 hover:bg-orange-600 border-orange-500"
+                    className="bg-orange-500 hover:bg-orange-600 border-orange-500"
                   >
                     <Edit3 className="w-4 h-4 mr-2" />
                     Write Here
@@ -248,10 +350,19 @@ export default function CreateNewBook() {
                     type="button"
                     variant={contentMethod === 'file' ? 'default' : 'outline'}
                     onClick={() => handleContentMethodChange('file')}
-                    className="flex-1 border-orange-500 text-orange-600 hover:bg-orange-50"
+                    className="border-orange-500 text-orange-600 hover:bg-orange-50"
                   >
                     <FileUp className="w-4 h-4 mr-2" />
                     Upload File
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={contentMethod === 'chapters' ? 'default' : 'outline'}
+                    onClick={() => handleContentMethodChange('chapters')}
+                    className="border-orange-500 text-orange-600 hover:bg-orange-50"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Chapters
                   </Button>
                 </div>
 
@@ -279,6 +390,17 @@ export default function CreateNewBook() {
                     </div>
                   </div>
                 )}
+
+                {contentMethod === 'chapters' && (
+                  <div className="space-y-4">
+                    <div className="text-sm text-gray-600">
+                      <p>Create your book with multiple chapters. Each chapter will be saved separately and can be read in order.</p>
+                    </div>
+                    <div className="text-sm text-orange-600">
+                      <p><strong>Chapters added:</strong> {chapters.length}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -295,7 +417,7 @@ export default function CreateNewBook() {
                   <TiptapEditor content={content} onChange={(newContent: string) => setContent(newContent)} />
                 </div>
               </div>
-            ) : (
+            ) : contentMethod === 'file' ? (
               <div className="bg-white rounded-lg border p-6">
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold text-gray-900 mb-2">Upload Book from Device</h2>
@@ -331,6 +453,97 @@ export default function CreateNewBook() {
                     </div>
                   </div>
                 </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg border p-6">
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-2">Create Book Chapters</h2>
+                  <p className="text-gray-600">Add chapters to your book. Each chapter will be saved separately.</p>
+                </div>
+                
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="create">Create Chapter</TabsTrigger>
+                    <TabsTrigger value="list">Chapters ({chapters.length})</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="create" className="space-y-4">
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="chapterTitle" className="text-sm font-semibold text-gray-700">
+                          Chapter Title *
+                        </Label>
+                        <Input
+                          id="chapterTitle"
+                          value={currentChapter.title}
+                          onChange={(e) => setCurrentChapter({...currentChapter, title: e.target.value})}
+                          placeholder="e.g., Chapter 1: The Beginning"
+                          className="border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="chapterContent" className="text-sm font-semibold text-gray-700">
+                          Chapter Content *
+                        </Label>
+                        <div className="mt-2">
+                          <TiptapEditor 
+                            content={currentChapter.content} 
+                            onChange={(newContent: string) => setCurrentChapter({...currentChapter, content: newContent})} 
+                          />
+                        </div>
+                      </div>
+                      
+                      <Button 
+                        onClick={addChapter}
+                        className="w-full bg-orange-500 hover:bg-orange-600"
+                        disabled={!currentChapter.title.trim() || !currentChapter.content.trim()}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Chapter
+                      </Button>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="list" className="space-y-4">
+                    {chapters.length === 0 ? (
+                      <div className="text-center py-8">
+                        <FileText className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                        <p className="text-gray-500">No chapters added yet. Create your first chapter!</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {chapters.map((chapter, index) => (
+                          <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <h3 className="font-semibold text-gray-900">Chapter {chapter.order}: {chapter.title}</h3>
+                                <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                                  <div className="flex items-center gap-1">
+                                    <FileText className="w-4 h-4" />
+                                    <span>{chapter.wordCount || 0} words</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Clock className="w-4 h-4" />
+                                    <span>{chapter.readingTime || 0} min</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => removeChapter(index)}
+                                className="ml-4"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
               </div>
             )}
           </div>
