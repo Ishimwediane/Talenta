@@ -79,7 +79,9 @@ export default function UserContentPage() {
 
   const fetchUserContent = async () => {
     try {
+      console.log('🔄 Fetching content for user:', userId, 'type:', activeTab);
       const contentData = await adminApiService.getUserContent(userId, activeTab as any);
+      console.log('📥 Received content data:', contentData);
       setUserContent(contentData);
     } catch (error) {
       console.error('Error fetching user content:', error);
