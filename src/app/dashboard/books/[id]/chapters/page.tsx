@@ -44,8 +44,7 @@ interface Chapter {
 interface Book {
   id: string;
   title: string;
-  isCollaborative: boolean;
-  allowChapterContributions: boolean;
+  author: string;
 }
 
 export default function BookChaptersPage() {
@@ -190,22 +189,16 @@ export default function BookChaptersPage() {
             </Button>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{book?.title}</h1>
-              <p className="text-gray-600">Manage chapters and collaborative content</p>
+              <p className="text-gray-600">Manage your book chapters</p>
             </div>
           </div>
 
-          {/* Book Settings */}
+          {/* Book Info */}
           <div className="flex items-center gap-4 mb-6">
             <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-blue-600" />
+              <User className="h-5 w-5 text-blue-600" />
               <span className="text-sm text-gray-600">
-                {book?.isCollaborative ? 'Collaborative' : 'Individual'} Book
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Settings className="h-5 w-5 text-green-600" />
-              <span className="text-sm text-gray-600">
-                Chapter Contributions: {book?.allowChapterContributions ? 'Enabled' : 'Disabled'}
+                Author: {book?.author}
               </span>
             </div>
           </div>
