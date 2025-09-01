@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { adminApiService, User as UserType, UserContent } from "@/lib/adminApi";
 import { 
   ArrowLeft, 
   User, 
@@ -26,65 +27,14 @@ import {
   ExternalLink
 } from "lucide-react";
 
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email?: string;
-  phone?: string;
-  role: 'USER' | 'CREATOR' | 'ADMIN' | 'MODERATOR';
-  isVerified: boolean;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  profilePicture?: string;
-  bio?: string;
-  location?: string;
-}
 
-interface Book {
-  id: string;
-  title: string;
-  description?: string;
-  status: 'DRAFT' | 'PUBLISHED';
-  category?: string;
-  subCategories?: string[];
-  createdAt: string;
-  updatedAt: string;
-  coverImage?: string;
-}
-
-interface Audio {
-  id: string;
-  title: string;
-  description?: string;
-  status: 'DRAFT' | 'PUBLISHED';
-  category?: string;
-  subCategories?: string[];
-  duration?: number;
-  createdAt: string;
-  updatedAt: string;
-  audioUrl?: string;
-}
-
-interface Content {
-  id: string;
-  title: string;
-  description?: string;
-  type: 'FILM' | 'PODCAST' | 'POETRY' | 'MUSIC' | 'PHOTOGRAPHY' | 'ART';
-  status: 'DRAFT' | 'PUBLISHED';
-  createdAt: string;
-  updatedAt: string;
-}
 
 export default function UserContentPage() {
   const router = useRouter();
   const params = useParams();
   const { user: currentUser, isAdmin } = useUser();
-  const [user, setUser] = useState<User | null>(null);
-  const [books, setBooks] = useState<Book[]>([]);
-  const [audios, setAudios] = useState<Audio[]>([]);
-  const [contents, setContents] = useState<Content[]>([]);
+  const [user, setUser] = useState<UserType | null>(null);
+  const [userContent, setUserContent] = useState<UserContent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('books');
@@ -105,125 +55,35 @@ export default function UserContentPage() {
     }
   }, [isAdmin, userId]);
 
+  // Fetch content when tab changes
+  useEffect(() => {
+    if (isAdmin() && userId && activeTab) {
+      fetchUserContent();
+    }
+  }, [isAdmin, userId, activeTab]);
+
   const fetchUserData = async () => {
     try {
       setIsLoading(true);
       setError(null);
       
-      // For demo purposes, create sample data
-      // In production, this would be API calls
-      const sampleUser: User = {
-        id: userId,
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john.doe@example.com',
-        phone: '+1 (555) 123-4567',
-        role: 'CREATOR',
-        isVerified: true,
-        isActive: true,
-        createdAt: '2024-01-15T10:00:00Z',
-        updatedAt: '2024-01-20T14:30:00Z',
-        bio: 'Creative writer and content creator',
-        location: 'New York, NY'
-      };
-
-      const sampleBooks: Book[] = [
-        {
-          id: '1',
-          title: 'The Creative Journey',
-          description: 'A comprehensive guide to unleashing your creative potential',
-          status: 'PUBLISHED',
-          category: 'Self-Help',
-          subCategories: ['Creativity', 'Personal Development'],
-          createdAt: '2024-01-16T10:00:00Z',
-          updatedAt: '2024-01-18T14:30:00Z'
-        },
-        {
-          id: '2',
-          title: 'Digital Marketing Secrets',
-          description: 'Learn the latest strategies in digital marketing',
-          status: 'PUBLISHED',
-          category: 'Business',
-          subCategories: ['Marketing', 'Digital'],
-          createdAt: '2024-01-17T11:00:00Z',
-          updatedAt: '2024-01-19T16:45:00Z'
-        },
-        {
-          id: '3',
-          title: 'My First Novel',
-          description: 'A work in progress - my debut fiction novel',
-          status: 'DRAFT',
-          category: 'Fiction',
-          subCategories: ['Novel', 'Contemporary'],
-          createdAt: '2024-01-20T09:00:00Z',
-          updatedAt: '2024-01-20T09:00:00Z'
-        }
-      ];
-
-      const sampleAudios: Audio[] = [
-        {
-          id: '1',
-          title: 'Creative Writing Tips Podcast',
-          description: 'Weekly tips and tricks for aspiring writers',
-          status: 'PUBLISHED',
-          category: 'Education',
-          subCategories: ['Writing', 'Podcast'],
-          duration: 1800, // 30 minutes
-          createdAt: '2024-01-16T12:00:00Z',
-          updatedAt: '2024-01-18T15:30:00Z'
-        },
-        {
-          id: '2',
-          title: 'Morning Motivation Audio',
-          description: 'Start your day with positive energy',
-          status: 'PUBLISHED',
-          category: 'Motivation',
-          subCategories: ['Self-Help', 'Audio'],
-          duration: 600, // 10 minutes
-          createdAt: '2024-01-17T08:00:00Z',
-          updatedAt: '2024-01-19T10:15:00Z'
-        }
-      ];
-
-      const sampleContents: Content[] = [
-        {
-          id: '1',
-          title: 'Creative Process Documentary',
-          description: 'Behind the scenes of creative work',
-          type: 'FILM',
-          status: 'PUBLISHED',
-          createdAt: '2024-01-15T14:00:00Z',
-          updatedAt: '2024-01-17T16:20:00Z'
-        },
-        {
-          id: '2',
-          title: 'Digital Art Collection',
-          description: 'A series of digital paintings',
-          type: 'ART',
-          status: 'PUBLISHED',
-          createdAt: '2024-01-18T13:00:00Z',
-          updatedAt: '2024-01-20T11:30:00Z'
-        },
-        {
-          id: '3',
-          title: 'Poetry Collection',
-          description: 'Personal poems and reflections',
-          type: 'POETRY',
-          status: 'DRAFT',
-          createdAt: '2024-01-19T16:00:00Z',
-          updatedAt: '2024-01-19T16:00:00Z'
-        }
-      ];
-
-      setUser(sampleUser);
-      setBooks(sampleBooks);
-      setAudios(sampleAudios);
-      setContents(sampleContents);
+      const userData = await adminApiService.getUserById(userId);
+      setUser(userData);
     } catch (error) {
       console.error('Error fetching user data:', error);
       setError('Failed to load user data. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchUserContent = async () => {
+    try {
+      const contentData = await adminApiService.getUserContent(userId, activeTab as any);
+      setUserContent(contentData);
+    } catch (error) {
+      console.error('Error fetching user content:', error);
+      setError('Failed to load user content. Please try again.');
     }
   };
 
@@ -364,32 +224,32 @@ export default function UserContentPage() {
 
         {/* Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="books" className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              Books ({books.length})
-            </TabsTrigger>
-            <TabsTrigger value="audios" className="flex items-center gap-2">
-              <Mic2 className="h-4 w-4" />
-              Audio ({audios.length})
-            </TabsTrigger>
-            <TabsTrigger value="contents" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              Content ({contents.length})
-            </TabsTrigger>
-          </TabsList>
+                     <TabsList className="grid w-full grid-cols-3">
+             <TabsTrigger value="books" className="flex items-center gap-2">
+               <BookOpen className="h-4 w-4" />
+               Books ({userContent?.books?.length || 0})
+             </TabsTrigger>
+             <TabsTrigger value="audios" className="flex items-center gap-2">
+               <Mic2 className="h-4 w-4" />
+               Audio ({userContent?.audio?.length || 0})
+             </TabsTrigger>
+             <TabsTrigger value="contents" className="flex items-center gap-2">
+               <User className="h-4 w-4" />
+               Content ({userContent?.contents?.length || 0})
+             </TabsTrigger>
+           </TabsList>
 
-          {/* Books Tab */}
-          <TabsContent value="books" className="space-y-4">
-            {books.length === 0 ? (
-              <div className="text-center py-12">
-                <BookOpen className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Books Found</h3>
-                <p className="text-gray-500">This user hasn't created any books yet.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {books.map((book) => (
+                     {/* Books Tab */}
+           <TabsContent value="books" className="space-y-4">
+             {!userContent?.books || userContent.books.length === 0 ? (
+               <div className="text-center py-12">
+                 <BookOpen className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                 <h3 className="text-lg font-medium text-gray-900 mb-2">No Books Found</h3>
+                 <p className="text-gray-500">This user hasn't created any books yet.</p>
+               </div>
+             ) : (
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                 {userContent.books.map((book) => (
                   <Card key={book.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-4">
@@ -441,17 +301,17 @@ export default function UserContentPage() {
             )}
           </TabsContent>
 
-          {/* Audio Tab */}
-          <TabsContent value="audios" className="space-y-4">
-            {audios.length === 0 ? (
-              <div className="text-center py-12">
-                <Mic2 className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Audio Found</h3>
-                <p className="text-gray-500">This user hasn't created any audio content yet.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {audios.map((audio) => (
+                     {/* Audio Tab */}
+           <TabsContent value="audios" className="space-y-4">
+             {!userContent?.audio || userContent.audio.length === 0 ? (
+               <div className="text-center py-12">
+                 <Mic2 className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                 <h3 className="text-lg font-medium text-gray-900 mb-2">No Audio Found</h3>
+                 <p className="text-gray-500">This user hasn't created any audio content yet.</p>
+               </div>
+             ) : (
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                 {userContent.audio.map((audio) => (
                   <Card key={audio.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-4">
@@ -509,17 +369,17 @@ export default function UserContentPage() {
             )}
           </TabsContent>
 
-          {/* Content Tab */}
-          <TabsContent value="contents" className="space-y-4">
-            {contents.length === 0 ? (
-              <div className="text-center py-12">
-                <User className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Content Found</h3>
-                <p className="text-gray-500">This user hasn't created any other content yet.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {contents.map((content) => (
+                     {/* Content Tab */}
+           <TabsContent value="contents" className="space-y-4">
+             {!userContent?.contents || userContent.contents.length === 0 ? (
+               <div className="text-center py-12">
+                 <User className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                 <h3 className="text-lg font-medium text-gray-900 mb-2">No Content Found</h3>
+                 <p className="text-gray-500">This user hasn't created any other content yet.</p>
+               </div>
+             ) : (
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                 {userContent.contents.map((content) => (
                   <Card key={content.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-4">

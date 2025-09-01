@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { adminApiService, User as UserType, UpdateUserData } from "@/lib/adminApi";
 import { 
   ArrowLeft, 
   Save, 
@@ -27,34 +28,13 @@ import {
   Trash2
 } from "lucide-react";
 
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email?: string;
-  phone?: string;
-  role: 'USER' | 'CREATOR' | 'ADMIN' | 'MODERATOR';
-  isVerified: boolean;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  profilePicture?: string;
-  bio?: string;
-  location?: string;
-  dateOfBirth?: string;
-  gender?: string;
-  _count?: {
-    books: number;
-    audio: number;
-    contents: number;
-  };
-}
+
 
 export default function EditUserPage() {
   const router = useRouter();
   const params = useParams();
   const { user: currentUser, isAdmin } = useUser();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -93,37 +73,18 @@ export default function EditUserPage() {
       setIsLoading(true);
       setError(null);
       
-      // For demo purposes, create a sample user
-      // In production, this would be an API call
-      const sampleUser: User = {
-        id: userId,
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john.doe@example.com',
-        phone: '+1 (555) 123-4567',
-        role: 'USER',
-        isVerified: true,
-        isActive: true,
-        createdAt: '2024-01-15T10:00:00Z',
-        updatedAt: '2024-01-20T14:30:00Z',
-        bio: 'Creative writer and content creator',
-        location: 'New York, NY',
-        dateOfBirth: '1990-05-15',
-        gender: 'MALE',
-        _count: { books: 3, audio: 2, contents: 5 }
-      };
-
-      setUser(sampleUser);
+      const userData = await adminApiService.getUserById(userId);
+      setUser(userData);
       setFormData({
-        firstName: sampleUser.firstName,
-        lastName: sampleUser.lastName,
-        email: sampleUser.email || '',
-        phone: sampleUser.phone || '',
-        bio: sampleUser.bio || '',
-        location: sampleUser.location || '',
-        role: sampleUser.role,
-        isVerified: sampleUser.isVerified,
-        isActive: sampleUser.isActive
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email || '',
+        phone: userData.phone || '',
+        bio: userData.bio || '',
+        location: userData.location || '',
+        role: userData.role,
+        isVerified: userData.isVerified,
+        isActive: userData.isActive
       });
     } catch (error) {
       console.error('Error fetching user:', error);
@@ -152,19 +113,10 @@ export default function EditUserPage() {
         return;
       }
 
-      // In production, this would be an API call
-      // For demo purposes, just update local state
-      const updatedUser = {
-        ...user!,
-        ...formData,
-        updatedAt: new Date().toISOString()
-      };
-
+      // Update user via API
+      const updatedUser = await adminApiService.updateUser(userId, formData);
       setUser(updatedUser);
       setSuccess('User updated successfully!');
-
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
 
     } catch (error) {
       console.error('Error updating user:', error);
@@ -182,8 +134,7 @@ export default function EditUserPage() {
         setIsSaving(true);
         setError(null);
 
-        // In production, this would be an API call
-        // For demo purposes, just redirect back to users list
+        await adminApiService.deleteUser(userId);
         router.push('/admin/users');
 
       } catch (error) {
