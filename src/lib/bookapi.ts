@@ -87,6 +87,13 @@ class ApiService {
   // --- BOOK FILE ENDPOINTS ---
   readBookContent = (filename: string) => this.requestRaw(`/books/read/${filename}`);
   getBookDownloadUrl = (filename: string): string => `${this.baseURL}/books/download/${filename}`;
+
+  // --- CHAPTER ENDPOINTS ---
+  createChapter = (bookId: string, chapterData: any) => this.request<any>(`/books/${bookId}/chapters`, { method: 'POST', body: chapterData });
+  getBookChapters = (bookId: string) => this.request<any[]>(`/books/${bookId}/chapters`);
+  getChapter = (chapterId: string) => this.request<any>(`/chapters/${chapterId}`);
+  updateChapter = (chapterId: string, chapterData: any) => this.request<any>(`/chapters/${chapterId}`, { method: 'PUT', body: chapterData });
+  deleteChapter = (chapterId: string) => this.request<{ message: string }>(`/chapters/${chapterId}`, { method: 'DELETE' });
 }
 
 const apiService = new ApiService();

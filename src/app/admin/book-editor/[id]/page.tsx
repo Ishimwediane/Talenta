@@ -8,11 +8,11 @@ import { Book } from '@/lib/types';
 import { BookEditorForm } from '../_components/BookEditorForm';
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default function EditBookPage({ params }: PageProps) {
-  const { id } = params;
+  const { id } = React.use(params);
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -15,6 +15,21 @@ export interface PublishedBookSummary {
   publishedAt: string;
 }
 
+export interface Chapter {
+  id: string;
+  title: string;
+  content: string;
+  order: number;
+  status: 'DRAFT' | 'PUBLISHED';
+  isPublished: boolean;
+  wordCount: number;
+  readingTime: number;
+  bookId: string;
+  authorId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Book {
   id: string;
   title: string;
@@ -32,4 +47,5 @@ export interface Book {
   downloadUrl?: string | null;
   publishedAt: string;
   updatedAt: string;
+  chapters?: Chapter[];
 }

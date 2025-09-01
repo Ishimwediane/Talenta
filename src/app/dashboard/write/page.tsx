@@ -19,6 +19,7 @@ interface Book {
   coverImage?: string | null;
   description?: string | null;
   tags?: string[];
+  chapters?: any[];
 }
 
 export default function UserBooksDashboard() {
@@ -427,6 +428,16 @@ export default function UserBooksDashboard() {
                                       <Edit3 className="h-4 w-4 mr-1" />
                                       Edit
                                     </Button>
+                                    {draft.chapters && draft.chapters.length > 0 && (
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => router.push(`/books/${draft.id}/chapters`)}
+                                      >
+                                        <BookOpen className="h-4 w-4 mr-1" />
+                                        Chapters ({draft.chapters.length})
+                                      </Button>
+                                    )}
                                     <Button
                                       variant="outline"
                                       size="sm"
@@ -517,6 +528,16 @@ export default function UserBooksDashboard() {
                                     <Eye className="h-4 w-4 mr-1" />
                                     Read
                                   </Button>
+                                  {book.chapters && book.chapters.length > 0 && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => router.push(`/books/${book.id}/chapters`)}
+                                    >
+                                      <BookOpen className="h-4 w-4 mr-1" />
+                                      Chapters ({book.chapters.length})
+                                    </Button>
+                                  )}
                                   <Button
                                     variant="outline"
                                     size="sm"

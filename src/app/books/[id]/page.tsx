@@ -10,11 +10,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default function PublicBookReaderPage({ params }: PageProps) {
-  const { id } = params;
+  const { id } = React.use(params);
   const router = useRouter();
   const { user } = useAuth();
   const [book, setBook] = useState<Book | null>(null);
@@ -88,6 +88,14 @@ export default function PublicBookReaderPage({ params }: PageProps) {
                 <Button><Download className="h-4 w-4 mr-2" /> Download</Button>
               </a>
             )}
+            {book.chapters && book.chapters.length > 0 && (
+              <Button 
+                variant="outline" 
+                onClick={() => router.push(`/books/${book.id}/chapters`)}
+              >
+                View Chapters ({book.chapters.length})
+              </Button>
+            )}
             {isOwner && (
               <Button variant="outline" onClick={() => router.push(`/admin/book-editor/${book.id}`)}>Edit</Button>
             )}
@@ -98,6 +106,50 @@ export default function PublicBookReaderPage({ params }: PageProps) {
           <p className="text-lg italic bg-gray-50 p-4 rounded-md mb-8 border-l-4 border-gray-300">
             {book.description}
           </p>
+        )}
+
+        {/* Chapters Preview */}
+        {book.chapters && book.chapters.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-semibold">Chapters</h2>
+              <Button 
+                variant="outline" 
+                onClick={() => router.push(`/books/${book.id}/chapters`)}
+              >
+                View All Chapters
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {book.chapters.slice(0, 4).map((chapter) => (
+                <div key={chapter.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <h3 className="font-semibold text-lg mb-2">
+                    Chapter {chapter.order}: {chapter.title}
+                  </h3>
+                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                    <span>{chapter.wordCount || 0} words</span>
+                    <span>{chapter.readingTime || 0} min read</span>
+                  </div>
+                  <div 
+                    className="text-sm text-gray-700 line-clamp-3"
+                    dangerouslySetInnerHTML={{ 
+                      __html: chapter.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...' 
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+            {book.chapters.length > 4 && (
+              <div className="text-center mt-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => router.push(`/books/${book.id}/chapters`)}
+                >
+                  View All {book.chapters.length} Chapters
+                </Button>
+              </div>
+            )}
+          </div>
         )}
 
         <div 

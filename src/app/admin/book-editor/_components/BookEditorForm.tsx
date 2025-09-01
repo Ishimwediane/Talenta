@@ -72,6 +72,12 @@ export function BookEditorForm({ initialData, formType }: BookEditorFormProps) {
       } else {
         setContentMethod('text');
       }
+      
+      // Handle existing chapters
+      if (initialData.chapters && initialData.chapters.length > 0) {
+        setChapters(initialData.chapters);
+        setContentMethod('chapters');
+      }
     }
   }, [initialData]);
 
@@ -134,16 +140,37 @@ export function BookEditorForm({ initialData, formType }: BookEditorFormProps) {
       readingTime
     };
 
-    setChapters([...chapters, newChapter]);
+    if (currentChapter.id) {
+      // Editing existing chapter
+      setChapters(chapters.map(ch => ch.id === currentChapter.id ? newChapter : ch));
+    } else {
+      // Adding new chapter
+      setChapters([...chapters, newChapter]);
+    }
+
     setCurrentChapter({
       title: '',
       content: '',
-      order: chapters.length + 2
+      order: chapters.length + 1
     });
     setError(null);
   };
 
-  const removeChapter = (index: number) => {
+  const removeChapter = async (index: number) => {
+    const chapterToRemove = chapters[index];
+    
+    // If the chapter has an ID, delete it from the database
+    if (chapterToRemove.id && formType === 'edit') {
+      try {
+        await apiService.deleteChapter(chapterToRemove.id);
+        console.log('✅ Chapter deleted from database:', chapterToRemove.title);
+      } catch (error) {
+        console.error('❌ Failed to delete chapter from database:', error);
+        setError('Failed to delete chapter from database');
+        return;
+      }
+    }
+    
     const updatedChapters = chapters.filter((_, i) => i !== index);
     // Update order numbers
     const reorderedChapters = updatedChapters.map((chapter, i) => ({
@@ -151,6 +178,18 @@ export function BookEditorForm({ initialData, formType }: BookEditorFormProps) {
       order: i + 1
     }));
     setChapters(reorderedChapters);
+  };
+
+  const editChapter = (chapter: Chapter) => {
+    setCurrentChapter(chapter);
+  };
+
+  const cancelEdit = () => {
+    setCurrentChapter({
+      title: '',
+      content: '',
+      order: chapters.length + 1
+    });
   };
 
   const handleSubmit = async (status: 'DRAFT' | 'PUBLISHED') => {
@@ -208,23 +247,30 @@ export function BookEditorForm({ initialData, formType }: BookEditorFormProps) {
         }
 
         const bookId = formType === 'new' ? bookResponse.id : initialData!.id;
+        console.log('📚 Creating chapters for book:', bookId);
+        console.log('📚 Chapters to create:', chapters);
 
-        // Create each chapter
+        // Handle chapters - create new ones and update existing ones
         for (const chapter of chapters) {
-          await fetch(`/api/books/${bookId}/chapters`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              title: chapter.title,
-              content: chapter.content,
-              order: chapter.order,
-              status: status,
-              isPublished: status === 'PUBLISHED'
-            })
-          });
+          console.log('📝 Processing chapter:', chapter.title);
+          const chapterData = {
+            title: chapter.title,
+            content: chapter.content,
+            order: chapter.order,
+            status: status,
+            isPublished: status === 'PUBLISHED'
+          };
+          console.log('📝 Chapter data:', chapterData);
+          
+          if (chapter.id) {
+            // Update existing chapter
+            const updatedChapter = await apiService.updateChapter(chapter.id, chapterData);
+            console.log('✅ Chapter updated successfully:', updatedChapter);
+          } else {
+            // Create new chapter
+            const createdChapter = await apiService.createChapter(bookId, chapterData);
+            console.log('✅ Chapter created successfully:', createdChapter);
+          }
         }
       }
 
@@ -499,14 +545,34 @@ export function BookEditorForm({ initialData, formType }: BookEditorFormProps) {
                         </div>
                       </div>
                       
-                      <Button 
-                        onClick={addChapter}
-                        className="w-full"
-                        disabled={!currentChapter.title.trim() || !currentChapter.content.trim()}
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Chapter
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={addChapter}
+                          className="flex-1"
+                          disabled={!currentChapter.title.trim() || !currentChapter.content.trim()}
+                        >
+                          {currentChapter.id ? (
+                            <>
+                              <Edit3 className="w-4 h-4 mr-2" />
+                              Update Chapter
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="w-4 h-4 mr-2" />
+                              Add Chapter
+                            </>
+                          )}
+                        </Button>
+                        {currentChapter.id && (
+                          <Button 
+                            variant="outline"
+                            onClick={cancelEdit}
+                            className="px-4"
+                          >
+                            Cancel
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </TabsContent>
                   
@@ -519,7 +585,7 @@ export function BookEditorForm({ initialData, formType }: BookEditorFormProps) {
                     ) : (
                       <div className="space-y-3">
                         {chapters.map((chapter, index) => (
-                          <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                          <div key={chapter.id || index} className="border rounded-lg p-4 bg-gray-50">
                             <div className="flex items-center justify-between">
                               <div className="flex-1">
                                 <h3 className="font-semibold text-gray-900">Chapter {chapter.order}: {chapter.title}</h3>
@@ -534,14 +600,24 @@ export function BookEditorForm({ initialData, formType }: BookEditorFormProps) {
                                   </div>
                                 </div>
                               </div>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => removeChapter(index)}
-                                className="ml-4"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => editChapter(chapter)}
+                                  className="ml-4"
+                                >
+                                  <Edit3 className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => removeChapter(index)}
+                                  className="ml-4"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         ))}

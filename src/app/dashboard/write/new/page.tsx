@@ -175,6 +175,9 @@ export default function CreateNewBook() {
 
       // If using chapters method, create chapters
       if (contentMethod === 'chapters' && chapters.length > 0) {
+        console.log('📚 Creating chapters for book:', bookId);
+        console.log('📚 Chapters to create:', chapters);
+        
         const token = localStorage.getItem("token");
         if (!token) {
           throw new Error('Authentication required');
@@ -182,20 +185,18 @@ export default function CreateNewBook() {
 
         // Create each chapter
         for (const chapter of chapters) {
-          await fetch(`/api/books/${bookId}/chapters`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              title: chapter.title,
-              content: chapter.content,
-              order: chapter.order,
-              status: status,
-              isPublished: status === 'PUBLISHED'
-            })
-          });
+          console.log('📝 Creating chapter:', chapter.title);
+          const chapterData = {
+            title: chapter.title,
+            content: chapter.content,
+            order: chapter.order,
+            status: status,
+            isPublished: status === 'PUBLISHED'
+          };
+          console.log('📝 Chapter data:', chapterData);
+          
+          const createdChapter = await apiService.createChapter(bookId, chapterData);
+          console.log('✅ Chapter created successfully:', createdChapter);
         }
       }
 

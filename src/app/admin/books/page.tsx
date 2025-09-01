@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Edit, Plus, AlertCircle, Eye } from 'lucide-react';
+import { Trash2, Edit, Plus, AlertCircle, Eye, BookOpen } from 'lucide-react';
 
 const API_BASE_URL = "http://localhost:5000";
 
@@ -197,6 +197,15 @@ export default function MyBooksPage() {
                       Read
                     </Button>
                   )}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => router.push(`/books/${book.id}/chapters`)}
+                    className="flex-shrink-0"
+                    title="View Chapters"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="destructive"
                     size="icon"
