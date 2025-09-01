@@ -229,7 +229,7 @@ export default function UserContentPage() {
                <BookOpen className="h-4 w-4" />
                Books ({userContent?.books?.length || 0})
              </TabsTrigger>
-             <TabsTrigger value="audios" className="flex items-center gap-2">
+             <TabsTrigger value="audio" className="flex items-center gap-2">
                <Mic2 className="h-4 w-4" />
                Audio ({userContent?.audio?.length || 0})
              </TabsTrigger>
@@ -302,7 +302,7 @@ export default function UserContentPage() {
           </TabsContent>
 
                      {/* Audio Tab */}
-           <TabsContent value="audios" className="space-y-4">
+           <TabsContent value="audio" className="space-y-4">
              {!userContent?.audio || userContent.audio.length === 0 ? (
                <div className="text-center py-12">
                  <Mic2 className="h-16 w-16 text-gray-300 mx-auto mb-4" />
@@ -341,7 +341,7 @@ export default function UserContentPage() {
                         <div className="flex items-center gap-2">
                           <Play className="h-3 w-3 text-gray-400" />
                           <span className="text-xs text-gray-500">
-                            Duration: {formatDuration(audio.duration)}
+                            Duration: {formatDuration(audio.totalDuration)}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
