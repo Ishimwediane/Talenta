@@ -250,11 +250,11 @@ export default function BookChaptersPage() {
                       <div className="flex items-center gap-2 text-sm">
                         <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
                           <span className="text-xs font-medium text-blue-600">
-                            {chapter.author.firstName[0]}{chapter.author.lastName[0]}
+                            {(chapter.author?.firstName?.[0] || '?')}{(chapter.author?.lastName?.[0] || '')}
                           </span>
                         </div>
                         <span className="text-gray-600">
-                          {chapter.author.firstName} {chapter.author.lastName}
+                          {chapter.author ? `${chapter.author.firstName} ${chapter.author.lastName}` : 'Unknown Author'}
                         </span>
                       </div>
                       
@@ -322,11 +322,11 @@ export default function BookChaptersPage() {
                       <div className="flex items-center gap-2 text-sm">
                         <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
                           <span className="text-xs font-medium text-blue-600">
-                            {chapter.author.firstName[0]}{chapter.author.lastName[0]}
+                            {(chapter.author?.firstName?.[0] || '?')}{(chapter.author?.lastName?.[0] || '')}
                           </span>
                         </div>
                         <span className="text-gray-600">
-                          {chapter.author.firstName} {chapter.author.lastName}
+                          {chapter.author ? `${chapter.author.firstName} ${chapter.author.lastName}` : 'Unknown Author'}
                         </span>
                       </div>
                       
@@ -394,11 +394,11 @@ export default function BookChaptersPage() {
                       <div className="flex items-center gap-2 text-sm">
                         <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
                           <span className="text-xs font-medium text-blue-600">
-                            {chapter.author.firstName[0]}{chapter.author.lastName[0]}
+                            {(chapter.author?.firstName?.[0] || '?')}{(chapter.author?.lastName?.[0] || '')}
                           </span>
                         </div>
                         <span className="text-gray-600">
-                          {chapter.author.firstName} {chapter.author.lastName}
+                          {chapter.author ? `${chapter.author.firstName} ${chapter.author.lastName}` : 'Unknown Author'}
                         </span>
                       </div>
                       
