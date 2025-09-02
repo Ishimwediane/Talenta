@@ -134,24 +134,31 @@ export function BookEditorForm({ initialData, formType }: BookEditorFormProps) {
     const wordCount = calculateWordCount(currentChapter.content);
     const readingTime = calculateReadingTime(wordCount);
 
+    // Determine order: when adding a new chapter, always append with next sequential order
+    const nextOrder = currentChapter.id ? currentChapter.order : chapters.length + 1;
+
     const newChapter: Chapter = {
       ...currentChapter,
+      order: nextOrder,
       wordCount,
       readingTime
     };
 
+    let updatedChapters: Chapter[];
     if (currentChapter.id) {
       // Editing existing chapter
-      setChapters(chapters.map(ch => ch.id === currentChapter.id ? newChapter : ch));
+      updatedChapters = chapters.map(ch => ch.id === currentChapter.id ? newChapter : ch);
     } else {
       // Adding new chapter
-      setChapters([...chapters, newChapter]);
+      updatedChapters = [...chapters, newChapter];
     }
+    setChapters(updatedChapters);
 
+    // After adding/updating, prepare a fresh chapter with the next sequential order
     setCurrentChapter({
       title: '',
       content: '',
-      order: chapters.length + 1
+      order: updatedChapters.length + 1
     });
     setError(null);
   };
