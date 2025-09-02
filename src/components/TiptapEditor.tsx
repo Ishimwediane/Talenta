@@ -21,16 +21,20 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
 interface TiptapProps {
   content: string;
   onChange: (richText: string) => void;
+  placeholder?: string;
 }
 
-export const TiptapEditor = ({ content, onChange }: TiptapProps) => {
+export const TiptapEditor = ({ content, onChange, placeholder }: TiptapProps) => {
   const editor = useEditor({
     extensions: [StarterKit.configure()],
     content: content,
     // THIS IS CRUCIAL to satisfy Tiptap's internal check
     immediatelyRender: false, 
     editorProps: {
-      attributes: { class: 'prose dark:prose-invert prose-sm sm:prose-base max-w-none focus:outline-none' },
+      attributes: { 
+        class: 'prose dark:prose-invert prose-sm sm:prose-base max-w-none focus:outline-none',
+        'data-placeholder': placeholder || ''
+      },
     },
     onUpdate({ editor }) {
       onChange(editor.getHTML());

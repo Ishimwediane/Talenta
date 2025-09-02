@@ -58,9 +58,16 @@ export default function CreateChapterPage() {
       if (response.ok) {
         const data = await response.json();
         const chapters = data.data.chapters || [];
-        const maxOrder = chapters.reduce((max: number, chapter: any) => 
-          Math.max(max, chapter.order || 0), 0);
-        setOrder(maxOrder + 1);
+        const sortedOrders = chapters.map((c: any) => c.order).filter((o: any) => Number.isInteger(o)).sort((a: number, b: number) => a - b);
+        // Find first missing positive integer
+        let next = 1;
+        for (let i = 1; i <= (sortedOrders[sortedOrders.length - 1] || 0) + 1; i++) {
+          if (!sortedOrders.includes(i)) {
+            next = i;
+            break;
+          }
+        }
+        setOrder(next);
       }
     } catch (error) {
       console.error('Error fetching chapter order:', error);
@@ -74,10 +81,7 @@ export default function CreateChapterPage() {
       return;
     }
 
-    if (!content.trim()) {
-      setError('Chapter content is required');
-      return;
-    }
+    // Content is optional; allow creating a placeholder chapter with just a title
 
     setIsLoading(true);
     setError(null);
@@ -104,8 +108,8 @@ export default function CreateChapterPage() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create chapter');
+        const errorData = await response.json().catch(() => ({} as any));
+        throw new Error(errorData?.message || 'Failed to create chapter');
       }
 
       const data = await response.json();
@@ -187,10 +191,12 @@ export default function CreateChapterPage() {
                       id="order"
                       type="number"
                       value={order || ''}
-                      onChange={(e) => setOrder(parseInt(e.target.value) || null)}
-                      placeholder="Chapter number..."
-                      className="mt-1"
+                      readOnly
+                      disabled
+                      placeholder="Assigned automatically"
+                      className="mt-1 bg-gray-100 text-gray-700"
                     />
+                    <p className="mt-1 text-xs text-gray-500">Order is assigned automatically to avoid gaps.</p>
                   </div>
                   
                   <div>
