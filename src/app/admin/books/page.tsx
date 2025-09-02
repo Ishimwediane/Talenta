@@ -200,7 +200,7 @@ export default function MyBooksPage() {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => router.push(`/books/${book.id}/chapters`)}
+                    onClick={() => router.push(`/admin/books/${book.id}/chapters`)}
                     className="flex-shrink-0"
                     title="View Chapters"
                   >
