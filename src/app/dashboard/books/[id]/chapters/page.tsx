@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import apiService from "@/lib/bookapi";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -73,36 +74,17 @@ export default function BookChaptersPage() {
     try {
       setIsLoading(true);
       setError(null);
-      
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error('Authentication required');
-      }
-
-      const response = await fetch(`/api/books/${bookId}/chapters?includeUnpublished=true`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch chapters');
-      }
-
-      const data = await response.json();
-      setBook(data.data.book);
-      setChapters(data.data.chapters);
-
-      // Ensure only the book owner can manage chapters in dashboard
-      if (data?.data?.book?.userId && user?.id && data.data.book.userId !== user.id) {
+      const bookData = await apiService.getBookById(bookId);
+      setBook(bookData);
+      setChapters(bookData.chapters || []);
+      // Owner guard
+      if (bookData?.userId && user?.id && bookData.userId !== user.id) {
         setError('You can only manage chapters for your own books. Redirecting to reader view...');
-        // Redirect to public reader view
         router.push(`/books/${bookId}/chapters`);
         return;
       }
-    } catch (error) {
-      console.error('Error fetching chapters:', error);
+    } catch (err) {
+      console.error('Error fetching chapters:', err);
       setError('Failed to load chapters. Please try again.');
     } finally {
       setIsLoading(false);
@@ -115,27 +97,10 @@ export default function BookChaptersPage() {
     }
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error('Authentication required');
-      }
-
-      const response = await fetch(`/api/chapters/${chapterId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete chapter');
-      }
-
-      // Remove chapter from state
+      await apiService.deleteChapter(chapterId);
       setChapters(chapters.filter(chapter => chapter.id !== chapterId));
-    } catch (error) {
-      console.error('Error deleting chapter:', error);
+    } catch (err) {
+      console.error('Error deleting chapter:', err);
       setError('Failed to delete chapter. Please try again.');
     }
   };

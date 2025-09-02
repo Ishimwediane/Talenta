@@ -16,6 +16,7 @@ import {
   FileText,
   Clock
 } from "lucide-react";
+import apiService from "@/lib/bookapi";
 
 export default function CreateChapterPage() {
   const router = useRouter();
@@ -87,32 +88,13 @@ export default function CreateChapterPage() {
     setError(null);
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error('Authentication required');
-      }
-
-      const response = await fetch(`/api/books/${bookId}/chapters`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          title: title.trim(),
-          content: content.trim(),
-          order: order,
-          status: status,
-          isPublished: isPublished
-        })
+      await apiService.createChapter(bookId, {
+        title: title.trim(),
+        content: content.trim(),
+        order,
+        status,
+        isPublished
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({} as any));
-        throw new Error(errorData?.message || 'Failed to create chapter');
-      }
-
-      const data = await response.json();
       router.push(`/dashboard/books/${bookId}/chapters`);
     } catch (error) {
       console.error('Error creating chapter:', error);
