@@ -18,7 +18,8 @@ import {
   Settings,
   GripVertical,
   Clock,
-  FileText
+  FileText,
+  User
 } from "lucide-react";
 import Link from "next/link";
 
@@ -45,6 +46,7 @@ interface Book {
   id: string;
   title: string;
   author: string;
+  userId: string; // Added userId to the Book interface
 }
 
 export default function BookChaptersPage() {
@@ -91,6 +93,14 @@ export default function BookChaptersPage() {
       const data = await response.json();
       setBook(data.data.book);
       setChapters(data.data.chapters);
+
+      // Ensure only the book owner can manage chapters in dashboard
+      if (data?.data?.book?.userId && user?.id && data.data.book.userId !== user.id) {
+        setError('You can only manage chapters for your own books. Redirecting to reader view...');
+        // Redirect to public reader view
+        router.push(`/books/${bookId}/chapters`);
+        return;
+      }
     } catch (error) {
       console.error('Error fetching chapters:', error);
       setError('Failed to load chapters. Please try again.');
