@@ -12,6 +12,14 @@ import { ArrowLeft, Save, BookOpen, Edit3, FileUp, AlertCircle } from "lucide-re
 import Link from "next/link";
 import apiService from '@/lib/bookapi';
 
+interface ChapterSummary {
+  id: string;
+  title: string;
+  order: number;
+  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  isPublished: boolean;
+}
+
 interface Book {
   id: string;
   title: string;
@@ -22,6 +30,7 @@ interface Book {
   content?: string;
   bookFile?: string;
   coverImage?: string | null;
+  chapters?: ChapterSummary[];
 }
 
 export default function EditBook() {
@@ -42,6 +51,7 @@ export default function EditBook() {
   const [coverImagePreview, setCoverImagePreview] = useState<string | null>(null);
   const [bookFile, setBookFile] = useState<File | null>(null);
   const [existingBookFileName, setExistingBookFileName] = useState<string | null>(null);
+  const [chapters, setChapters] = useState<ChapterSummary[]>([]);
 
   const bookId = params.id as string;
 
@@ -79,6 +89,10 @@ export default function EditBook() {
       // Set cover image preview if exists
       if (bookData.coverImage) {
         setCoverImagePreview(bookData.coverImage);
+      }
+      // Capture chapters if present
+      if (Array.isArray(bookData.chapters)) {
+        setChapters(bookData.chapters as unknown as ChapterSummary[]);
       }
       
     } catch (error) {
@@ -213,8 +227,15 @@ export default function EditBook() {
             <ArrowLeft className="h-4 w-4" />
             Back to Books Dashboard
           </Link>
-          <h1 className="text-2xl font-semibold text-gray-900">Edit: {title}</h1>
-          <p className="text-gray-600 mt-1">Update your book details, content, and settings</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold text-gray-900">Edit: {title}</h1>
+              <p className="text-gray-600 mt-1">Update your book details, content, and settings</p>
+            </div>
+            <Button onClick={() => router.push(`/dashboard/books/${bookId}/chapters`)} className="bg-orange-500 hover:bg-orange-600 text-white">
+              Manage Chapters
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -314,6 +335,40 @@ export default function EditBook() {
                 />
                 <p className="text-xs text-gray-500">Recommended: 1200x1800 pixels, JPG or PNG</p>
               </div>
+            </div>
+
+            {/* Chapters Summary */}
+            <div className="bg-white rounded-lg border p-6">
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-1">Chapters</h2>
+                  <p className="text-gray-600 text-sm">{chapters.length} chapter{chapters.length !== 1 ? 's' : ''}</p>
+                </div>
+                <Button onClick={() => router.push(`/dashboard/books/${bookId}/chapters`)} className="bg-orange-500 hover:bg-orange-600 text-white">
+                  Manage
+                </Button>
+              </div>
+              {chapters.length === 0 ? (
+                <p className="text-sm text-gray-500">No chapters yet. Use Manage to add one.</p>
+              ) : (
+                <ul className="space-y-2 max-h-64 overflow-auto">
+                  {chapters.map((ch) => (
+                    <li key={ch.id} className="flex items-center justify-between text-sm">
+                      <div className="truncate">
+                        <span className="font-medium">#{ch.order}</span>
+                        <span className="ml-2 truncate max-w-[12rem] inline-block align-bottom">{ch.title || 'Untitled'}</span>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => router.push(`/dashboard/books/${bookId}/chapters/${ch.id}/edit`)}
+                      >
+                        Edit
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             {/* Content Method Selection */}
