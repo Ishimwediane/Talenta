@@ -14,7 +14,7 @@ import { TiptapEditor } from '@/components/TiptapEditor';
 export default function BookChaptersPage() {
   const params = useParams();
   const router = useRouter();
-  const bookId = React.use(params).id as string;
+  const { id: bookId } = params as { id: string };
   
   const [book, setBook] = useState<Book | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
@@ -114,13 +114,6 @@ export default function BookChaptersPage() {
        }
      }
      
-     console.log('📝 Creating chapter with order calculation:', {
-       chaptersLength: chapters.length,
-       existingOrders: chapters.map(ch => ch.order),
-       calculatedNextOrder: nextOrder,
-       chapterData
-     });
-     
      const chapterData = {
        title: newChapter.title,
        content: newChapter.content,
@@ -128,15 +121,22 @@ export default function BookChaptersPage() {
        status: 'DRAFT',
        isPublished: false
      };
-
-      const createdChapter = await apiService.createChapter(bookId, chapterData);
-      console.log('✅ New chapter created:', createdChapter);
-      
-      // Refresh chapters
-      const updatedBookData = await apiService.getBookById(bookId);
-      setChapters(updatedBookData.chapters || []);
-      setSelectedChapter(createdChapter);
-      
+     
+     console.log('📝 Creating chapter with order calculation:', {
+       chaptersLength: chapters.length,
+       existingOrders: chapters.map(ch => ch.order),
+       calculatedNextOrder: nextOrder,
+       chapterData
+     });
+     
+     const createdChapter = await apiService.createChapter(bookId, chapterData);
+     console.log('✅ New chapter created:', createdChapter);
+     
+     // Refresh chapters
+     const updatedBookData = await apiService.getBookById(bookId);
+     setChapters(updatedBookData.chapters || []);
+     setSelectedChapter(createdChapter);
+     
              // Reset form
        setShowNewChapterForm(false);
        setNewChapter({ title: '', content: '' });
@@ -144,21 +144,22 @@ export default function BookChaptersPage() {
        // Show success message
        setSuccessMessage('🎉 Chapter created successfully!');
        setTimeout(() => setSuccessMessage(null), 5000);
-     } catch (error) {
-       console.error('❌ Error creating chapter:', error);
-       
-       // Show more specific error message
-       let errorMessage = 'Failed to create chapter. Please try again.';
-       if (error.message.includes('order already exists')) {
-         errorMessage = 'A chapter with this order already exists. The system will automatically assign the correct order.';
-       } else if (error.message.includes('400')) {
-         errorMessage = 'Chapter creation failed. Please check your input and try again.';
-       }
-       
-       alert(errorMessage);
-     } finally {
-       setIsCreatingChapter(false);
-     }
+     } catch (err) {
+      console.error('❌ Error creating chapter:', err);
+      
+      // Show more specific error message
+      const message = err instanceof Error ? err.message : String(err);
+      let errorMessage = 'Failed to create chapter. Please try again.';
+      if (message.includes('order already exists')) {
+        errorMessage = 'A chapter with this order already exists. The system will automatically assign the correct order.';
+      } else if (message.includes('400')) {
+        errorMessage = 'Chapter creation failed. Please check your input and try again.';
+      }
+      
+      alert(errorMessage);
+    } finally {
+      setIsCreatingChapter(false);
+    }
   };
 
   const handleEditChapter = (chapter: Chapter) => {
@@ -194,12 +195,12 @@ export default function BookChaptersPage() {
        // Show success message
        setSuccessMessage('✅ Chapter updated successfully!');
        setTimeout(() => setSuccessMessage(null), 5000);
-     } catch (error) {
-       console.error('❌ Error updating chapter:', error);
-       alert('Failed to update chapter. Please try again.');
-     } finally {
-       setIsUpdatingChapter(false);
-     }
+     } catch (err) {
+      console.error('❌ Error updating chapter:', err);
+      alert('Failed to update chapter. Please try again.');
+    } finally {
+      setIsUpdatingChapter(false);
+    }
   };
 
   const handleCancelEdit = () => {
@@ -234,8 +235,8 @@ export default function BookChaptersPage() {
       if (editingChapter?.id === chapterId) {
         setEditingChapter(null);
       }
-    } catch (error) {
-      console.error('❌ Error deleting chapter:', error);
+    } catch (err) {
+      console.error('❌ Error deleting chapter:', err);
       alert('Failed to delete chapter. Please try again.');
     }
   };
@@ -261,8 +262,8 @@ export default function BookChaptersPage() {
       if (selectedChapter?.id === chapterId) {
         setSelectedChapter(updatedChapter);
       }
-    } catch (error) {
-      console.error('❌ Error reordering chapter:', error);
+    } catch (err) {
+      console.error('❌ Error reordering chapter:', err);
       alert('Failed to reorder chapter. Please try again.');
     }
   };
@@ -293,8 +294,8 @@ export default function BookChaptersPage() {
         setSuccessMessage('🔄 Chapters have been automatically reordered to fix conflicts!');
         setTimeout(() => setSuccessMessage(null), 5000);
       }
-    } catch (error) {
-      console.error('❌ Error reordering chapters:', error);
+    } catch (err) {
+      console.error('❌ Error reordering chapters:', err);
       alert('Failed to reorder chapters automatically. Please try again.');
     }
   };
@@ -336,6 +337,7 @@ export default function BookChaptersPage() {
   }
 
   return (
+    <div>
     <div className="min-h-screen bg-gray-50">
              {/* Success Message */}
        {successMessage && (
@@ -715,5 +717,6 @@ export default function BookChaptersPage() {
         </div>
       </div>
     </div>
+    
   );
 }
