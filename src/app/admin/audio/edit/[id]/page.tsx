@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -499,6 +500,16 @@ export default function EditAudioPage() {
                     Publish & Auto-Merge
                   </Button>
                 )}
+                <Link href={`/audio/${audio.id}/parts`}>
+                  <Button 
+                    variant="outline"
+                    size="lg"
+                    className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                  >
+                    <Volume2 className="h-4 w-4 mr-2" />
+                    Manage Parts
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -800,6 +811,8 @@ export default function EditAudioPage() {
     </div>
   );
 }
+
+
 
 
 

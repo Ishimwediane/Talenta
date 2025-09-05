@@ -137,6 +137,174 @@ class ApiService {
     });
   }
 
+  // Audio Chapter endpoints
+  async createAudioChapter(audioId, chapterData) {
+    return this.request(`/audio/${audioId}/chapters`, {
+      method: 'POST',
+      body: JSON.stringify(chapterData)
+    });
+  }
+
+  async getAudioChapters(audioId, includeUnpublished = false) {
+    const params = new URLSearchParams();
+    if (includeUnpublished) {
+      params.append('includeUnpublished', 'true');
+    }
+    return this.request(`/audio/${audioId}/chapters?${params}`);
+  }
+
+  async getAudioChapter(chapterId) {
+    return this.request(`/audio/chapters/${chapterId}`);
+  }
+
+  async updateAudioChapter(chapterId, chapterData) {
+    return this.request(`/audio/chapters/${chapterId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(chapterData)
+    });
+  }
+
+  async deleteAudioChapter(chapterId) {
+    return this.request(`/audio/chapters/${chapterId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  async reorderAudioChapters(audioId, chapterOrders) {
+    return this.request(`/audio/${audioId}/chapters/reorder`, {
+      method: 'PATCH',
+      body: JSON.stringify({ chapterOrders })
+    });
+  }
+
+  // Audio endpoints
+  async getAudioById(audioId) {
+    return this.request(`/audio/${audioId}`);
+  }
+
+  async createAudio(audioData) {
+    return this.request('/audio', {
+      method: 'POST',
+      body: JSON.stringify(audioData)
+    });
+  }
+
+  async updateAudio(audioId, audioData) {
+    return this.request(`/audio/${audioId}`, {
+      method: 'PUT',
+      body: JSON.stringify(audioData)
+    });
+  }
+
+  async deleteAudio(audioId) {
+    return this.request(`/audio/${audioId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  // Audio Part endpoints (direct to audio, not through chapters)
+  async createAudioPart(audioId, partData) {
+    return this.request(`/audio/${audioId}/parts`, {
+      method: 'POST',
+      body: JSON.stringify(partData)
+    });
+  }
+
+  async getAudioParts(audioId, includeUnpublished = false) {
+    const params = new URLSearchParams();
+    if (includeUnpublished) {
+      params.append('includeUnpublished', 'true');
+    }
+    return this.request(`/audio/${audioId}/parts?${params}`);
+  }
+
+  async getAudioPart(partId) {
+    return this.request(`/audio/parts/${partId}`);
+  }
+
+  async updateAudioPart(partId, partData) {
+    return this.request(`/audio/parts/${partId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(partData)
+    });
+  }
+
+  async deleteAudioPart(partId) {
+    return this.request(`/audio/parts/${partId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  async reorderAudioParts(audioId, partOrders) {
+    return this.request(`/audio/${audioId}/parts/reorder`, {
+      method: 'PATCH',
+      body: JSON.stringify({ partOrders })
+    });
+  }
+
+  // Audio Chapter endpoints (legacy - for backward compatibility)
+  async createAudioChapter(audioId, chapterData) {
+    return this.request(`/audio/${audioId}/chapters`, {
+      method: 'POST',
+      body: JSON.stringify(chapterData)
+    });
+  }
+
+  async getAudioChapters(audioId, includeUnpublished = false) {
+    const params = new URLSearchParams();
+    if (includeUnpublished) {
+      params.append('includeUnpublished', 'true');
+    }
+    return this.request(`/audio/${audioId}/chapters?${params}`);
+  }
+
+  async getAudioChapter(chapterId) {
+    return this.request(`/audio/chapters/${chapterId}`);
+  }
+
+  async updateAudioChapter(chapterId, chapterData) {
+    return this.request(`/audio/chapters/${chapterId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(chapterData)
+    });
+  }
+
+  async deleteAudioChapter(chapterId) {
+    return this.request(`/audio/chapters/${chapterId}`, {
+      method: 'DELETE'
+    });
+  }
+
+  async reorderAudioChapters(audioId, chapterOrders) {
+    return this.request(`/audio/${audioId}/chapters/reorder`, {
+      method: 'PATCH',
+      body: JSON.stringify({ chapterOrders })
+    });
+  }
+
+  // Audio Part endpoints (within chapters - legacy)
+  async createAudioPartInChapter(chapterId, partData) {
+    return this.request(`/audio/chapters/${chapterId}/parts`, {
+      method: 'POST',
+      body: JSON.stringify(partData)
+    });
+  }
+
+  async getAudioPartsInChapter(chapterId, includeUnpublished = false) {
+    const params = new URLSearchParams();
+    if (includeUnpublished) {
+      params.append('includeUnpublished', 'true');
+    }
+    return this.request(`/audio/chapters/${chapterId}/parts?${params}`);
+  }
+
+  async reorderAudioPartsInChapter(chapterId, partOrders) {
+    return this.request(`/audio/chapters/${chapterId}/parts/reorder`, {
+      method: 'PATCH',
+      body: JSON.stringify({ partOrders })
+    });
+  }
+
   // Health check
   async healthCheck() {
     return this.request('/health');

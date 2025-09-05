@@ -152,7 +152,9 @@ function AudioCard({ audio }: { audio: PublicAudio }) {
       </div>
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">{audio.title}</h3>
+          <Link href={`/audio/${audio.id}`}>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2 hover:text-blue-600 transition-colors cursor-pointer">{audio.title}</h3>
+          </Link>
           {audio.description && (
             <p className="text-gray-600 text-sm mb-3">{audio.description}</p>
           )}
@@ -205,6 +207,12 @@ function AudioCard({ audio }: { audio: PublicAudio }) {
             {isMenuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border z-50">
                 <div className="py-1">
+                  <Link
+                    href={`/audio/${audio.id}/parts`}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Manage Parts
+                  </Link>
                   <button
                     onClick={handleEdit}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

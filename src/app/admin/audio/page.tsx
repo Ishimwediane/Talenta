@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -307,9 +308,12 @@ const AudioRecorder: React.FC<{
   const [recordingDescription, setRecordingDescription] = useState("");
   const [recordingTags, setRecordingTags] = useState("");
   const [recordingSubCategories, setRecordingSubCategories] = useState("");
+  const [recordingCategory, setRecordingCategory] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{type: 'success' | 'error', message: string} | null>(null);
   const [microphoneAccess, setMicrophoneAccess] = useState<'granted' | 'denied' | 'pending'>('pending');
+  const [showMetadataForm, setShowMetadataForm] = useState(true);
+  const [metadataCompleted, setMetadataCompleted] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -325,7 +329,28 @@ const AudioRecorder: React.FC<{
       });
   }, []);
 
+  const handleMetadataComplete = () => {
+    if (!recordingTitle.trim()) {
+      setSaveMessage({
+        type: 'error',
+        message: 'Please enter a title for your audio recording.'
+      });
+      return;
+    }
+    setMetadataCompleted(true);
+    setShowMetadataForm(false);
+    setSaveMessage(null);
+  };
+
   const startRecording = async () => {
+    if (!metadataCompleted) {
+      setSaveMessage({
+        type: 'error',
+        message: 'Please complete the audio information form first.'
+      });
+      return;
+    }
+
     try {
       setSaveMessage(null);
       const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -407,7 +432,11 @@ const AudioRecorder: React.FC<{
     setRecordingTitle("");
     setRecordingDescription("");
     setRecordingTags("");
+    setRecordingSubCategories("");
+    setRecordingCategory("");
     setSaveMessage(null);
+    setShowMetadataForm(true);
+    setMetadataCompleted(false);
     if (recordedAudioUrl) {
       URL.revokeObjectURL(recordedAudioUrl);
     }
@@ -437,6 +466,9 @@ const AudioRecorder: React.FC<{
     formData.append("title", title);
     formData.append("description", recordingDescription);
     formData.append("status", isDraft ? "draft" : "published");
+    if (recordingCategory.trim()) {
+      formData.append("category", recordingCategory);
+    }
     if (recordingTags.trim()) {
       formData.append("tags", recordingTags);
     }
@@ -512,31 +544,137 @@ const AudioRecorder: React.FC<{
           </p>
         </div>
       )}
-      
-      <div className="flex items-center space-x-4">
-        <Button
-          onClick={isRecording ? stopRecording : startRecording}
-          variant={isRecording ? "destructive" : "default"}
-          className="flex items-center space-x-2"
-          disabled={isSaving || microphoneAccess === 'denied'}
-        >
-          {isRecording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-          <span>{isRecording ? 'Stop Recording' : 'Start Recording'}</span>
-        </Button>
-        
-        {(isRecording || recordingTime > 0) && (
-          <div className="text-lg font-mono font-semibold">
-            {formatRecordingTime(recordingTime)}
+
+      {/* Metadata Form - Show First */}
+      {showMetadataForm && (
+        <div className="space-y-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center gap-2 mb-4">
+            <Edit3 className="h-5 w-5 text-blue-600" />
+            <h4 className="font-semibold text-blue-900">Audio Information</h4>
           </div>
-        )}
-        
-        {audioBlob && !isRecording && (
-          <Button onClick={clearRecording} variant="outline" size="sm" disabled={isSaving}>
-            <Trash2 className="h-4 w-4 mr-1" />
-            Clear
-          </Button>
-        )}
-      </div>
+          <p className="text-sm text-blue-700 mb-4">
+            Please fill in the audio details before starting your recording. This information will be used when saving your audio.
+          </p>
+          
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+              <Input 
+                placeholder="Enter audio title..." 
+                value={recordingTitle} 
+                onChange={(e) => setRecordingTitle(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea 
+                placeholder="Enter audio description (optional)..." 
+                value={recordingDescription} 
+                onChange={(e) => setRecordingDescription(e.target.value)}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select 
+                  value={recordingCategory} 
+                  onChange={(e) => setRecordingCategory(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select category (optional)</option>
+                  <option value="Education">Education</option>
+                  <option value="Entertainment">Entertainment</option>
+                  <option value="News">News</option>
+                  <option value="Music">Music</option>
+                  <option value="Podcast">Podcast</option>
+                  <option value="Interview">Interview</option>
+                  <option value="Tutorial">Tutorial</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+                <Input 
+                  placeholder="Enter tags (optional)..." 
+                  value={recordingTags} 
+                  onChange={(e) => setRecordingTags(e.target.value)}
+                  className="w-full"
+                />
+                <p className="text-xs text-gray-500 mt-1">Separate multiple tags with commas</p>
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sub-categories</label>
+              <Input 
+                placeholder="Enter sub-categories (optional)..." 
+                value={recordingSubCategories} 
+                onChange={(e) => setRecordingSubCategories(e.target.value)}
+                className="w-full"
+              />
+              <p className="text-xs text-gray-500 mt-1">Separate multiple sub-categories with commas</p>
+            </div>
+          </div>
+          
+          <div className="flex gap-3 pt-4">
+            <Button 
+              onClick={handleMetadataComplete}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+            >
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Continue to Recording
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Recording Interface - Show After Metadata */}
+      {!showMetadataForm && (
+        <>
+          <div className="flex items-center space-x-4">
+            <Button
+              onClick={isRecording ? stopRecording : startRecording}
+              variant={isRecording ? "destructive" : "default"}
+              className="flex items-center space-x-2"
+              disabled={isSaving || microphoneAccess === 'denied'}
+            >
+              {isRecording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              <span>{isRecording ? 'Stop Recording' : 'Start Recording'}</span>
+            </Button>
+            
+            {(isRecording || recordingTime > 0) && (
+              <div className="text-lg font-mono font-semibold">
+                {formatRecordingTime(recordingTime)}
+              </div>
+            )}
+            
+            {audioBlob && !isRecording && (
+              <Button onClick={clearRecording} variant="outline" size="sm" disabled={isSaving}>
+                <Trash2 className="h-4 w-4 mr-1" />
+                Clear
+              </Button>
+            )}
+            
+            <Button 
+              onClick={() => {
+                setShowMetadataForm(true);
+                setMetadataCompleted(false);
+              }}
+              variant="outline" 
+              size="sm"
+            >
+              <Edit3 className="h-4 w-4 mr-1" />
+              Edit Info
+            </Button>
+          </div>
+        </>
+      )}
       
       {isRecording && (
         <div className="flex items-center space-x-2 text-red-500">
@@ -922,6 +1060,12 @@ export default function AudioManagementPage() {
                 {audioState.isMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border z-50">
                     <div className="py-1">
+                      <Link
+                        href={`/audio/${audio.id}/parts`}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Manage Parts
+                      </Link>
                       <button
                         onClick={() => handleEdit(audio.id)}
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -972,6 +1116,21 @@ export default function AudioManagementPage() {
         )}
         
         <AudioPlayer audio={audio} extraSources={extraForAudio} />
+        
+        {/* Manage Parts Button */}
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <div className="text-center mb-3">
+            <p className="text-xs text-gray-600 mb-2">
+              💡 <strong>Tip:</strong> Break your audio into parts for better organization
+            </p>
+          </div>
+          <Link href={`/audio/${audio.id}/parts`}>
+            <Button variant="outline" size="sm" className="w-full">
+              <Volume2 className="h-4 w-4 mr-2" />
+              Manage Parts
+            </Button>
+          </Link>
+        </div>
       </CardContent>
 
       {/* Edit Modal */}
